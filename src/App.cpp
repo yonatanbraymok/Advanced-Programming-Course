@@ -22,7 +22,7 @@ void App::run() {
                 break;
             case CommandType::Invalid:
             default:
-                // Ex1 contract: invalid commands must be ignored silently.
+                //invalid commands must be ignored silently.
                 break;
         }
     }

@@ -5,7 +5,7 @@
 
 #include "Types.h"
 
-// High-level command categories recognized by the parser.
+// command categories recognized by the parser.
 enum class CommandType {
     Invalid,
     Add,
