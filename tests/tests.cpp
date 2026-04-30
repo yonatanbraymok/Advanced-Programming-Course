@@ -1,15 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
 
 #include "FileRepository.h"
 
 namespace {
-// Minimal assertion helper:
-// - If `condition` is false, print a readable message.
-// - Return the condition so the caller can combine results.
 bool expect(bool condition, const std::string& message) {
     if (!condition) {
         std::cerr << "FAILED: " << message << '\n';
@@ -17,8 +15,6 @@ bool expect(bool condition, const std::string& message) {
     return condition;
 }
 
-// Create a unique temporary file path for this test run.
-// We write repository data to this file, then delete it at the end.
 std::string makeTempFilePath() {
     const auto suffix = std::to_string(std::rand());
     return (std::filesystem::temp_directory_path() / ("ex1_test_" + suffix + ".txt")).string();
@@ -26,21 +22,15 @@ std::string makeTempFilePath() {
 }  // namespace
 
 int main() {
-    // Tracks whether ALL checks passed. If any expect(...) fails, `ok` becomes false.
     bool ok = true;
 
     {
-        // Persistence smoke test:
-        // 1) Create a repository and write some data to disk
-        // 2) Create a NEW repository instance reading the same file
-        // 3) Verify the data survived the reload
+        // Persistence smoke test: write -> reload -> validate.
         const std::string path = makeTempFilePath();
         {
-            // First scope: create & write data.
-            // When this block ends, `repo` is destroyed (and should have saved data to `path`).
             FileRepository repo(path);
 
-            // Fresh path should be handled gracefully.
+            // Fresh path.
             repo.load();
 
             // Write a small dataset.
@@ -49,7 +39,6 @@ int main() {
         }
 
         {
-            // Second scope: create a NEW instance to prove persistence
             FileRepository reloaded(path);
             reloaded.load();
 
@@ -65,11 +54,40 @@ int main() {
             ok &= expect(watched2 != nullptr && watched2->count(104) == 1, "user 2 contains product 104 after reload");
         }
 
-        // Cleanup: delete the temporary file we created for this test.
         std::remove(path.c_str());
     }
 
-    // Any failure returns non-zero so CI / scripts can detect it.
+    {
+        // Load should ignore invalid IDs in the file.
+        const std::string path = makeTempFilePath();
+        {
+            std::ofstream out(path, std::ios::trunc);
+            out << "0 100 200\n";          // invalid user id
+            out << "-7 100\n";             // invalid user id
+            out << "1 -5 10 0 20\n";       // invalid product ids mixed with valid ones
+            out << "abc 1 2 3\n";          // invalid line
+            out << "2 30 30 40\n";         // duplicates are ok (set)
+        }
+
+        FileRepository repo(path);
+        repo.load();
+
+        const auto* w1 = repo.getWatched(1);
+        ok &= expect(w1 != nullptr, "user 1 loaded");
+        ok &= expect(w1 != nullptr && w1->count(10) == 1, "user 1 contains valid product 10");
+        ok &= expect(w1 != nullptr && w1->count(20) == 1, "user 1 contains valid product 20");
+        ok &= expect(w1 != nullptr && w1->count(-5) == 0, "user 1 ignores negative product");
+        ok &= expect(w1 != nullptr && w1->count(0) == 0, "user 1 ignores product 0");
+
+        const auto* w2 = repo.getWatched(2);
+        ok &= expect(w2 != nullptr && w2->count(30) == 1 && w2->count(40) == 1, "user 2 loaded with deduped products");
+
+        ok &= expect(repo.getWatched(0) == nullptr, "user 0 not loaded");
+        ok &= expect(repo.getWatched(-7) == nullptr, "negative user id not loaded");
+
+        std::remove(path.c_str());
+    }
+
     if (!ok) {
         return 1;
     }
