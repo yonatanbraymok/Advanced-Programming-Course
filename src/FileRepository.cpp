@@ -9,12 +9,12 @@
  * FileRepository Implementation
  * ----------------------------
  * This class serves as the persistence layer for the Recommendation System.
- * It handles the mapping between Users and the Products they have watched.
+ * It handles the mapping between Users and the Products they have watched
  * 
  * Requirement Compliance:
  * - Persistent Storage: Automatically saves data to disk on changes.
  * - Validation: Filters out non-positive IDs.
- * - Stability: Sorts data during save to ensure clean Git diffs.
+ * - Stability: Sorts data during save to ensure clean Git diffs
  */
 
 // Constructor: Initializes the repository with the target file path.

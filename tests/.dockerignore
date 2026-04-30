@@ -1,0 +1,9 @@
+build/
+.git/
+.cursor/
+**/CMakeFiles/
+**/*.o
+**/*.obj
+**/*.exe
+.vs/
+out/
