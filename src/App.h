@@ -4,21 +4,28 @@
 #include <ostream>
 
 #include "CommandParser.h"
+#include "Interfaces.h"
 
-// Temporary app shell used to manually test the parser.
-// It reads text input, parses it, and prints a normalized parse result.
+// Main CLI app loop: read command -> parse -> execute behavior.
 class App {
 public:
-    App(std::istream& input, std::ostream& output);
+    App(std::istream& input, std::ostream& output, IRepository& repository, const IRecommender& recommender);
 
-    // Starts the read-parse-print loop until input stream ends (EOF).
+    // Runs until input ends (EOF in local runs).
     void run();
 
 private:
     std::istream& input_;
     std::ostream& output_;
+    IRepository& repository_;
+    const IRecommender& recommender_;
     CommandParser parser_;
 
-    // Helper that turns ParsedCommand into a human-readable debug line.
-    void printParsedCommand(const ParsedCommand& cmd);
+    // Command handlers kept separate to keep run() easy to read.
+    void handleAdd(const ParsedCommand& cmd);
+    void handleRecommend(const ParsedCommand& cmd);
+    void handleHelp();
+
+    // Formats products exactly as one space-separated line.
+    static std::string joinProducts(const ProductList& products);
 };
