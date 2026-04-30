@@ -22,3 +22,10 @@ public:
     // Return a snapshot list of all known user IDs in the repository.
     virtual std::vector<UserId> getAllUsers() const = 0;
 };
+// Recommender API: returns ranked product suggestions.
+class IRecommender {
+public:
+    virtual ~IRecommender() = default;
+    // Recommend products for userId, using productId as context.
+    virtual ProductList recommend(UserId userId, ProductId productId, std::size_t limit = 10) const = 0;
+};
