@@ -15,6 +15,8 @@ void FileRepository::load() {
         return;
     }
 
+    // Storage format (one line per user):
+    //   <userId> <productId> <productId> ...
     std::string line;
     while (std::getline(in, line)) {
         if (line.empty()) {
@@ -26,9 +28,15 @@ void FileRepository::load() {
         if (!(ss >> userId)) {
             continue;
         }
+        if (userId <= 0) {
+            continue;
+        }
 
         int productId = 0;
         while (ss >> productId) {
+            if (productId <= 0) {
+                continue;
+            }
             userProducts_[userId].insert(productId);
         }
     }
@@ -40,6 +48,7 @@ void FileRepository::save() const {
         return;
     }
 
+    // Make sure diffs are stable.
     std::vector<UserId> users;
     users.reserve(userProducts_.size());
     for (const auto& [userId, _] : userProducts_) {
@@ -82,4 +91,3 @@ std::vector<UserId> FileRepository::getAllUsers() const {
     }
     return users;
 }
-
