@@ -14,7 +14,7 @@
  * Requirement Compliance:
  * - Persistent Storage: Automatically saves data to disk on changes.
  * - Validation: Filters out non-positive IDs.
- * - Stability: Sorts data during save to ensure clean Git diffs
+ * - Stability: Sorts data during save to ensure clean Git diffs.
  */
 
 // Constructor: Initializes the repository with the target file path.
