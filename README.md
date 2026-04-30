@@ -35,6 +35,8 @@ Core files:
 - `src/main.cpp` - app wiring/composition root
 - `src/App.h`, `src/App.cpp` - loop + dispatch logic
 - `src/CommandParser.h`, `src/CommandParser.cpp` - strict command grammar
+- `src/Commands.h`, `src/Commands.cpp` - command execution and output formatting
+- `src/ConsoleIO.h`, `src/ConsoleIO.cpp` - standard input/output decoupling
 - `src/FileRepository.h`, `src/FileRepository.cpp` - persistence layer
 - `src/SimilarityRecommender.h`, `src/SimilarityRecommender.cpp` - recommendation logic
 - `src/Interfaces.h` - shared abstractions
@@ -42,21 +44,36 @@ Core files:
 
 ## How to Build and Run
 
-### 1) Configure and build
+### Option A: Run via Docker (Recommended / Grader Environment)
 
+**1) Build the Docker image**
+```bash
+docker build -t advanced-prog-ex1 .
+```
+### 2) Run the App
+
+```bash
+docker run -it advanced-prog-ex1 ./build/app
+```
+
+### 3) Run the tests separately
+
+```bash
+docker run advanced-prog-ex1 ctest --test-dir build --output-on-failure
+```
+### Option B: Local Build (Linux/Mac)
+
+**1) Configure and build**
 ```bash
 cmake -S . -B build
 cmake --build build
 ```
-
-### 2) Run tests
+### 2) Run the test
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
-
-### 3) Run the app
-
+### 3) Run the App
 ```bash
 ./build/app
 ```
