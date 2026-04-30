@@ -1,2 +1,3 @@
 # ignore details.txt file
 details.txt
+build/
