@@ -1,55 +1,40 @@
 #include "App.h"
-
-#include <sstream>
 #include <string>
 
-App::App(std::istream& input, std::ostream& output, IRepository& repository, const IRecommender& recommender)
-    : input_(input), output_(output), repository_(repository), recommender_(recommender) {}
+// Constructor uses dependency injection to receive its I/O and execution tools
+App::App(IInput& input, CommandExecutor& executor) : input_(input), executor_(executor) {}
 
 void App::run() {
     std::string line;
-    while (std::getline(input_, line)) {
+    
+    // Standard blocking loop: waits naturally for user input.
+    // Automatically returns false and exits the loop if the input stream is closed (like an EOF signal).
+    while (input_.readLine(line)) {
+        
+        // Skip processing if the user just hits Enter on an empty line
+        if (line.empty()) {
+            continue;
+        }
+
+        // Parse the raw input string into an actionable command struct
         const ParsedCommand cmd = parser_.parse(line);
+        
+        // Route the parsed command to the appropriate execution logic
         switch (cmd.type) {
             case CommandType::Add:
-                handleAdd(cmd);
+                executor_.executeAdd(cmd.userId, cmd.products);
                 break;
             case CommandType::Recommend:
-                handleRecommend(cmd);
+                executor_.executeRecommend(cmd.userId, cmd.productId);
                 break;
             case CommandType::Help:
-                handleHelp();
+                executor_.executeHelp();
                 break;
             case CommandType::Invalid:
             default:
-                //invalid commands must be ignored silently.
+                // The assignment instructions explicitly state that invalid commands 
+                // must be ignored silently without printing any errors.
                 break;
         }
     }
-}
-
-void App::handleAdd(const ParsedCommand& cmd) { repository_.addWatched(cmd.userId, cmd.products); }
-
-std::string App::joinProducts(const ProductList& products) {
-    std::ostringstream out;
-    for (std::size_t i = 0; i < products.size(); ++i) {
-        if (i > 0) {
-            out << ' ';
-        }
-        out << products[i];
-    }
-    return out.str();
-}
-
-void App::handleRecommend(const ParsedCommand& cmd) {
-    const ProductList recommendations = recommender_.recommend(cmd.userId, cmd.productId, 10);
-    // Ex1 expects a single output line for recommend, even if no products exist.
-    output_ << joinProducts(recommendations) << '\n';
-}
-
-void App::handleHelp() {
-    // Keep the exact text/order from the assignment contract.
-    output_ << "add [userid] [productid1] [productid2] ...\n";
-    output_ << "recommend [userid] [productid]\n";
-    output_ << "help\n";
 }
