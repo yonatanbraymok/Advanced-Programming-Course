@@ -1,6 +1,7 @@
 #pragma once
 
-#include "interfaces.h"
+// Keep exact file case for cross-platform builds (Linux is case-sensitive).
+#include "Interfaces.h"
 
 class SimilarityRecommender : public IRecommender {
 public:

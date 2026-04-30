@@ -24,7 +24,8 @@ bool CommandParser::parsePositiveInt(const std::string& token, int& value) {
     }
 
     value = static_cast<int>(parsed);
-    return true;
+    // IDs in this app are positive (zero is treated as invalid input).
+    return value > 0;
 }
 
 std::vector<std::string> CommandParser::splitBySpaces(const std::string& line) {
