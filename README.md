@@ -50,13 +50,13 @@ Core files:
 ```bash
 docker build -t advanced-prog-ex1 .
 ```
-##2) Run the App
+**2) Run the App**
 
 ```bash
 docker run -it advanced-prog-ex1 ./build/app
 ```
 
-##3) Run the tests separately
+**3) Run the tests separately**
 
 ```bash
 docker run advanced-prog-ex1 ctest --test-dir build --output-on-failure
@@ -68,12 +68,12 @@ docker run advanced-prog-ex1 ctest --test-dir build --output-on-failure
 cmake -S . -B build
 cmake --build build
 ```
-##2) Run the test
+**2) Run the test**
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
-##3) Run the App
+**3) Run the App**
 ```bash
 ./build/app
 ```
