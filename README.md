@@ -44,7 +44,7 @@ Core files:
 
 ## How to Build and Run
 
-### Option A: Run via Docker (Recommended / Grader Environment)
+### Option A: Run via Docker
 
 **1) Build the Docker image**
 ```bash
