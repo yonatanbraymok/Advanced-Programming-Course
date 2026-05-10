@@ -98,3 +98,7 @@ Expected output pattern:
 
 - Build artifacts go under `build/` and should not be committed.
 - Runtime data file may appear under `data/users_products.txt`; treat it as generated local data unless explicitly required by the task.
+
+## Notes for TA
+- Each task's finished product will be pushed to task-#tasknum-main for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
+Example: Task 1 code will be presented in a branch named "TASK-1-DONE"
