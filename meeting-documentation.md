@@ -1,3 +1,7 @@
 # First Status Meeting (1)
 
 As part of the initial status meeting for Advanced Systems Programming - Exercise 1, we completed the setup of the project infrastructure using JIRA and GitHub. We established roles for our three-member team, including the appointment of a Scrum Master, and conducted sprint planning by organizing the project into Epics, User Stories, and detailed tasks. Additionally, we aligned on a development workflow utilizing feature branches and a Pull Request system, where any code merge requires approval from the two other team members. Our immediate priority is the submission of the details.txt file to Moodle.
+
+# Second Status Meeting (2)
+
+In the second status meeting , we reviewed the final (as for Ex1) state of the application and verified that all tests pass when the full system is integrated. We also checked relevant edge cases and performed manual input testing to validate runtime behavior. In addition, we discussed whether to refactor the main application loop to avoid using a switch-case structure. We decided not to refactor at this stage because the current implementation includes only a small number of commands, and the existing structure remains clear and maintainable.

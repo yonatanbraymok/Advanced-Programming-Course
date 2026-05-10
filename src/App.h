@@ -1,31 +1,25 @@
 #pragma once
 
-#include <istream>
-#include <ostream>
-
 #include "CommandParser.h"
+#include "Commands.h"
 #include "Interfaces.h"
 
-// Main CLI app loop: read command -> parse -> execute behavior.
+// It adheres to the Single Responsibility Principle by only managing the main loop,
+// delegating the actual work of parsing and executing to other classes.
 class App {
 public:
-    App(std::istream& input, std::ostream& output, IRepository& repository, const IRecommender& recommender);
+    // Constructor uses dependency injection for its I/O and execution dependencies.
+    // This ensures loose coupling—App doesn't know if it's reading from a console or a file.
+    App(IInput& input, CommandExecutor& executor);
 
-    // Runs until input ends (EOF in local runs).
+    // Starts the blocking main application loop.
     void run();
 
 private:
-    std::istream& input_;
-    std::ostream& output_;
-    IRepository& repository_;
-    const IRecommender& recommender_;
+    // References to our injected tools
+    IInput& input_;
+    CommandExecutor& executor_;
+    
+    // Utility for translating raw strings into command structures
     CommandParser parser_;
-
-    // Command handlers kept separate to keep run() easy to read.
-    void handleAdd(const ParsedCommand& cmd);
-    void handleRecommend(const ParsedCommand& cmd);
-    void handleHelp();
-
-    // Formats products exactly as one space-separated line.
-    static std::string joinProducts(const ProductList& products);
 };
