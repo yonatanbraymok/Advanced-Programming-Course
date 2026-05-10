@@ -1,36 +1,11 @@
-# Advanced Programming Course - (Current Phase)
+# Advanced Programming Course - Ex1 (Current App State)
 
-This repository contains our current implementation stage of the Ex1 CLI recommender system in C++.
+This is our current C++ CLI implementation for Ex1.
+The app supports adding watched products for users, asking for recommendations, and printing help.
 
-## Project Structure (Current State)
+## Functionality
 
-- `src/`
-  - core application code (`App`, parser, repository, recommender, `main`)
-- `tests/`
-  - current test runner (`tests.cpp`)
-- `data/`
-  - runtime storage file for user-product data (`users_products.txt`) when generated
-- `CMakeLists.txt`
-  - build and test configuration
-
-## Build and Run
-
-### 1. Configure + build
-
-```bash
-cmake -S . -B build
-cmake --build build
-```
-
-### 2. Run the app
-
-```bash
-./build/app
-```
-
-## How to Use the CLI (Current Behavior)
-
-Supported commands:
+The app currently supports these commands:
 
 ```text
 add [userid] [productid1] [productid2] ...
@@ -38,15 +13,74 @@ recommend [userid] [productid]
 help
 ```
 
-Notes:
+Behavior rules:
 - invalid commands are ignored silently (no extra output)
-- `help` prints the exact command list
-- `add` updates data and prints nothing
-- `recommend` prints one line of recommendations (space-separated)
+- `add` updates stored data and prints nothing
+- `recommend` prints one newline-terminated line (space-separated product IDs)
+- `help` prints the exact required 3-line command list
 
-## Example Session
+## Architecture
 
-Input:
+Main flow:
+1. `main.cpp` creates concrete objects (`FileRepository`, `SimilarityRecommender`, `App`).
+2. `App` reads user lines from standard input.
+3. `CommandParser` validates and parses each line to a `ParsedCommand`.
+4. `App` dispatches by command type:
+   - `Add` -> repository update
+   - `Recommend` -> recommender call + output formatting
+   - `Help` -> exact contract text
+   - `Invalid` -> ignore silently
+
+Core files:
+- `src/main.cpp` - app wiring/composition root
+- `src/App.h`, `src/App.cpp` - loop + dispatch logic
+- `src/CommandParser.h`, `src/CommandParser.cpp` - strict command grammar
+- `src/Commands.h`, `src/Commands.cpp` - command execution and output formatting
+- `src/ConsoleIO.h`, `src/ConsoleIO.cpp` - standard input/output decoupling
+- `src/FileRepository.h`, `src/FileRepository.cpp` - persistence layer
+- `src/SimilarityRecommender.h`, `src/SimilarityRecommender.cpp` - recommendation logic
+- `src/Interfaces.h` - shared abstractions
+- `tests/tests.cpp` - behavior/integration-style checks for current phase
+
+## How to Build and Run
+
+### Option A: Run via Docker
+
+**1) Build the Docker image**
+```bash
+docker build -t advanced-prog-ex1 .
+```
+**2) Run the App**
+
+```bash
+docker run -it advanced-prog-ex1 ./build/app
+```
+
+**3) Run the tests separately**
+
+```bash
+docker run advanced-prog-ex1 ctest --test-dir build --output-on-failure
+```
+### Option B: Local Build (Linux/Mac)
+
+**1) Configure and build**
+```bash
+cmake -S . -B build
+cmake --build build
+```
+**2) Run the test**
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+**3) Run the App**
+```bash
+./build/app
+```
+
+## Example Usage
+
+Example input:
 
 ```text
 add 1 100 101 102
@@ -55,11 +89,16 @@ recommend 1 103
 help
 ```
 
-Expected behavior:
-- first two `add` commands: no output
-- `recommend`: prints one recommendation line (or empty line if none found)
-- `help`: prints the 3 help lines exactly
+Expected output pattern:
+- first two `add` commands -> no output
+- `recommend` -> one recommendation line (or empty line if no candidates)
+- `help` -> exact 3-line command list
+
+## Notes for Development
+
+- Build artifacts go under `build/` and should not be committed.
+- Runtime data file may appear under `data/users_products.txt`; treat it as generated local data unless explicitly required by the task.
 
 ## Notes for TA
-- Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
+- Each task's finished product will be pushed to task-#tasknum-main for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
 Example: Task 1 code will be presented in a branch named "TASK-1-DONE"
