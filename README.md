@@ -62,4 +62,4 @@ Expected behavior:
 
 ## Notes for TA
 - Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
-Example: Task 1 code will be presented in a branch named "TASK-1-DONE"
+Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
