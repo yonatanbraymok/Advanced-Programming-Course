@@ -14,6 +14,10 @@ public:
     void load() override;
     void addWatched(UserId userId, const ProductList& productIds) override;
     const std::unordered_set<ProductId>* getWatched(UserId userId) const override;
+    
+    // Implementation of the removal logic
+    void removeUser(UserId userId) override;
+
     std::vector<UserId> getAllUsers() const override;
 
 private:
@@ -22,4 +26,3 @@ private:
     std::string filePath_;
     std::unordered_map<UserId, std::unordered_set<ProductId>> userProducts_;
 };
-

@@ -11,6 +11,8 @@ enum class CommandType {
     Add,
     Post,
     Patch,
+    Get,
+    Delete,
     Recommend,
     Help
 };

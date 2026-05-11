@@ -116,3 +116,59 @@ TEST_F(AppTDDTest, PatchNonExistentUserReturns404) {
     // EXPECTED: "404 Not Found"
     EXPECT_EQ(output.getLastMessage(), "404 Not Found");
 }
+
+// Test GET functionality
+TEST_F(AppTDDTest, GetCommandReturnsProductList) {
+    FileRepository repo(testDb);
+    repo.addWatched(100, {1, 2, 3}); // Seed user
+    
+    SimilarityRecommender recommender(repo);
+    MockInput input;
+    input.addLine("GET 100");
+    MockOutput output;
+    
+    CommandExecutor executor(repo, recommender, output);
+    App app(input, executor);
+    app.run();
+
+    // EXPECTED: The list of products separated by spaces
+    EXPECT_EQ(output.getLastMessage(), "1 2 3");
+}
+
+// Test DELETE functionality
+TEST_F(AppTDDTest, DeleteCommandReturns204) {
+    FileRepository repo(testDb);
+    repo.addWatched(100, {1, 2}); // Seed user
+    
+    SimilarityRecommender recommender(repo);
+    MockInput input;
+    input.addLine("DELETE 100");
+    MockOutput output;
+    
+    CommandExecutor executor(repo, recommender, output);
+    App app(input, executor);
+    app.run();
+
+    EXPECT_EQ(output.getLastMessage(), "204 No Content");
+    // Verify user is actually gone
+    EXPECT_EQ(repo.getWatched(100), nullptr);
+}
+
+// Test GET/DELETE 404
+TEST_F(AppTDDTest, GetAndDeleteNonExistentUserReturns404) {
+    FileRepository repo(testDb);
+    SimilarityRecommender recommender(repo);
+    MockInput input;
+    input.addLine("GET 999");
+    input.addLine("DELETE 999");
+    MockOutput output;
+    
+    CommandExecutor executor(repo, recommender, output);
+    App app(input, executor);
+    app.run();
+
+    // Both should return 404
+    ASSERT_GE(output.sentMessages.size(), 2);
+    EXPECT_EQ(output.sentMessages[0], "404 Not Found");
+    EXPECT_EQ(output.sentMessages[1], "404 Not Found");
+}

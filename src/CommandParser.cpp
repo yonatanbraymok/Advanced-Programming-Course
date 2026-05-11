@@ -66,6 +66,26 @@ ParsedCommand CommandParser::parse(const std::string& line) const {
         return cmd;
     }
 
+    // GET format: GET <userId>
+    if (tokens[0] == "GET") {
+        int userId = 0;
+        if (tokens.size() == 2 && parsePositiveInt(tokens[1], userId)) {
+            cmd.type = CommandType::Get;
+            cmd.userId = userId;
+        }
+        return cmd;
+    }
+
+    // DELETE format: DELETE <userId>
+    if (tokens[0] == "DELETE") {
+        int userId = 0;
+        if (tokens.size() == 2 && parsePositiveInt(tokens[1], userId)) {
+            cmd.type = CommandType::Delete;
+            cmd.userId = userId;
+        }
+        return cmd;
+    }
+
     // POST format: POST <userId> <productId1> <productId2> ...
     if (tokens[0] == "POST") {
         if (tokens.size() < 3) {

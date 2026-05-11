@@ -25,14 +25,22 @@ void App::run() {
                 executor_.executeAdd(cmd.userId, cmd.products);
                 break;
             
-            // Handling the POST command
             case CommandType::Post:
                 executor_.executePost(cmd.userId, cmd.products);
                 break;
 
-            // Handling the PATCH command
             case CommandType::Patch:
                 executor_.executePatch(cmd.userId, cmd.products);
+                break;
+
+            // Handling the GET command
+            case CommandType::Get:
+                executor_.executeGet(cmd.userId);
+                break;
+
+            // Handling the DELETE command
+            case CommandType::Delete:
+                executor_.executeDelete(cmd.userId);
                 break;
 
             case CommandType::Recommend:
