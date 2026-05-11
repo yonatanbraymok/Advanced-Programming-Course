@@ -9,6 +9,8 @@
 enum class CommandType {
     Invalid,
     Add,
+    Post,
+    Patch,
     Recommend,
     Help
 };

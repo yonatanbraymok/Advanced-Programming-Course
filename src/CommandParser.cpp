@@ -51,27 +51,72 @@ std::vector<std::string> CommandParser::splitBySpaces(const std::string& line) {
 }
 
 ParsedCommand CommandParser::parse(const std::string& line) const {
-    // Default is Invalid; we only set fields when a format is fully valid.
-    ParsedCommand cmd;
+    auto tokens = splitBySpaces(line);
+    ParsedCommand cmd; // Defaults to CommandType::Invalid
 
-    // Baseline contract: tab-separated input is considered malformed.
-    if (line.find('\t') != std::string::npos) {
-        return cmd;
-    }
-
-    // First stage: lexical split from raw text into tokens.
-    const std::vector<std::string> tokens = splitBySpaces(line);
-    // Blank or whitespace-only input stays Invalid (silent ignore path).
     if (tokens.empty()) {
         return cmd;
     }
 
-    // help has a strict form: exactly one token.
+    // help format: help
     if (tokens[0] == "help") {
         if (tokens.size() == 1) {
             cmd.type = CommandType::Help;
         }
-        // If extra tokens exist, help is invalid by the strict contract.
+        return cmd;
+    }
+
+    // POST format: POST <userId> <productId1> <productId2> ...
+    if (tokens[0] == "POST") {
+        if (tokens.size() < 3) {
+            return cmd;
+        }
+
+        int userId = 0;
+        if (!parsePositiveInt(tokens[1], userId)) {
+            return cmd;
+        }
+
+        ProductList products;
+        products.reserve(tokens.size() - 2);
+        for (std::size_t i = 2; i < tokens.size(); ++i) {
+            int productId = 0;
+            if (!parsePositiveInt(tokens[i], productId)) {
+                return ParsedCommand{}; // Invalid product cancels the whole command
+            }
+            products.push_back(productId);
+        }
+
+        cmd.type = CommandType::Post;
+        cmd.userId = userId;
+        cmd.products = std::move(products);
+        return cmd;
+    }
+
+    // PATCH format: PATCH <userId> <productId1> <productId2> ...
+    if (tokens[0] == "PATCH") {
+        if (tokens.size() < 3) {
+            return cmd;
+        }
+
+        int userId = 0;
+        if (!parsePositiveInt(tokens[1], userId)) {
+            return cmd;
+        }
+
+        ProductList products;
+        products.reserve(tokens.size() - 2);
+        for (std::size_t i = 2; i < tokens.size(); ++i) {
+            int productId = 0;
+            if (!parsePositiveInt(tokens[i], productId)) {
+                return ParsedCommand{};
+            }
+            products.push_back(productId);
+        }
+
+        cmd.type = CommandType::Patch;
+        cmd.userId = userId;
+        cmd.products = std::move(products);
         return cmd;
     }
 
@@ -90,14 +135,12 @@ ParsedCommand CommandParser::parse(const std::string& line) const {
         products.reserve(tokens.size() - 2);
         for (std::size_t i = 2; i < tokens.size(); ++i) {
             int productId = 0;
-            // Any invalid product token invalidates the entire command.
             if (!parsePositiveInt(tokens[i], productId)) {
                 return ParsedCommand{};
             }
             products.push_back(productId);
         }
 
-        // Only after all checks pass do we mark this command as valid Add.
         cmd.type = CommandType::Add;
         cmd.userId = userId;
         cmd.products = std::move(products);
@@ -116,13 +159,11 @@ ParsedCommand CommandParser::parse(const std::string& line) const {
             return cmd;
         }
 
-        // Recommend carries exactly one user id and one product id.
         cmd.type = CommandType::Recommend;
         cmd.userId = userId;
         cmd.productId = productId;
         return cmd;
     }
 
-    // Unknown command keyword.
     return cmd;
 }

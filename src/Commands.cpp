@@ -9,6 +9,25 @@ void CommandExecutor::executeAdd(UserId userId, const ProductList& products) {
     repository_.addWatched(userId, products); 
 }
 
+// Implementation of POST. Adds/Updates user and returns 201 Created status code.
+void CommandExecutor::executePost(UserId userId, const ProductList& products) {
+    repository_.addWatched(userId, products);
+    output_.writeLine("201 Created");
+}
+
+// Implementation of PATCH. Updates existing user products and returns 204 No Content.
+// Returns 404 Not Found if the user does not exist in the repository.
+void CommandExecutor::executePatch(UserId userId, const ProductList& products) {
+    // Check if user exists before attempting to patch
+    if (repository_.getWatched(userId) == nullptr) {
+        output_.writeLine("404 Not Found");
+        return;
+    }
+    
+    repository_.addWatched(userId, products);
+    output_.writeLine("204 No Content");
+}
+
 // Combines product IDs into a single string separated by spaces for printing
 std::string CommandExecutor::joinProducts(const ProductList& products) {
     std::ostringstream out;
