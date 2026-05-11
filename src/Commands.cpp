@@ -35,6 +35,8 @@ void CommandExecutor::executeGet(UserId userId) {
         output_.writeLine("404 Not Found");
         return;
     }
+    // Status line + blank line (\n results in double newline with writeLine)
+    output_.writeLine("200 Ok\n");
 
     // Convert unordered_set to vector for joining
     ProductList products(watched->begin(), watched->end());

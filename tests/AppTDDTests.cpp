@@ -120,7 +120,7 @@ TEST_F(AppTDDTest, PatchNonExistentUserReturns404) {
 // Test GET functionality
 TEST_F(AppTDDTest, GetCommandReturnsProductList) {
     FileRepository repo(testDb);
-    repo.addWatched(100, {1, 2, 3}); // Seed user
+    repo.addWatched(100, {1, 2, 3});
     
     SimilarityRecommender recommender(repo);
     MockInput input;
@@ -131,8 +131,10 @@ TEST_F(AppTDDTest, GetCommandReturnsProductList) {
     App app(input, executor);
     app.run();
 
-    // EXPECTED: The list of products separated by spaces
-    EXPECT_EQ(output.getLastMessage(), "1 2 3");
+    // Verify format: Message 0 is status, Message 1 is data
+    ASSERT_GE(output.sentMessages.size(), 2);
+    EXPECT_EQ(output.sentMessages[0], "200 Ok\n");
+    EXPECT_EQ(output.sentMessages[1], "1 2 3");
 }
 
 // Test DELETE functionality
