@@ -156,6 +156,25 @@ TEST_F(AppTDDTest, DeleteCommandReturns204) {
     EXPECT_EQ(repo.getWatched(100), nullptr);
 }
 
+// Parser returns Invalid → App must call executeInvalidCommand() so the client
+// sees exactly "400 Bad Request" (Ex2 wire contract / APC-96). MockOutput lets
+// us assert the string without opening a real socket.
+TEST_F(AppTDDTest, InvalidCommandReturns400BadRequest) {
+    FileRepository repo(testDb);
+    SimilarityRecommender recommender(repo);
+    MockInput input;
+    MockOutput output;
+
+    input.addLine("this-is-not-a-valid-command 1 2");
+
+    CommandExecutor executor(repo, recommender, output);
+    App app(input, executor);
+    app.run();
+
+    ASSERT_FALSE(output.sentMessages.empty());
+    EXPECT_EQ(output.sentMessages.back(), "400 Bad Request");
+}
+
 // Test GET/DELETE 404
 TEST_F(AppTDDTest, GetAndDeleteNonExistentUserReturns404) {
     FileRepository repo(testDb);

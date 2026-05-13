@@ -1,17 +1,21 @@
 # Advanced Programming Course - (Current Phase)
 
-This repository contains our current implementation stage of the Ex1 CLI recommender system in C++.
+This repository contains the recommender system in C++ with a **TCP server** entry point, TDD tests, and persisted user–product data.
 
 ## Project Structure (Current State)
 
 - `src/`
-  - core application code (`App`, parser, repository, recommender, `main`)
+  - Core application: `App`, `CommandParser`, `CommandExecutor`, `FileRepository`, `SimilarityRecommender`
+  - **Socket adapters:** `SocketLineInput`, `SocketLineOutput` (`IInput` / `IOutput` over a connected TCP fd)
+  - `main.cpp` — binds a port, `accept` loop, one client at a time, shared repository across sessions
 - `tests/`
-  - current test runner (`tests.cpp`)
+  - `tests.cpp` — legacy checks + launches GTest
+  - `AppTDDTests.cpp` — POST / PATCH / GET / DELETE / invalid (`400 Bad Request`) scenarios
+  - `SocketServerTest.cpp` — server survives client disconnect; second connection still works; persistence across TCP sessions
 - `data/`
-  - runtime storage file for user-product data (`users_products.txt`) when generated
+  - Runtime storage (`users_products.txt` when using default server path)
 - `CMakeLists.txt`
-  - build and test configuration
+  - Builds `app` (TCP server) and `tests_runner`. If **GTest** (using this library is allowed) is not installed system-wide, CMake **FetchContent** downloads GoogleTest (requires network on first configure).
 
 ## Build and Run
 
@@ -22,43 +26,66 @@ cmake -S . -B build
 cmake --build build
 ```
 
-### 2. Run the app
+### 2. Run the TCP server
+
+The server listens on **all interfaces** and takes the port as **the only program argument** (Exercise 2 requirement):
 
 ```bash
-./build/app
+./build/app 8080
 ```
 
-## How to Use the CLI (Current Behavior)
-
-Supported commands:
+Each client connection uses one persistent TCP stream: one command line per message (terminated by `\n`); server replies with line-oriented output. **Malformed or unknown commands** receive exactly:
 
 ```text
-add [userid] [productid1] [productid2] ...
-recommend [userid] [productid]
+400 Bad Request
+```
+
+The process keeps running after a client disconnects and accepts further connections on the same port.
+
+### 3. Quick manual check
+
+From another terminal:
+
+```bash
+printf 'help\n' | nc 127.0.0.1 8080 (MAC)
+printf 'help\n' | nc -N 127.0.0.1 8080
+```
+
+You should see the three `help` lines returned by the server.
+
+## Wire commands (server)
+
+Supported verbs over the socket (see `CommandParser` / `CommandExecutor` for exact grammar):
+
+```text
+POST <userid> <productid> ...
+PATCH <userid> <productid> ...
+GET <userid>
+DELETE <userid>
+add ...
+recommend ...
 help
 ```
 
 Notes:
-- invalid commands are ignored silently (no extra output)
-- `help` prints the exact command list
-- `add` updates data and prints nothing
-- `recommend` prints one line of recommendations (space-separated)
+- Valid success / error lines follow the course spec (e.g. `201 Created`, `204 No Content`, `404 Not Found`, `GET` success uses `200 Ok` plus a blank line before the body line).
+- Invalid input returns **`400 Bad Request`** (no extra text).
 
-## Example Session
+### 4. Run tests
 
-Input:
-
-```text
-add 1 100 101 102
-add 2 101 103
-recommend 1 103
-help
+```bash
+./build/tests_runner
 ```
 
-Expected behavior:
-- first two `add` commands: no output
-- `recommend`: prints one recommendation line (or empty line if none found)
-- `help`: prints the 3 help lines exactly
+## Example session (over TCP)
+
+With the server running on port `8080`:
+
+```bash
+printf 'POST 1 100 101\nGET 1\nhelp\n' | nc -N 127.0.0.1 8080
+```
+
+You should see status lines and bodies as defined by `CommandExecutor` (e.g. `201 Created`, then `GET` output with the `200 Ok` / blank line / product list framing, then three `help` lines).
 
 ## Notes for TA
 - Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.

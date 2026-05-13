@@ -1,3 +1,8 @@
 # ignore details.txt file
 details.txt
+
+# ignore build directory
 build/
+
+# ignore DS_Store file
+.DS_Store
