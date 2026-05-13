@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <gtest/gtest.h>
 
 #include "CommandParser.h"
 #include "Commands.h"
@@ -38,7 +39,9 @@ std::string makeTempFilePath() {
 }
 }  // namespace
 
-int main() {
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+
     bool ok = true;
 
     {
@@ -146,6 +149,12 @@ int main() {
     if (!ok) {
         return 1;
     }
+
+    if (ok) {
+        std::cout << "Legacy tests passed, now running GTest (TDD)..." << std::endl;
+    }
+
+    return RUN_ALL_TESTS();
 
     std::cout << "All tests passed\n";
     return 0;

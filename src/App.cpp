@@ -8,7 +8,7 @@ void App::run() {
     std::string line;
     
     // Standard blocking loop: waits naturally for user input.
-    // Automatically returns false and exits the loop if the input stream is closed (like an EOF signal).
+    // Automatically returns false and exits the loop if the input stream is closed.
     while (input_.readLine(line)) {
         
         // Skip processing if the user just hits Enter on an empty line
@@ -24,16 +24,36 @@ void App::run() {
             case CommandType::Add:
                 executor_.executeAdd(cmd.userId, cmd.products);
                 break;
+            
+            case CommandType::Post:
+                executor_.executePost(cmd.userId, cmd.products);
+                break;
+
+            case CommandType::Patch:
+                executor_.executePatch(cmd.userId, cmd.products);
+                break;
+
+            // Handling the GET command
+            case CommandType::Get:
+                executor_.executeGet(cmd.userId);
+                break;
+
+            // Handling the DELETE command
+            case CommandType::Delete:
+                executor_.executeDelete(cmd.userId);
+                break;
+
             case CommandType::Recommend:
                 executor_.executeRecommend(cmd.userId, cmd.productId);
                 break;
+
             case CommandType::Help:
                 executor_.executeHelp();
                 break;
+
             case CommandType::Invalid:
             default:
-                // The assignment instructions explicitly state that invalid commands 
-                // must be ignored silently without printing any errors.
+                // ignore invalid commands silently without printing any errors
                 break;
         }
     }

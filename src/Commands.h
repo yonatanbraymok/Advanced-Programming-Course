@@ -13,6 +13,14 @@ public:
 
     // Command handlers
     void executeAdd(UserId userId, const ProductList& products);
+    
+    void executePost(UserId userId, const ProductList& products);
+    void executePatch(UserId userId, const ProductList& products);
+    
+    // command handlers for GET and DELETE
+    void executeGet(UserId userId);
+    void executeDelete(UserId userId);
+    
     void executeRecommend(UserId userId, ProductId productId);
     void executeHelp();
 
