@@ -19,7 +19,6 @@
 #include <iostream>
 #include <string>
 
-#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -30,6 +29,7 @@
 #include "SimilarityRecommender.h"
 #include "SocketLineInput.h"
 #include "SocketLineOutput.h"
+#include "TcpServer.h"
 
 namespace {
 
@@ -74,42 +74,17 @@ int main(int argc, char* argv[]) {
 
     SimilarityRecommender recommender(repository);
 
-    // --- Create the listening socket (IPv4, TCP) ---
-    const int listenFd = socket(AF_INET, SOCK_STREAM, 0);
-    if (listenFd < 0) {
-        std::cerr << "socket: " << std::strerror(errno) << '\n';
-        return 1;
-    }
-
-    // SO_REUSEADDR helps during development: if the OS still holds the port in
-    // TIME_WAIT after a crash, you can re-bind sooner instead of waiting.
-    int opt = 1;
-    if (setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) != 0) {
-        std::cerr << "setsockopt: " << std::strerror(errno) << '\n';
-        close(listenFd);
-        return 1;
-    }
-
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);  // listen on all interfaces
-    addr.sin_port = htons(port);
-
-    if (bind(listenFd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0) {
-        std::cerr << "bind: " << std::strerror(errno) << '\n';
-        close(listenFd);
-        return 1;
-    }
-
-    if (listen(listenFd, SOMAXCONN) != 0) {
-        std::cerr << "listen: " << std::strerror(errno) << '\n';
-        close(listenFd);
+    TcpServer server(static_cast<int>(port));
+    try {
+        server.setup();
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to start server: " << e.what() << '\n';
         return 1;
     }
 
     // --- Main server loop: accept -> handle one client -> repeat forever ---
     while (true) {
-        const int clientFd = accept(listenFd, nullptr, nullptr);
+        const int clientFd = accept(server.getServerFd(), nullptr, nullptr);
         if (clientFd < 0) {
             // accept() can fail with EINTR if a signal arrives; retry in that case.
             if (errno == EINTR) {
