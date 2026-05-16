@@ -5,3 +5,5 @@ As part of the initial status meeting for Advanced Systems Programming - Exercis
 # Second Status Meeting (2)
 
 In the second status meeting , we reviewed the final (as for Ex1) state of the application and verified that all tests pass when the full system is integrated. We also checked relevant edge cases and performed manual input testing to validate runtime behavior. In addition, we discussed whether to refactor the main application loop to avoid using a switch-case structure. We decided not to refactor at this stage because the current implementation includes only a small number of commands, and the existing structure remains clear and maintainable.
+
+# Third Status Meeting (3)

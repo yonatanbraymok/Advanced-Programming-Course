@@ -1,7 +1,9 @@
 #include "Commands.h"
-#include <sstream>
-#include <vector>
+
 #include <algorithm>
+#include <sstream>
+#include <unordered_set>
+#include <vector>
 
 CommandExecutor::CommandExecutor(IRepository& repository, const IRecommender& recommender, IOutput& output)
     : repository_(repository), recommender_(recommender), output_(output) {}
@@ -80,4 +82,10 @@ void CommandExecutor::executeHelp() {
     output_.writeLine("add [userid] [productid1] [productid2] ...");
     output_.writeLine("recommend [userid] [productid]");
     output_.writeLine("help");
+}
+
+// Exercise 2: anything that is not a well-formed supported command must produce
+// this single line on the wire (IOutput adds the trailing '\n' for us).
+void CommandExecutor::executeInvalidCommand() {
+    output_.writeLine("400 Bad Request");
 }

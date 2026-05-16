@@ -7,8 +7,10 @@ App::App(IInput& input, CommandExecutor& executor) : input_(input), executor_(ex
 void App::run() {
     std::string line;
     
-    // Standard blocking loop: waits naturally for user input.
-    // Automatically returns false and exits the loop if the input stream is closed.
+    // One iteration = one line from IInput (console OR TCP — App stays the same).
+    // readLine returns false when the stream ends (EOF on stdin, or client closed
+    // the socket), which ends THIS session only; main()'s accept loop may start
+    // another client afterward.
     while (input_.readLine(line)) {
         
         // Skip processing if the user just hits Enter on an empty line
@@ -33,12 +35,10 @@ void App::run() {
                 executor_.executePatch(cmd.userId, cmd.products);
                 break;
 
-            // Handling the GET command
             case CommandType::Get:
                 executor_.executeGet(cmd.userId);
                 break;
 
-            // Handling the DELETE command
             case CommandType::Delete:
                 executor_.executeDelete(cmd.userId);
                 break;
@@ -51,9 +51,12 @@ void App::run() {
                 executor_.executeHelp();
                 break;
 
+            // Parser could not build a known command (wrong tokens, bad numbers,
+            // unknown verb, …). On the network we must answer with exactly one line:
+            // "400 Bad Request" — see CommandExecutor::executeInvalidCommand().
             case CommandType::Invalid:
             default:
-                // ignore invalid commands silently without printing any errors
+                executor_.executeInvalidCommand();
                 break;
         }
     }

@@ -1,69 +1,108 @@
+// =============================================================================
+// main.cpp — TCP server entry point
+// =============================================================================
+// The program no longer reads from stdin. Instead it:
+//   1) Parses the listen PORT from argv[1].
+//   2) Loads the FileRepository once for the whole process (shared memory/file).
+//   3) Listens on TCP; for EACH accepted client, wires SocketLineInput/Output
+//      into App + CommandExecutor, runs the usual command loop, then closes
+//      that client. The OUTER loop never exits — new clients can connect after
+//      old ones disconnect.
+//
+// stderr is only used for startup errors (bad port, bind failed). The wire
+// protocol itself must stay exactly as CommandExecutor defines it.
+// =============================================================================
+
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
+
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <unistd.h>
+
 #include "App.h"
 #include "Commands.h"
 #include "FileRepository.h"
 #include "SimilarityRecommender.h"
+#include "SocketLineInput.h"
+#include "SocketLineOutput.h"
 #include "TcpServer.h"
-#include "SocketIO.h"
+
+namespace {
+
+// Convert argv[1] into a valid TCP port (1..65535). Rejects garbage, signs,
+// trailing junk, and overflow so we do not pass nonsense to bind().
+bool parsePort(const char* text, uint16_t* outPort) {
+    if (text == nullptr || text[0] == '\0') {
+        return false;
+    }
+    char* end = nullptr;
+    errno = 0;
+    const unsigned long value = std::strtoul(text, &end, 10);
+    if (errno != 0 || end == text || *end != '\0') {
+        return false;
+    }
+    if (value == 0UL || value > 65535UL) {
+        return false;
+    }
+    *outPort = static_cast<uint16_t>(value);
+    return true;
+}
+
+}
 
 int main(int argc, char* argv[]) {
-    // argument parsing for the port number
-    if (argc < 2) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << (argc > 0 ? argv[0] : "app") << " <port>\n";
         return 1;
     }
 
-    int port;
-    try {
-        port = std::stoi(argv[1]);
-        if (port < 1024 || port > 65535) return 1;
-    } catch (...) {
+    uint16_t port = 0;
+    if (!parsePort(argv[1], &port)) {
+        std::cerr << "Invalid port: " << argv[1] << '\n';
         return 1;
     }
 
-    // initializig shared data structures (Repository and Recommender)
-    // These are initialized once and shared across all sequential clients.
+    // One repository + one recommender for the entire server lifetime. All
+    // clients share this state (assignment: one client at a time, but data
+    // persists across connections).
     FileRepository repository("data/users_products.txt");
     repository.load();
+
     SimilarityRecommender recommender(repository);
 
-    // setup the TCP Server (socket, bind, listen)
-    TcpServer server(port);
+    TcpServer server(static_cast<int>(port));
     try {
         server.setup();
     } catch (const std::exception& e) {
-        // if  the port is taken or socket fails, exit
+        std::cerr << "Failed to start server: " << e.what() << '\n';
         return 1;
     }
 
-    // the accept Loop
-    // the server handle one client at a time.
+    // --- Main server loop: accept -> handle one client -> repeat forever ---
     while (true) {
-        struct sockaddr_in clientAddr;
-        socklen_t clientLen = sizeof(clientAddr);
-        
-        // Blocking call: waits here until a client connects
-        int clientFd = accept(server.getServerFd(), (struct sockaddr*)&clientAddr, &clientLen);
-        
+        const int clientFd = accept(server.getServerFd(), nullptr, nullptr);
         if (clientFd < 0) {
-            continue; // Ignore failed connection attempts and wait for the next one
+            // accept() can fail with EINTR if a signal arrives; retry in that case.
+            if (errno == EINTR) {
+                continue;
+            }
+            std::cerr << "accept: " << std::strerror(errno) << '\n';
+            continue;
         }
 
-        // initialize the Socket bridge for this specific client
-        SocketIO io(clientFd);
-        
-        // initialize the Executor and App with the current client's IO.
-        CommandExecutor executor(repository, recommender, io);
-        App app(io, executor);
-        
-        // run() is blocking and processing client commands until the client disconnects
+        // Same App/CommandExecutor pipeline as before — only IInput/IOutput are
+        // backed by the socket instead of cin/cout.
+        SocketLineInput input(clientFd);
+        SocketLineOutput output(clientFd);
+        CommandExecutor executor(repository, recommender, output);
+        App app(input, executor);
         app.run();
 
-        // Cleanup the client socket before starting to wait for the next connection.
+        // Session over (client closed or recv returned 0). Release OS resources.
         close(clientFd);
     }
-    
-    return 0;
 }

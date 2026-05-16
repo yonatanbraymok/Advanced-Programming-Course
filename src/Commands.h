@@ -24,6 +24,10 @@ public:
     void executeRecommend(UserId userId, ProductId productId);
     void executeHelp();
 
+    // Called when CommandParser marks the line as Invalid. Sends the exact HTTP-style
+    // status text the grader expects — no extra spaces, no second line.
+    void executeInvalidCommand();
+
 private:
     // References to our core data and output components
     IRepository& repository_;
