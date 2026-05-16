@@ -6,7 +6,9 @@ This repository contains the recommender system in C++ with a **TCP server** ent
 
 - `src/`
   - Core application: `App`, `CommandParser`, `CommandExecutor`, `FileRepository`, `SimilarityRecommender`
-  - **Socket adapters:** `SocketLineInput`, `SocketLineOutput` (`IInput` / `IOutput` over a connected TCP fd)
+  - **Protocol line I/O (APC-80 / APC-81):** `ProtocolLineIO` — read/write one `\n`-terminated line on a socket fd
+  - **Socket adapters:** `SocketLineInput`, `SocketLineOutput` (`IInput` / `IOutput` delegating to `ProtocolLineIO`)
+  - **Python client (APC-82):** `protocol_message.py` — `append_newline`, `send_line`, `read_line`, `read_response`; used by `client.py`
   - `main.cpp` — binds a port, `accept` loop, one client at a time, shared repository across sessions
 - `tests/`
   - `tests.cpp` — legacy checks + launches GTest

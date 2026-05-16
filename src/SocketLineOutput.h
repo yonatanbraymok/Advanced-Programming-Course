@@ -4,9 +4,7 @@
 
 #include "Interfaces.h"
 
-// SocketLineOutput — send one logical line over TCP
-// Implements IOutput. Each writeLine() sends the given string followed by \n.
-
+// Sends server replies to the TCP socket (same idea as writing to cout).
 class SocketLineOutput : public IOutput {
 public:
     explicit SocketLineOutput(int socketFd);
