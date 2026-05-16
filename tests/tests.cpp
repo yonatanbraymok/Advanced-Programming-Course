@@ -56,16 +56,28 @@ int main(int argc, char **argv) {
         ok &= expect(invalidTabs.type == CommandType::Invalid, "tabs are invalid");
 
         const ParsedCommand add = parser.parse("add 1 100 101");
-        ok &= expect(add.type == CommandType::Add && add.products.size() == 2, "add command parsed");
+        ok &= expect(add.type == CommandType::Invalid, "add is not an Ex2 wire command");
 
         const ParsedCommand spacedAdd = parser.parse("add   1    100   101   102");
-        ok &= expect(spacedAdd.type == CommandType::Add && spacedAdd.products.size() == 3, "add supports multiple spaces");
+        ok &= expect(spacedAdd.type == CommandType::Invalid, "add with spaces is invalid on wire");
 
         const ParsedCommand badAdd = parser.parse("add 1");
         ok &= expect(badAdd.type == CommandType::Invalid, "short add invalid");
 
+        const ParsedCommand recommend = parser.parse("recommend 1 104");
+        ok &= expect(recommend.type == CommandType::Invalid, "recommend is not an Ex2 wire command");
+
         const ParsedCommand badNumber = parser.parse("recommend x 104");
         ok &= expect(badNumber.type == CommandType::Invalid, "recommend invalid number");
+
+        const ParsedCommand getCmd = parser.parse("GET 1 104");
+        ok &= expect(getCmd.type == CommandType::Get && getCmd.userId == 1 && getCmd.productId == 104,
+                      "GET parses userid and productid");
+
+        const ParsedCommand deleteCmd = parser.parse("DELETE 1 100 101");
+        ok &= expect(deleteCmd.type == CommandType::Delete && deleteCmd.userId == 1 &&
+                         deleteCmd.products.size() == 2,
+                      "DELETE parses userid and product list");
     }
 
     {

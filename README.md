@@ -62,15 +62,15 @@ Supported verbs over the socket (see `CommandParser` / `CommandExecutor` for exa
 ```text
 POST <userid> <productid> ...
 PATCH <userid> <productid> ...
-GET <userid>
-DELETE <userid>
-add ...
-recommend ...
+GET <userid> <productid>
+DELETE <userid> <productid> ...
 help
 ```
 
+Legacy verbs `add` and `recommend` are not accepted on the wire (they return `400 Bad Request`). The `help` text still lists older names until APC-105 updates it.
+
 Notes:
-- Valid success / error lines follow the course spec (e.g. `201 Created`, `204 No Content`, `404 Not Found`, `GET` success uses `200 Ok` plus a blank line before the body line).
+- Valid success / error lines follow the course spec (e.g. `201 Created`, `204 No Content`, `404 Not Found`). `GET` success uses `200 Ok` plus a blank line before the recommendation line (Ex1-style product list).
 - Invalid input returns **`400 Bad Request`** (no extra text).
 
 ### 4. Run tests
@@ -84,10 +84,10 @@ Notes:
 With the server running on port `8080`:
 
 ```bash
-printf 'POST 1 100 101\nGET 1\nhelp\n' | nc -N 127.0.0.1 8080
+printf 'POST 1 100 101\nGET 1 104\nhelp\n' | nc -N 127.0.0.1 8080
 ```
 
-You should see status lines and bodies as defined by `CommandExecutor` (e.g. `201 Created`, then `GET` output with the `200 Ok` / blank line / product list framing, then three `help` lines).
+You should see status lines and bodies as defined by `CommandExecutor` (e.g. `201 Created`, then `GET` output with the `200 Ok` / blank line / recommendation line, then three `help` lines).
 
 ## Notes for TA
 - Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.

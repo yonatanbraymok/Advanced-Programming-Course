@@ -8,12 +8,10 @@
 // Command categories recognized by the parser.
 enum class CommandType {
     Invalid,
-    Add,
     Post,
     Patch,
     Get,
     Delete,
-    Recommend,
     Help
 };
 
