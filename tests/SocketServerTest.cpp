@@ -159,13 +159,19 @@ TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
         std::string line1;
         std::string line2;
         std::string line3;
+        std::string line4;
+        std::string line5;
         ASSERT_TRUE(recvWholeLine(c, line1));
         ASSERT_TRUE(recvWholeLine(c, line2));
         ASSERT_TRUE(recvWholeLine(c, line3));
+        ASSERT_TRUE(recvWholeLine(c, line4));
+        ASSERT_TRUE(recvWholeLine(c, line5));
 
-        EXPECT_EQ(line1, "add [userid] [productid1] [productid2] ...");
-        EXPECT_EQ(line2, "recommend [userid] [productid]");
-        EXPECT_EQ(line3, "help");
+        EXPECT_EQ(line1, "DELETE, arguments: [userid] [productid1] [productid2] ...");
+        EXPECT_EQ(line2, "GET, arguments: [userid] [productid]");
+        EXPECT_EQ(line3, "PATCH, arguments: [userid] [productid1] [productid2] ...");
+        EXPECT_EQ(line4, "POST, arguments: [userid] [productid1] [productid2] ...");
+        EXPECT_EQ(line5, "help");
 
         shutdown(c, SHUT_RDWR);
         close(c);

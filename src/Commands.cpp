@@ -57,9 +57,16 @@ std::string CommandExecutor::joinProducts(const ProductList& products) {
 }
 
 void CommandExecutor::executeHelp() {
-    output_.writeLine("add [userid] [productid1] [productid2] ...");
-    output_.writeLine("recommend [userid] [productid]");
-    output_.writeLine("help");
+    static const char* const kHelpLines[] = {
+        "DELETE, arguments: [userid] [productid1] [productid2] ...",
+        "GET, arguments: [userid] [productid]",
+        "PATCH, arguments: [userid] [productid1] [productid2] ...",
+        "POST, arguments: [userid] [productid1] [productid2] ...",
+        "help",
+    };
+    for (const char* line : kHelpLines) {
+        output_.writeLine(line);
+    }
 }
 
 void CommandExecutor::executeInvalidCommand() {
