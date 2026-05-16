@@ -1,6 +1,3 @@
-# Root Dockerfile aliases the server image for backward compatibility.
-# For separate server / client / tests images, see Dockerfile.server,
-# Dockerfile.client, Dockerfile.tests and docker-compose.yml.
 FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -149,11 +149,13 @@ int main(int argc, char **argv) {
 
         executor.executeHelp();
         
-        // The assignment has a strict format for the 'help' command output
-        ok &= expect(out.lines.size() == 3, "help prints exactly 3 lines");
-        ok &= expect(out.lines[0] == "add [userid] [productid1] [productid2] ...", "help line 1");
-        ok &= expect(out.lines[1] == "recommend [userid] [productid]", "help line 2");
-        ok &= expect(out.lines[2] == "help", "help line 3");
+        // Ex2 help: alphabetical verbs, arguments syntax, help last
+        ok &= expect(out.lines.size() == 5, "help prints exactly 5 lines");
+        ok &= expect(out.lines[0] == "DELETE, arguments: [userid] [productid1] [productid2] ...", "help line 1");
+        ok &= expect(out.lines[1] == "GET, arguments: [userid] [productid]", "help line 2");
+        ok &= expect(out.lines[2] == "PATCH, arguments: [userid] [productid1] [productid2] ...", "help line 3");
+        ok &= expect(out.lines[3] == "POST, arguments: [userid] [productid1] [productid2] ...", "help line 4");
+        ok &= expect(out.lines[4] == "help", "help line 5");
         
         std::remove(path.c_str());
     }
