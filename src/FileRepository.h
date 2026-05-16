@@ -15,8 +15,7 @@ public:
     void addWatched(UserId userId, const ProductList& productIds) override;
     const std::unordered_set<ProductId>* getWatched(UserId userId) const override;
     
-    // Implementation of the removal logic
-    void removeUser(UserId userId) override;
+    bool removeWatched(UserId userId, const ProductList& productIds) override;
 
     std::vector<UserId> getAllUsers() const override;
 

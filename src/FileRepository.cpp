@@ -103,13 +103,25 @@ const std::unordered_set<ProductId>* FileRepository::getWatched(UserId userId) c
     return &it->second;
 }
 
-// Implementation of user removal
-void FileRepository::removeUser(UserId userId) {
-    // erase() returns the number of elements removed (0 or 1)
-    if (userProducts_.erase(userId) > 0) {
-        // Requirement: Persist changes immediately
-        save();
+bool FileRepository::removeWatched(UserId userId, const ProductList& productIds) {
+    auto it = userProducts_.find(userId);
+    if (it == userProducts_.end()) {
+        return false;
     }
+
+    auto& watched = it->second;
+    for (ProductId productId : productIds) {
+        if (watched.count(productId) == 0) {
+            return false;
+        }
+    }
+
+    for (ProductId productId : productIds) {
+        watched.erase(productId);
+    }
+
+    save();
+    return true;
 }
 
 std::vector<UserId> FileRepository::getAllUsers() const {

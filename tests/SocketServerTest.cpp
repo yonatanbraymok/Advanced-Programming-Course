@@ -73,6 +73,19 @@ bool sendAll(int fd, const char* data, std::size_t len) {
     return true;
 }
 
+void seedAppendixUsers(FileRepository& repo) {
+    repo.addWatched(1, {100, 101, 102, 103});
+    repo.addWatched(2, {101, 102, 104, 105, 106});
+    repo.addWatched(3, {100, 104, 105, 107, 108});
+    repo.addWatched(4, {101, 105, 106, 107, 109, 110});
+    repo.addWatched(5, {100, 102, 103, 105, 108, 111});
+    repo.addWatched(6, {100, 103, 104, 110, 111, 112, 113});
+    repo.addWatched(7, {102, 105, 106, 107, 108, 109, 110});
+    repo.addWatched(8, {101, 104, 105, 106, 109, 111, 114});
+    repo.addWatched(9, {100, 103, 105, 107, 112, 113, 115});
+    repo.addWatched(10, {100, 102, 105, 106, 107, 109, 110, 116});
+}
+
 }  // namespace
 
 TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
@@ -82,6 +95,7 @@ TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
 
     FileRepository repository(path);
     repository.load();
+    seedAppendixUsers(repository);
     SimilarityRecommender recommender(repository);
 
     const int listenFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -164,7 +178,6 @@ TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
     {
         int c = -1;
         ASSERT_TRUE(connectClient(c));
-        // sizeof includes the '\0' terminator — subtract 1 so we send the real line.
         const char kPost[] = "POST 77 1 2\n";
         ASSERT_TRUE(sendAll(c, kPost, sizeof(kPost) - 1));
 
@@ -172,11 +185,9 @@ TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
         ASSERT_TRUE(recvWholeLine(c, created));
         EXPECT_EQ(created, "201 Created");
 
-        const char kGet[] = "GET 77\n";
+        const char kGet[] = "GET 1 104\n";
         ASSERT_TRUE(sendAll(c, kGet, sizeof(kGet) - 1));
 
-        // GET success framing on the wire: "200 Ok", then an empty line, then body.
-        // (Same three logical lines you would read with nc line-by-line.)
         std::string statusLine;
         std::string blankLine;
         std::string bodyLine;
@@ -186,7 +197,7 @@ TEST(SocketServerTest, AcceptsSecondClientAfterFirstDisconnects) {
 
         EXPECT_EQ(statusLine, "200 Ok");
         EXPECT_EQ(blankLine, "");
-        EXPECT_EQ(bodyLine, "1 2");
+        EXPECT_EQ(bodyLine, "105 106 111 110 112 113 107 108 109 114");
 
         shutdown(c, SHUT_RDWR);
         close(c);

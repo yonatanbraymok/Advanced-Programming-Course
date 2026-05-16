@@ -5,27 +5,21 @@
 #include "Interfaces.h"
 
 // Responsible for executing the commands parsed from the user input.
-// This separates the "what to do" (execution) from the "how to read it" (parsing).
+// This separates the "what to do" from the "how to read it".
 class CommandExecutor {
 public:
     // Takes interfaces as dependencies to ensure loose coupling
     CommandExecutor(IRepository& repository, const IRecommender& recommender, IOutput& output);
 
-    // Command handlers
-    void executeAdd(UserId userId, const ProductList& products);
-    
     void executePost(UserId userId, const ProductList& products);
     void executePatch(UserId userId, const ProductList& products);
-    
-    // command handlers for GET and DELETE
-    void executeGet(UserId userId);
-    void executeDelete(UserId userId);
-    
-    void executeRecommend(UserId userId, ProductId productId);
+
+    void executeGet(UserId userId, ProductId productId);
+    void executeDelete(UserId userId, const ProductList& products);
+
     void executeHelp();
 
     // Called when CommandParser marks the line as Invalid. Sends the exact HTTP-style
-    // status text the grader expects — no extra spaces, no second line.
     void executeInvalidCommand();
 
 private:

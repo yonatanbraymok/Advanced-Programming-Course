@@ -19,8 +19,9 @@ public:
     // - Returns a pointer to an internal set owned by the repository.
     virtual const std::unordered_set<ProductId>* getWatched(UserId userId) const = 0;
 
-    // support DELETE command.
-    virtual void removeUser(UserId userId) = 0;
+    // Remove listed products from a user's watch set. Returns false if the user
+    // is missing or any product is not currently watched.
+    virtual bool removeWatched(UserId userId, const ProductList& productIds) = 0;
 
     // Return a snapshot list of all known user IDs in the repository.
     virtual std::vector<UserId> getAllUsers() const = 0;
