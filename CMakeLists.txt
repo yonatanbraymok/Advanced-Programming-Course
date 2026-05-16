@@ -30,6 +30,7 @@ add_executable(app
     src/ConsoleIO.cpp
     src/FileRepository.cpp
     src/SimilarityRecommender.cpp
+    src/ProtocolLineIO.cpp
     src/SocketLineInput.cpp
     src/SocketLineOutput.cpp
 )
@@ -47,6 +48,7 @@ add_executable(tests_runner
     src/ConsoleIO.cpp
     src/FileRepository.cpp
     src/SimilarityRecommender.cpp
+    src/ProtocolLineIO.cpp
     src/SocketLineInput.cpp
     src/SocketLineOutput.cpp
 )

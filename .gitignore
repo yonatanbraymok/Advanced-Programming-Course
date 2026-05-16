@@ -6,3 +6,10 @@ build/
 
 # ignore DS_Store file
 .DS_Store
+
+# ignore local data files
+data/*
+!data/.gitkeep
+
+# ignore python cache directory
+src/__pycache__/
