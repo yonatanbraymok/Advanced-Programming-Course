@@ -1,0 +1,17 @@
+{
+  "name": "advanced-programming-web",
+  "version": "1.0.0",
+  "description": "Exercise 3 — Wolt-style REST API (Node.js + Express MVC)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "express": "^4.22.2"
+  }
+}
