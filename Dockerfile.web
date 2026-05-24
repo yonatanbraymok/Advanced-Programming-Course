@@ -1,0 +1,20 @@
+# Use a lightweight Node.js image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the package files from YB's 'web' folder
+COPY web/package*.json ./
+
+# Install dependencies (Express, etc.)
+RUN npm install
+
+# Copy the rest of the MVC application code
+COPY web/ .
+
+# Expose the port the Express server runs on
+EXPOSE 3000
+
+# Command to start the application
+CMD ["npm", "start"]

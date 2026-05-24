@@ -19,3 +19,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tests
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
