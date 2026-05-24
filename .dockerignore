@@ -7,3 +7,4 @@ build/
 **/*.exe
 .vs/
 out/
+web/node_modules/

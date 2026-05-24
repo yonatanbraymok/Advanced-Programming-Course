@@ -13,3 +13,8 @@ data/*
 
 # ignore python cache directory
 src/__pycache__/
+
+# Node web server
+web/node_modules/
+.env
+.env.*

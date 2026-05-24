@@ -164,6 +164,13 @@ docker build -f Dockerfile.client -t recommender-client .
 docker build -f Dockerfile.tests -t recommender-tests .
 ```
 
+## Exercise 3 — Web server (Node.js + Express)
+
+Exercise 3 adds a **REST API** in [`web/`](web/) (MVC). The Exercise 2 C++ TCP recommender stays under [`src/`](src/) and will be frozen on a `TASK-2-DONE` branch for grading; Ex3 work continues on `main` and feature branches.
+
+- **Run the web server:** see [web/README.md](web/README.md)
+- **Stack:** Node.js + Express only; in-memory data; JSON under `/api/*`
+
 ## Notes for TA
 - Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
 Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
