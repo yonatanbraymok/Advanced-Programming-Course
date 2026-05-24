@@ -24,6 +24,25 @@ const registerUser = (req, res) => {
     });
 };
 
+const getUserProfile = (req, res) => {
+    const userId = req.params.id; // Get the ID from the URL
+
+    // Find the user in our model
+    const user = User.findById(userId);
+
+    // Handle if user doesn't exist
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
+
+    // Strip the password out so we don't leak it to the client
+    const { password, ...safeUserProfile } = user;
+
+    // Return the clean profile data
+    res.status(200).json(safeUserProfile);
+};
+
 module.exports = {
-    registerUser
+    registerUser,
+    getUserProfile 
 };
