@@ -37,7 +37,18 @@ const User = {
 
     findById: (id) => {
         return users.find(user => user.id === id);
+    },
+    validateLogin: (username, rawPassword) => {
+        const user = users.find(u => u.username === username);
+        
+        // If the user doesn't exist, or the hashes don't match, return null
+        if (!user || user.password !== manualHash(rawPassword)) {
+            return null;
+        }
+        
+        return user; // Credentials are valid!
     }
 };
+
 
 module.exports = User;
