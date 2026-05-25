@@ -1,24 +1,24 @@
-// app.js — Express application
-// Builds the app without listening on a port so tests can import it.
-// All /api/* responses must be JSON.
-
 const express = require('express');
 const apiRoutes = require('./routes');
+const restaurantRoutes = require('./routes/restaurant');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Parse JSON request bodies (POST / PATCH from upcoming stories).
+// Parse JSON request bodies
 app.use(express.json());
 
-// Mount feature routers under /api (e.g. /api/health).
+// Mount feature routers under /api
 app.use('/api', apiRoutes);
 
-// No route matched — return JSON 404 before the error handler runs.
+// Mount restaurant and nested product router
+app.use('/api/restaurants', restaurantRoutes);
+
+// No route matched — return JSON 404
 app.use(notFound);
 
-// Four-argument middleware: catches errors passed to next(err).
+// Error handler middleware
 app.use(errorHandler);
 
 module.exports = app;
