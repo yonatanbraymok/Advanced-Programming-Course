@@ -52,8 +52,12 @@ const createProduct = (req, res) => {
     }
 
     const newProduct = productModel.create(id, name.trim(), price);
-    res.setHeader('Location', `/api/restaurants/${id}/products/${newProduct.id}`);
-    return res.status(201).send();
+    
+    
+    return res.status(201).json({
+        message: "Product created successfully",
+        productId: newProduct.id
+    });
 };
 
 // Handles GET /api/restaurants/:id/products/:pId
@@ -94,7 +98,9 @@ const updateProduct = (req, res) => {
     }
 
     productModel.update(pId, name.trim(), price);
-    return res.status(204).send();
+    
+    
+    return res.status(200).json({ message: "Product updated successfully" });
 };
 
 // Handles DELETE /api/restaurants/:id/products/:pId
@@ -109,7 +115,9 @@ const deleteProduct = (req, res) => {
     }
 
     productModel.remove(pId);
-    return res.status(204).send();
+    
+    
+    return res.status(200).json({ message: "Product deleted successfully" });
 };
 
 module.exports = {

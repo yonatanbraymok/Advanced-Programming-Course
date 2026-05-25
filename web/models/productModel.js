@@ -1,7 +1,7 @@
 // In-memory volatile storage for products
 const products = [];
 
-// Generate a random ID (consistent with userModel)
+// Generate a random ID 
 const generateId = () => {
     return 'prod_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 };
