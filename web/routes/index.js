@@ -2,12 +2,14 @@
 // (users, restaurants, orders, search).
 
 const express = require('express');
-const healthRoutes = require('./health');
-const userRoutes = require('./userRoutes');
-
 const router = express.Router();
+
+const healthRoutes = require('./health'); 
+const userRoutes = require('./userRoutes'); 
+const tokenRoutes = require('./tokenRoutes'); 
 
 router.use('/health', healthRoutes);
 router.use('/users', userRoutes);
+router.use('/tokens', tokenRoutes); 
 
 module.exports = router;
