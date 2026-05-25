@@ -1,6 +1,6 @@
 const net = require('net');
-const productModel = require('../models/product');
-const restaurantModel = require('../models/restaurant');
+const productModel = require('../models/productModel');
+const restaurantModel = require('../models/restaurantModel');
 
 // TCP configuration for the C++ Server
 const CPP_SERVER_PORT = 5555; 

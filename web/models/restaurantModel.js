@@ -1,7 +1,10 @@
-const crypto = require('crypto');
-
 // In-memory volatile storage for restaurants
 const restaurants = [];
+
+// Generate a random ID (consistent with userModel)
+const generateId = () => {
+    return 'rest_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+};
 
 // Retrieves all restaurants from the volatile memory array
 const getAll = () => {
@@ -11,7 +14,7 @@ const getAll = () => {
 // Creates a new restaurant object, stores it in memory, and returns it
 const create = (name) => {
     const newRestaurant = {
-        id: crypto.randomUUID(),
+        id: generateId(), // Swapped crypto for our manual generator
         name: name
     };
     restaurants.push(newRestaurant);

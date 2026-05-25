@@ -1,4 +1,4 @@
-const restaurantModel = require('../models/restaurant');
+const restaurantModel = require('../models/restaurantModel');
 
 // Handles GET /api/restaurants
 const getRestaurants = (req, res) => {
