@@ -51,7 +51,7 @@ const updateRestaurant = (req, res) => {
     }
 
     // No content
-    return res.status(204);
+    return res.status(204).send();
 };
 
 // Handles DELETE /api/restaurants/:id
@@ -64,7 +64,7 @@ const deleteRestaurant = (req, res) => {
     }
 
     // No content
-    return res.status(204);
+    return res.status(204).send();
 };
 
 module.exports = {

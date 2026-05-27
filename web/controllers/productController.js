@@ -101,7 +101,7 @@ const updateProduct = (req, res) => {
     
     
     // No content
-    return res.status(204);
+    return res.status(204).send();
 };
 
 // Handles DELETE /api/restaurants/:id/products/:pId
@@ -119,7 +119,7 @@ const deleteProduct = (req, res) => {
     
     
     // No content
-    return res.status(204);
+    return res.status(204).send();
 };
 
 module.exports = {
