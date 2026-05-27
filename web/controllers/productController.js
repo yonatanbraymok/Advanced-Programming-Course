@@ -100,7 +100,8 @@ const updateProduct = (req, res) => {
     productModel.update(pId, name.trim(), price);
     
     
-    return res.status(200).json({ message: "Product updated successfully" });
+    // No content
+    return res.status(204);
 };
 
 // Handles DELETE /api/restaurants/:id/products/:pId
@@ -117,7 +118,8 @@ const deleteProduct = (req, res) => {
     productModel.remove(pId);
     
     
-    return res.status(200).json({ message: "Product deleted successfully" });
+    // No content
+    return res.status(204);
 };
 
 module.exports = {

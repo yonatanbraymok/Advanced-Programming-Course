@@ -50,8 +50,8 @@ const updateRestaurant = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
 
-    
-    return res.status(200).json({ message: "Restaurant updated successfully" });
+    // No content
+    return res.status(204);
 };
 
 // Handles DELETE /api/restaurants/:id
@@ -63,8 +63,8 @@ const deleteRestaurant = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
 
-   
-    return res.status(200).json({ message: "Restaurant deleted successfully" });
+    // No content
+    return res.status(204);
 };
 
 module.exports = {
