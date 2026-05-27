@@ -1,4 +1,4 @@
-const restaurantModel = require('../models/restaurant');
+const restaurantModel = require('../models/restaurantModel');
 
 // Handles GET /api/restaurants
 const getRestaurants = (req, res) => {
@@ -15,8 +15,12 @@ const createRestaurant = (req, res) => {
     }
 
     const newRestaurant = restaurantModel.create(name.trim());
-    res.setHeader('Location', `/api/restaurants/${newRestaurant.id}`);
-    return res.status(201).send();
+    
+   
+    return res.status(201).json({
+        message: "Restaurant created successfully",
+        restaurantId: newRestaurant.id
+    });
 };
 
 // Handles GET /api/restaurants/:id.
@@ -46,7 +50,8 @@ const updateRestaurant = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
 
-    return res.status(204).send();
+    
+    return res.status(200).json({ message: "Restaurant updated successfully" });
 };
 
 // Handles DELETE /api/restaurants/:id
@@ -58,7 +63,8 @@ const deleteRestaurant = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
 
-    return res.status(204).send();
+   
+    return res.status(200).json({ message: "Restaurant deleted successfully" });
 };
 
 module.exports = {

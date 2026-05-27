@@ -1,7 +1,10 @@
-const crypto = require('crypto');
-
 // In-memory volatile storage for products
 const products = [];
+
+// Generate a random ID 
+const generateId = () => {
+    return 'prod_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+};
 
 // Retrieves all products belonging to a specific restaurant
 const getByRestaurantId = (restaurantId) => {
@@ -11,7 +14,7 @@ const getByRestaurantId = (restaurantId) => {
 // Creates a new menu product and stores it in memory
 const create = (restaurantId, name, price) => {
     const newProduct = {
-        id: crypto.randomUUID(),
+        id: generateId(), // Swapped crypto for our manual generator
         restaurantId: restaurantId,
         name: name,
         price: price

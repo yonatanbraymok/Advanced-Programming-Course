@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const restaurantController = require('../controllers/restaurant');
-const productController = require('../controllers/product');
+const restaurantController = require('../controllers/restaurantController');
+const productController = require('../controllers/productController');
 
 // Base restaurant collection endpoints
 router.get('/', restaurantController.getRestaurants);
