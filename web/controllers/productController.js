@@ -1,26 +1,6 @@
-const net = require('net');
 const productModel = require('../models/productModel');
 const restaurantModel = require('../models/restaurantModel');
-
-// TCP configuration for the C++ Server
-const CPP_SERVER_PORT = 5555; 
-const CPP_SERVER_HOST = '127.0.0.1';
-
-// Helper function to send a command to the C++ server using a TCP socket
-const sendViewToCppServer = (userId, productId) => {
-    const client = net.createConnection({ port: CPP_SERVER_PORT, host: CPP_SERVER_HOST }, () => {
-        const command = `GET ${userId} ${productId}\n`;
-        client.write(command);
-    });
-
-    client.on('error', (err) => {
-        console.error('Error connecting to C++ server via socket:', err.message);
-    });
-
-    client.on('data', () => {
-        client.end();
-    });
-};
+const { recordProductView } = require('../services/ex2TcpClient');
 
 // Handles GET /api/restaurants/:id/products.
 const getProducts = (req, res) => {
@@ -81,7 +61,7 @@ const getProductById = (req, res) => {
     }
 
     const userId = req.headers['user-id'] || req.headers['x-user-id'] || '0';
-    sendViewToCppServer(userId, pId);
+    recordProductView(userId, pId);
 
     return res.status(200).json(product);
 };
