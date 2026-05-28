@@ -36,7 +36,7 @@ const getProducts = (req, res) => {
 // Handles POST /api/restaurants/:id/products.
 const createProduct = (req, res) => {
     const { id } = req.params;
-    const { name, price } = req.body;
+    const { name, price, description } = req.body;
 
     const restaurant = restaurantModel.getById(id);
     if (!restaurant) {
@@ -51,7 +51,16 @@ const createProduct = (req, res) => {
         return res.status(400).json({ error: "Valid product price is required" });
     }
 
-    const newProduct = productModel.create(id, name.trim(), price);
+    if (description !== undefined && typeof description !== 'string') {
+        return res.status(400).json({ error: "Description must be a string" });
+    }
+
+    const newProduct = productModel.create(
+        id,
+        name.trim(),
+        price,
+        description !== undefined ? description.trim() : ''
+    );
     
     
     return res.status(201).json({
@@ -80,7 +89,7 @@ const getProductById = (req, res) => {
 // Handles PATCH /api/restaurants/:id/products/:pId
 const updateProduct = (req, res) => {
     const { id, pId } = req.params;
-    const { name, price } = req.body;
+    const { name, price, description } = req.body;
 
     const restaurant = restaurantModel.getById(id);
     const product = productModel.getById(pId);
@@ -97,7 +106,16 @@ const updateProduct = (req, res) => {
         return res.status(400).json({ error: "Valid product price is required" });
     }
 
-    productModel.update(pId, name.trim(), price);
+    if (description !== undefined && typeof description !== 'string') {
+        return res.status(400).json({ error: "Description must be a string" });
+    }
+
+    productModel.update(
+        pId,
+        name.trim(),
+        price,
+        description !== undefined ? description.trim() : undefined
+    );
     
     
     // No content

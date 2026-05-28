@@ -8,13 +8,20 @@ const getRestaurants = (req, res) => {
 
 // Handles POST /api/restaurants
 const createRestaurant = (req, res) => {
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim() === '') {
         return res.status(400).json({ error: "Name is required" });
     }
 
-    const newRestaurant = restaurantModel.create(name.trim());
+    if (description !== undefined && typeof description !== 'string') {
+        return res.status(400).json({ error: "Description must be a string" });
+    }
+
+    const newRestaurant = restaurantModel.create(
+        name.trim(),
+        description !== undefined ? description.trim() : ''
+    );
     
    
     return res.status(201).json({
@@ -38,13 +45,21 @@ const getRestaurantById = (req, res) => {
 // Handles PATCH /api/restaurants/:id.
 const updateRestaurant = (req, res) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim() === '') {
         return res.status(400).json({ error: "Name is required" });
     }
 
-    const updatedRestaurant = restaurantModel.update(id, name.trim());
+    if (description !== undefined && typeof description !== 'string') {
+        return res.status(400).json({ error: "Description must be a string" });
+    }
+
+    const updatedRestaurant = restaurantModel.update(
+        id,
+        name.trim(),
+        description !== undefined ? description.trim() : undefined
+    );
 
     if (!updatedRestaurant) {
         return res.status(404).json({ error: "Restaurant not found" });

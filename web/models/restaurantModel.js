@@ -12,10 +12,12 @@ const getAll = () => {
 };
 
 // Creates a new restaurant object, stores it in memory, and returns it
-const create = (name) => {
+const create = (name, description = '') => {
     const newRestaurant = {
         id: generateId(), // Swapped crypto for our manual generator
-        name: name
+        name: name,
+        // Keep description optional for backward compatibility with older payloads.
+        description: description
     };
     restaurants.push(newRestaurant);
     return newRestaurant;
@@ -26,12 +28,18 @@ const getById = (id) => {
     return restaurants.find(r => r.id === id);
 };
 
-// Updates an existing restaurant name
-const update = (id, name) => {
+// Updates an existing restaurant fields
+const update = (id, name, description) => {
     const restaurant = getById(id);
     if (!restaurant) return null;
     
     restaurant.name = name;
+    if (description !== undefined) {
+        restaurant.description = description;
+    } else if (restaurant.description === undefined) {
+        // Older in-memory records may not have this field yet.
+        restaurant.description = '';
+    }
     return restaurant;
 };
 

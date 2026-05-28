@@ -11,13 +11,20 @@ const getByRestaurantId = (restaurantId) => {
     return products.filter(p => p.restaurantId === restaurantId);
 };
 
+// Retrieves all products from volatile memory.
+const getAll = () => {
+    return products;
+};
+
 // Creates a new menu product and stores it in memory
-const create = (restaurantId, name, price) => {
+const create = (restaurantId, name, price, description = '') => {
     const newProduct = {
         id: generateId(), // Swapped crypto for our manual generator
         restaurantId: restaurantId,
         name: name,
-        price: price
+        price: price,
+        // Keep optional to avoid breaking old requests.
+        description: description
     };
     products.push(newProduct);
     return newProduct;
@@ -29,12 +36,17 @@ const getById = (productId) => {
 };
 
 // Updates an existing product fields directly
-const update = (productId, name, price) => {
+const update = (productId, name, price, description) => {
     const product = getById(productId);
     if (!product) return null;
 
     product.name = name;
     product.price = price;
+    if (description !== undefined) {
+        product.description = description;
+    } else if (product.description === undefined) {
+        product.description = '';
+    }
 
     return product;
 };
@@ -50,6 +62,7 @@ const remove = (productId) => {
 
 module.exports = {
     getByRestaurantId,
+    getAll,
     create,
     getById,
     update,
