@@ -1,5 +1,4 @@
-// Aggregates all /api/* route modules. Add new routers here as features land
-// (users, restaurants, orders, search).
+// Aggregates all /api/* route modules.
 
 const express = require('express');
 const router = express.Router();

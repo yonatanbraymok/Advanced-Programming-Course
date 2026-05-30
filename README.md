@@ -1,176 +1,244 @@
-# Advanced Programming Course - (Current Phase)
+# Advanced Programming Course — Exercise 3
 
-This repository contains the recommender system in C++ with a **TCP server** entry point, TDD tests, and persisted user–product data.
+---
+## Notes for TA
+```bash
+- Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
+Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
+```
+---
 
-## Project Structure (Current State)
+This repository contains a **Wolt-style food delivery REST API** (Exercise 3) built with **Node.js + Express (MVC)**, integrated with the **Exercise 2 C++ TCP recommender server**.
 
-- `src/`
-  - Core application: `App`, `CommandParser`, `CommandExecutor`, `FileRepository`, `SimilarityRecommender`
-  - **Protocol line I/O (APC-80 / APC-81):** `ProtocolLineIO` — read/write one `\n`-terminated line on a socket fd
-  - **Socket adapters:** `SocketLineInput`, `SocketLineOutput` (`IInput` / `IOutput` delegating to `ProtocolLineIO`)
-  - **Python client (APC-82):** `protocol_message.py` — `append_newline`, `send_line`, `read_line`, `read_response`; used by `client.py`
-  - `main.cpp` — binds a port, `accept` loop, one client at a time, shared repository across sessions
-- `tests/`
-  - `tests.cpp` — legacy checks + launches GTest
-  - `AppTDDTests.cpp` — POST / PATCH / GET / DELETE / invalid (`400 Bad Request`) scenarios
-  - `SocketServerTest.cpp` — server survives client disconnect; second connection still works; persistence across TCP sessions
-- `data/`
-  - Runtime storage (`users_products.txt` when using default server path)
-- `CMakeLists.txt`
-  - Builds `app` (TCP server) and `tests_runner`. If **GTest** (using this library is allowed) is not installed system-wide, CMake **FetchContent** downloads GoogleTest (requires network on first configure).
+- **Web API (Ex3):** JSON REST under `/api/*`, in-memory data, no HTML views.
+- **Recommender (Ex2):** Line-based TCP protocol on port `8080`, persisted in `data/users_products.txt`.
 
-## Build and Run
+---
 
-### 1. Configure + build
+## General app state
+
+| Component | Location | Role |
+|-----------|----------|------|
+| Web server | `web/` | Users, tokens, restaurants, products, orders, search |
+| Ex2 server | `src/`, `build/app` | Product-view / recommendation over TCP |
+| Ex2 TCP client | `web/services/ex2TcpClient.js` | Web calls Ex2 when a product is viewed |
+| Tests (C++) | `tests/` | GTest suite via `tests_runner` |
+| Docker | `docker-compose.yml` | Separate containers for `server`, `web`, `tests`, `client` |
+
+**Implemented API (Ex3):**
+
+- `POST/GET` `/api/users`, `POST` `/api/tokens`
+- Restaurants CRUD + nested products CRUD
+- Orders: create, list (logged-in user), get/update/delete by id
+- `GET` `/api/search/:query` — case-insensitive match on name/description
+
+**Auth (Ex3):** After login, send header `user-id: <id from tokens response>` on protected routes (orders; product view uses it for Ex2).
+
+---
+
+## Architecture
+
+### Exercise 3 — full stack
+
+![Exercise 3 architecture](docs/architecture-ex3.svg)
+
+HTTP clients talk to the Express app. On **product view**, the web server opens a TCP client connection to the C++ server (fire-and-forget; API still returns JSON immediately).
+
+### Exercise 2 — C++ recommender (detail)
+
+![Exercise 2 architecture](docs/architecture.svg)
+
+The Python client and C++ server exchange one line per message (`\n`-terminated). `App` drives parsing and execution without knowing about TCP details.
+
+---
+
+## Configuration
+
+Copy the template and adjust locally (do **not** commit `.env`):
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default (local) | Purpose |
+|----------|-----------------|--------|
+| `PORT` | `3000` | Web server listen port |
+| `EX2_SERVER_HOST` | `127.0.0.1` | Ex2 TCP host |
+| `EX2_SERVER_PORT` | `8080` | Ex2 TCP port |
+
+The web app reads these via `process.env` (no extra npm packages). For local runs, export variables or use a `.env` file with Docker Compose / your shell.
+
+**Docker:** `docker-compose.yml` loads `.env` and overrides `EX2_SERVER_HOST=server` so the web container reaches the C++ service on the compose network.
+
+---
+
+## How to build
+
+### Option 1 — Native (CMake + npm)
+
+**Exercise 2 (C++):**
 
 ```bash
 cmake -S . -B build
 cmake --build build
 ```
 
-### 2. Run the TCP server
+**Exercise 3 (web):**
 
-The server listens on **all interfaces** and takes the port as **the only program argument** (Exercise 2 requirement):
+```bash
+cd web
+npm install
+```
+
+### Option 2 — Docker
+
+```bash
+docker compose build
+```
+
+| Service | Dockerfile | Purpose |
+|---------|------------|---------|
+| `server` | `Dockerfile.server` | Build and run `./build/app` |
+| `web` | `Dockerfile.web` | Node web API |
+| `tests` | `Dockerfile.tests` | CMake + `ctest` |
+| `client` | `Dockerfile.client` | Python TCP client |
+
+---
+
+## How to run
+
+### Native
+
+**Terminal 1 — Ex2 server:**
 
 ```bash
 ./build/app 8080
 ```
 
-Each client connection uses one persistent TCP stream: one command line per message (terminated by `\n`); server replies with line-oriented output. **Malformed or unknown commands** receive exactly:
-
-```text
-400 Bad Request
-```
-
-The process keeps running after a client disconnects and accepts further connections on the same port.
-
-### 3. Quick manual check
-
-From another terminal:
+**Terminal 2 — Web server:**
 
 ```bash
-printf 'help\n' | nc 127.0.0.1 8080 (MAC)
-printf 'help\n' | nc -N 127.0.0.1 8080
+cd web
+npm start
 ```
 
-You should see five `help` lines (Ex2 alphabetical format; `help` last).
+Web listens on `http://localhost:3000` (or `PORT` from environment).
 
-## Wire commands (server)
-
-Supported verbs over the socket (see `CommandParser` / `CommandExecutor` for exact grammar):
-
-```text
-POST <userid> <productid> ...
-PATCH <userid> <productid> ...
-GET <userid> <productid>
-DELETE <userid> <productid> ...
-help
-```
-
-Verbs `add` and `recommend` are not accepted on the wire (they return `400 Bad Request`).
-
-Notes:
-- Valid success / error lines follow the course spec (e.g. `201 Created`, `204 No Content`, `404 Not Found`). `GET` success uses `200 Ok` plus a blank line before the recommendation line (Ex1-style product list).
-- Invalid input returns **`400 Bad Request`** (no extra text).
-
-### 4. Run tests
+**C++ unit tests:**
 
 ```bash
 ./build/tests_runner
 ```
 
-## Example session (over TCP)
-
-With the server running on port `8080`:
+### Docker
 
 ```bash
-printf 'POST 1 100 101\nGET 1 104\nhelp\n' | nc -N 127.0.0.1 8080
+# C++ tests
+docker compose run --rm tests
+
+# Ex2 + web together
+docker compose up --build server web
 ```
 
-You should see status lines and bodies as defined by `CommandExecutor` (e.g. `201 Created`, then `GET` output with the `200 Ok` / blank line / recommendation line, then five `help` lines).
+- Web: `http://localhost:3000`
+- Ex2: `localhost:8080`
 
-Example `help` output:
-
-```text
-DELETE, arguments: [userid] [productid1] [productid2] ...
-GET, arguments: [userid] [productid]
-PATCH, arguments: [userid] [productid1] [productid2] ...
-POST, arguments: [userid] [productid1] [productid2] ...
-help
-```
-
-### 5. Python client
+**Interactive Ex2 client (optional):**
 
 ```bash
+docker compose run --rm -it client server 8080
+# or locally:
 python3 src/client.py 127.0.0.1 8080
 ```
 
-Type one command per line (same verbs as above). Exit with Ctrl+D or `quit`.
+---
 
-## Architecture
-![Architecture](docs/architecture.svg)
+## How to use (API examples)
 
-The Python client and C++ server exchange one line per message (`\n`-terminated). `ProtocolLineIO` / `protocol_message.py` handle framing; `SocketLineInput` / `SocketLineOutput` adapt sockets to `IInput` / `IOutput`; `App` drives parsing and execution without knowing about TCP.
+Base URL: `http://localhost:3000/api`
 
-## Design & SOLID (Exercise 2)
-
-Exercise 2 asks whether each change required editing the “closed” application loop in `App`. In our design, **`App` stayed stable** because responsibilities are split behind interfaces.
-
-| Change | Modified closed `App` loop? | How Ex1 design limited impact |
-|--------|----------------------------|--------------------------------|
-| **Renamed commands** (`add`→`POST`, `recommend`→`GET`, etc.) | **No** | `CommandParser` maps wire tokens to `CommandType`; `App` only dispatches on the enum. Renaming is a parser/executor change, not a loop rewrite. |
-| **New commands** (`PATCH`, `DELETE`, status outputs) | **No** | New `CommandType` values and `CommandExecutor` methods; `App` gained `switch` cases but the read→parse→execute pattern is unchanged. |
-| **Changed command output** (HTTP-style status lines) | **No** | Responses are formatted in `CommandExecutor` via `IOutput::writeLine`, not in `App`. |
-| **Socket I/O instead of console** | **No** | `IInput` / `IOutput` abstractions; `main` wires `SocketLineInput` / `SocketLineOutput` instead of stdin/stdout. `App` never included `<iostream>` or socket code. |
-
-**Open/Closed Principle:** We extend behavior by adding parser rules, executor methods, and repository operations (`IRepository`) rather than rewriting the core loop.
-
-**Future multi-client (Exercise 2):** Today `main` accepts one connection at a time with a shared `FileRepository`. To serve more clients without rewriting `App` or `CommandExecutor`, we would:
-
-- Keep the accept loop in `main`.
-- Create a thread (or use async I/O) per accepted socket.
-- Give each client its own `SocketLineInput` / `SocketLineOutput` pair and `App` instance (or shared `App` with synchronized `IRepository` access).
-- Protect `FileRepository` with a mutex if multiple threads mutate the same in-memory store.
-
-The command pipeline (`App` -> parser -> executor -> `IOutput`) would stay the same; only connection handling and repository locking would grow.
-
-## Docker
-
-Exercise 2 requires running **server**, **client**, and **unit tests** in separate containers. Use `docker-compose.yml` with three Dockerfiles:
-
-| File | Purpose |
-|------|---------|
-| `Dockerfile.server` | Build and run `./build/app` |
-| `Dockerfile.client` | Python `client.py` |
-| `Dockerfile.tests` | CMake build + `ctest` |
-| `Dockerfile` (root) | Alias of server image for backward compatibility |
+### 1. Health
 
 ```bash
-docker compose build
-docker compose run --rm tests
-docker compose run --rm -p 8080:8080 server 8080
-docker compose run --rm -it client server 8080
+curl -i http://localhost:3000/api/health
 ```
 
-- **tests** — runs `ctest` in an isolated image.
-- **server** — publishes port `8080`; override port: `docker compose run --rm -p 9000:9000 server 9000`.
-- **client** — connects to the compose service hostname `server` on the Docker network (`stdin_open` / `tty` for interactive use).
+Expected: `200` and `{"status":"ok"}`.
 
-Build a single image without compose:
+### 2. Register and login
 
 ```bash
-docker build -f Dockerfile.server -t recommender-server .
-docker build -f Dockerfile.client -t recommender-client .
-docker build -f Dockerfile.tests -t recommender-tests .
+curl -i -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"secret","name":"Alice","phone":"050","address":"TLV"}'
+
+curl -i -X POST http://localhost:3000/api/tokens \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"secret"}'
 ```
 
-## Exercise 3 — Web server (Node.js + Express)
+Save the `id` from the tokens response for the `user-id` header.
 
-Exercise 3 adds a **REST API** in [`web/`](web/) (MVC). The Exercise 2 C++ TCP recommender stays under [`src/`](src/) and will be frozen on a `TASK-2-DONE` branch for grading; Ex3 work continues on `main` and feature branches.
+### 3. Restaurants and menu
 
-- **Run the web server:** see [web/README.md](web/README.md)
-- **Stack:** Node.js + Express only; in-memory data; JSON under `/api/*`
+```bash
+curl -i -X POST http://localhost:3000/api/restaurants \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Pizza Hub","description":"Wood fired"}'
 
-## Notes for TA
-- Each task's finished product will be pushed to TASK-#tasknum-DONE for your code review. Please note that we will continue merging code in to main branch as a new task is out. We will NOT however merge code in to a specific task branch after due date.
-Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
+curl -i http://localhost:3000/api/restaurants
+
+# Replace REST_ID and use returned restaurant id
+curl -i -X POST http://localhost:3000/api/restaurants/REST_ID/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Margherita","price":42,"description":"Cheese pizza"}'
+```
+
+### 4. View product (triggers Ex2 TCP side-call)
+
+```bash
+curl -i http://localhost:3000/api/restaurants/REST_ID/products/PROD_ID \
+  -H "user-id: USER_ID_FROM_LOGIN"
+```
+
+Expected: `200` with product JSON. Ex2 is notified asynchronously; if Ex2 is down, the API still returns `200` and logs a TCP error on the server console.
+
+### 5. Orders (requires `user-id`)
+
+```bash
+curl -i -X POST http://localhost:3000/api/orders \
+  -H "Content-Type: application/json" \
+  -H "user-id: USER_ID_FROM_LOGIN" \
+  -d '{"restaurantId":"REST_ID","items":[{"productId":"PROD_ID","quantity":1}]}'
+
+curl -i http://localhost:3000/api/orders -H "user-id: USER_ID_FROM_LOGIN"
+```
+
+### 6. Search
+
+```bash
+curl -i http://localhost:3000/api/search/pizza
+```
+
+Expected: `200` with `{"restaurants":[...],"products":[...]}` (case-insensitive).
+
+---
+
+## Exercise 3 branch for TA
+
+Exercise 3 code is frozen for grading on branch **`TASK-3-DONE`**. Development continues on **`main`** and feature branches so next submissions do not mix.
+
+---
+
+## Project structure (summary)
+
+```
+├── src/              # Ex2 C++ recommender + TCP server
+├── web/              # Ex3 Node.js Express MVC API
+├── tests/            # C++ GTest
+├── data/             # Ex2 persistence (runtime)
+├── docs/             # Architecture diagrams
+├── docker-compose.yml
+├── .env.example      # Environment template (copy to .env)
+└── Dockerfile.*
+```
