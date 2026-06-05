@@ -168,11 +168,11 @@ Expected: `200` and `{"status":"ok"}`.
 ```bash
 curl -i -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"secret","name":"Alice","phone":"050","address":"TLV"}'
+  -d '{"username":"alice","password":"Password1","name":"Alice","profileImage":"data:image/png;base64,..."}'
 
 curl -i -X POST http://localhost:3000/api/tokens \
   -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"secret"}'
+  -d '{"username":"alice","password":"Password1"}'
 ```
 
 Save the `token` from the tokens response for the `Authorization` header.

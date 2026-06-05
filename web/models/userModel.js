@@ -25,7 +25,8 @@ const User = {
             password: manualHash(userData.password), // Stored as a hash
             name: userData.name,
             phone: userData.phone,
-            address: userData.address
+            address: userData.address,
+            profileImage: userData.profileImage || null,
         };
         users.push(newUser);
         return newUser;
