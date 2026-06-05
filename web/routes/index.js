@@ -1,4 +1,7 @@
 // Aggregates all /api/* route modules.
+//
+// Public routes (no JWT): health, users, tokens, restaurants, search.
+// Protected routes: orders only (JWT middleware is applied inside orderRoutes.js).
 
 const express = require('express');
 const router = express.Router();

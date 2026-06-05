@@ -1,3 +1,6 @@
+// Central place to read environment variables for the web server.
+// JWT_SECRET is required so tokens can be signed and verified safely.
+
 const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
     console.error('FATAL: JWT_SECRET environment variable is required');

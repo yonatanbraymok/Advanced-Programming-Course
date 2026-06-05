@@ -30,7 +30,7 @@ This repository contains a **Wolt-style food delivery REST API** (Exercise 3) bu
 - Orders: create, list (logged-in user), get/update/delete by id
 - `GET` `/api/search/:query` — case-insensitive match on name/description
 
-**Auth:** `POST /api/tokens` returns a JWT. Send `Authorization: Bearer <token>` on protected routes (orders). Product view still accepts optional `user-id` for Ex2 TCP.
+**Auth:** `POST /api/tokens` returns a JWT. Send `Authorization: Bearer <token>` on protected routes (orders). Product view still accepts optional `user-id` for Ex2 TCP. Run `./web/scripts/smoke-jwt-auth.sh` to verify route protection.
 
 ---
 

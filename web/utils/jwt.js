@@ -1,3 +1,6 @@
+// JWT helpers using Node crypto (HS256). No external JWT library needed.
+// signToken creates a token on login; verifyToken checks it on protected routes.
+
 const crypto = require('crypto');
 const config = require('../config');
 
@@ -24,7 +27,7 @@ const base64UrlDecode = (str) => {
     return Buffer.from(base64, 'base64');
 };
 
-// Helper function to parse the expiresIn value
+// Convert values like "24h" or "7d" into seconds for the exp claim.
 const parseExpiresIn = (expiresIn) => {
     if (typeof expiresIn === 'number') {
         return expiresIn;
@@ -40,7 +43,7 @@ const parseExpiresIn = (expiresIn) => {
     return value * multipliers[match[2]];
 };
 
-// Sign a JWT token
+// Build a signed JWT with user id (sub) and username in the payload.
 const signToken = ({ userId, username }) => {
     const header = { alg: 'HS256', typ: 'JWT' };
     const iat = Math.floor(Date.now() / 1000);
@@ -61,7 +64,7 @@ const signToken = ({ userId, username }) => {
     return segments.join('.');
 };
 
-// Verify a JWT token
+// Return the decoded payload if the token is valid, otherwise null.
 const verifyToken = (token) => {
     if (!token || typeof token !== 'string') {
         return null;

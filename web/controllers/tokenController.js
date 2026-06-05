@@ -17,6 +17,7 @@ const loginUser = (req, res) => {
         return res.status(401).json({ error: "Invalid username or password" });
     }
 
+    // 4. Return a JWT so the client can send it on future protected requests.
     const token = signToken({
         userId: validUser.id,
         username: validUser.username,
