@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const { signToken } = require('../utils/jwt');
 
 const loginUser = (req, res) => {
     const { username, password } = req.body;
@@ -16,10 +17,14 @@ const loginUser = (req, res) => {
         return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // 4. Return the user ID upon successful login
-    res.status(200).json({ 
+    const token = signToken({
+        userId: validUser.id,
+        username: validUser.username,
+    });
+
+    res.status(200).json({
         message: "Login successful",
-        id: validUser.id 
+        token,
     });
 };
 
