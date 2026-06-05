@@ -24,7 +24,7 @@ This document describes the **Exercise 3** Node.js + Express MVC layout for cont
 | `routes/` | URL mounting (`/users`, `/restaurants`, …) |
 | `controllers/` | HTTP logic, status codes, validation |
 | `models/` | In-memory arrays and CRUD helpers |
-| `middleware/` | `notFound`, `errorHandler` |
+| `middleware/` | `auth`, `notFound`, `errorHandler` |
 | `services/` | External integrations (`ex2TcpClient.js`) |
 
 ---
@@ -66,7 +66,16 @@ Product view additionally calls `services/ex2TcpClient` (non-blocking).
 1. `POST /api/tokens` with `{ "username", "password" }` -> `{ "message", "token" }` (HS256 JWT signed with `JWT_SECRET`)
 2. Send `Authorization: Bearer <token>` on protected routes (all `/api/orders` endpoints).
 
-JWT payload includes `sub` (user id) and `username`. Orders reject missing or invalid token with `401`. Product GET still accepts optional `user-id` header and falls back to `'0'` for Ex2 notification only.
+JWT payload includes `sub` (user id) and `username`. Orders reject missing or invalid token with `401` and body `{ "error": "Unauthorized" }`. Product GET still accepts optional `user-id` header and falls back to `'0'` for Ex2 notification only.
+
+### Public vs protected routes
+
+| Access | Routes |
+|--------|--------|
+| **Public** (no JWT) | `GET /api/health`, `POST/GET /api/users`, `POST /api/tokens`, all `/api/restaurants` and nested products, `GET /api/search/:query` |
+| **Protected** (Bearer JWT) | All `/api/orders` endpoints: `POST`, `GET`, `GET /:id`, `PATCH /:id`, `DELETE /:id` |
+
+Auth middleware is mounted only in `routes/orderRoutes.js`. All other route modules stay public.
 
 ---
 
@@ -98,7 +107,7 @@ npm install
 npm start
 ```
 
-Optional: copy root `.env.example` to `.env` and export variables, or rely on defaults in code.
+Copy root `.env.example` to `.env` and set `JWT_SECRET` before starting (required).
 
 Quick smoke:
 
@@ -106,6 +115,19 @@ Quick smoke:
 curl -i http://localhost:3000/api/health
 curl -i http://localhost:3000/api/unknown
 ```
+
+JWT auth smoke test (server must be running with `JWT_SECRET` set):
+
+```bash
+# Terminal 1
+cd web && npm start
+
+# Terminal 2 (from repo root)
+chmod +x web/scripts/smoke-jwt-auth.sh
+./web/scripts/smoke-jwt-auth.sh
+```
+
+The script checks: orders return `401` without a token, `200` with a valid Bearer token, and public routes stay open.
 
 ---
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const orderController = require('../controllers/orderController');
 const authenticate = require('../middleware/auth');
 
+// Orders require a logged-in user. Every route in this file needs a valid Bearer JWT.
 router.use(authenticate);
 
 // POST /api/orders

@@ -1,3 +1,5 @@
+// Order handlers assume req.userId was set by auth middleware before this controller runs.
+
 const Order = require('../models/orderModel');
 const Restaurant = require('../models/restaurantModel');
 const Product = require('../models/productModel');
