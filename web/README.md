@@ -45,30 +45,28 @@ Product view additionally calls `services/ex2TcpClient` (non-blocking).
 
 ## API map
 
-| Method | Path | Auth (`user-id` header) | Notes |
-|--------|------|-------------------------|--------|
+| Method | Path | Auth | Notes |
+|--------|------|------|--------|
 | GET | `/api/health` | No | Smoke test |
 | POST | `/api/users` | No | Register |
 | GET | `/api/users/:id` | No | Profile (no password in response) |
-| POST | `/api/tokens` | No | Login → returns `id` |
+| POST | `/api/tokens` | No | Login → returns JWT `token` |
 | GET/POST | `/api/restaurants` | No | List / create |
 | GET/PATCH/DELETE | `/api/restaurants/:id` | No | CRUD |
 | GET/POST | `/api/restaurants/:id/products` | No | Menu list / add product |
 | GET/PATCH/DELETE | `/api/restaurants/:id/products/:pId` | Optional on GET | GET notifies Ex2 |
-| POST/GET | `/api/orders` | Yes | Create / list own orders |
-| GET/PATCH/DELETE | `/api/orders/:id` | Yes | Own order only |
+| POST/GET | `/api/orders` | Bearer JWT | Create / list own orders |
+| GET/PATCH/DELETE | `/api/orders/:id` | Bearer JWT | Own order only |
 | GET | `/api/search/:query` | No | Case-insensitive name/description |
 
 ---
 
 ## Authentication model
 
-Ex3 uses a simple header (not JWT):
+1. `POST /api/tokens` with `{ "username", "password" }` -> `{ "message", "token" }` (HS256 JWT signed with `JWT_SECRET`)
+2. Send `Authorization: Bearer <token>` on protected routes (all `/api/orders` endpoints).
 
-1. `POST /api/tokens` with `{ "username", "password" }` → `{ "id": "user_..." }`
-2. Send `user-id: <that id>` on protected routes.
-
-Orders reject missing header with `401`. Product GET falls back to `'0'` if header omitted (Ex2 notification only).
+JWT payload includes `sub` (user id) and `username`. Orders reject missing or invalid token with `401`. Product GET still accepts optional `user-id` header and falls back to `'0'` for Ex2 notification only.
 
 ---
 

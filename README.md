@@ -30,7 +30,7 @@ This repository contains a **Wolt-style food delivery REST API** (Exercise 3) bu
 - Orders: create, list (logged-in user), get/update/delete by id
 - `GET` `/api/search/:query` — case-insensitive match on name/description
 
-**Auth (Ex3):** After login, send header `user-id: <id from tokens response>` on protected routes (orders; product view uses it for Ex2).
+**Auth:** `POST /api/tokens` returns a JWT. Send `Authorization: Bearer <token>` on protected routes (orders). Product view still accepts optional `user-id` for Ex2 TCP.
 
 ---
 
@@ -175,7 +175,7 @@ curl -i -X POST http://localhost:3000/api/tokens \
   -d '{"username":"alice","password":"secret"}'
 ```
 
-Save the `id` from the tokens response for the `user-id` header.
+Save the `token` from the tokens response for the `Authorization` header.
 
 ### 3. Restaurants and menu
 
@@ -201,15 +201,15 @@ curl -i http://localhost:3000/api/restaurants/REST_ID/products/PROD_ID \
 
 Expected: `200` with product JSON. Ex2 is notified asynchronously; if Ex2 is down, the API still returns `200` and logs a TCP error on the server console.
 
-### 5. Orders (requires `user-id`)
+### 5. Orders (requires JWT)
 
 ```bash
 curl -i -X POST http://localhost:3000/api/orders \
   -H "Content-Type: application/json" \
-  -H "user-id: USER_ID_FROM_LOGIN" \
+  -H "Authorization: Bearer JWT_FROM_LOGIN" \
   -d '{"restaurantId":"REST_ID","items":[{"productId":"PROD_ID","quantity":1}]}'
 
-curl -i http://localhost:3000/api/orders -H "user-id: USER_ID_FROM_LOGIN"
+curl -i http://localhost:3000/api/orders -H "Authorization: Bearer JWT_FROM_LOGIN"
 ```
 
 ### 6. Search

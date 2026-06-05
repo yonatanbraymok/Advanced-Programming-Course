@@ -32,5 +32,7 @@ services:
       # Docker network: C++ service hostname is "server", not localhost.
       - EX2_SERVER_HOST=server
       - EX2_SERVER_PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
     depends_on:
       - server

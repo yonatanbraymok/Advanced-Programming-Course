@@ -1,23 +1,6 @@
 const Order = require('../models/orderModel');
-const User = require('../models/userModel');
 const Restaurant = require('../models/restaurantModel');
 const Product = require('../models/productModel');
-
-// Reused guard for endpoints that require a logged-in user header.
-const getAuthenticatedUserId = (req, res) => {
-    const userId = req.headers['user-id'];
-    if (!userId) {
-        res.status(401).json({ error: "Unauthorized: Missing user-id header" });
-        return null;
-    }
-
-    if (!User.findById(userId)) {
-        res.status(404).json({ error: "User not found" });
-        return null;
-    }
-
-    return userId;
-};
 
 // Reused ownership check so order IDs of other users stay hidden.
 const getOwnedOrder = (req, res, userId) => {
@@ -31,12 +14,7 @@ const getOwnedOrder = (req, res, userId) => {
 };
 
 const createOrder = (req, res) => {
-    // Extract and validate logged-in user context from headers.
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) {
-        return;
-    }
-
+    const userId = req.userId;
     const { restaurantId, items } = req.body;
 
     if (!restaurantId || !items || !Array.isArray(items) || items.length === 0) {
@@ -61,7 +39,6 @@ const createOrder = (req, res) => {
         }
     }
 
-    // 5. All checks passed, Create the order.
     const newOrder = Order.create(userId, restaurantId, items);
     
     res.status(201).json({
@@ -71,12 +48,7 @@ const createOrder = (req, res) => {
 };
 
 const getUserOrders = (req, res) => {
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) {
-        return;
-    }
-
-    // Filter orders to only return the ones belonging to this user
+    const userId = req.userId;
     const allOrders = Order.getAll();
     const userOrders = allOrders.filter(order => order.userId === userId);
 
@@ -84,11 +56,7 @@ const getUserOrders = (req, res) => {
 };
 
 const getOrderById = (req, res) => {
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) {
-        return;
-    }
-
+    const userId = req.userId;
     const order = getOwnedOrder(req, res, userId);
     if (!order) {
         return;
@@ -98,26 +66,19 @@ const getOrderById = (req, res) => {
 };
 
 const updateOrder = (req, res) => {
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) {
-        return;
-    }
-
+    const userId = req.userId;
     const order = getOwnedOrder(req, res, userId);
     if (!order) {
         return;
     }
 
-    // Allowed fields to update
     const allowedFields = ['status', 'items'];
     const bodyKeys = Object.keys(req.body || {});
 
-    // If no fields are provided, return an error
     if (bodyKeys.length === 0) {
         return res.status(400).json({ error: "At least one field is required: status or items" });
     }
 
-    // If the field is not allowed, return an error
     const hasUnknownField = bodyKeys.some(field => !allowedFields.includes(field));
     if (hasUnknownField) {
         return res.status(400).json({ error: "Only status and items can be updated" });
@@ -125,7 +86,6 @@ const updateOrder = (req, res) => {
 
     const patchData = {};
 
-    // If the status is provided, update the status
     if (Object.prototype.hasOwnProperty.call(req.body, 'status')) {
         if (typeof req.body.status !== 'string' || req.body.status.trim() === '') {
             return res.status(400).json({ error: "status must be a non-empty string" });
@@ -133,20 +93,16 @@ const updateOrder = (req, res) => {
         patchData.status = req.body.status.trim();
     }
 
-    // If the items are provided, update the items
     if (Object.prototype.hasOwnProperty.call(req.body, 'items')) {
         if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
             return res.status(400).json({ error: "items must be a non-empty array" });
         }
 
-        // Keep order's restaurant fixed; updated items must still belong to it.
         for (const item of req.body.items) {
             const product = Product.getById(item.productId);
-            // If the product is not found, return an error
             if (!product) {
                 return res.status(404).json({ error: `Product ${item.productId} not found` });
             }
-            // If the product does not belong to the order's restaurant, return an error
             if (product.restaurantId !== order.restaurantId) {
                 return res.status(400).json({ error: `Product ${item.productId} does not belong to this restaurant` });
             }
@@ -155,9 +111,7 @@ const updateOrder = (req, res) => {
         patchData.items = req.body.items;
     }
 
-    // Update the order
     const updatedOrder = Order.update(order.id, patchData);
-    // If the order is not found, return an error
     if (!updatedOrder) {
         return res.status(404).json({ error: "Order not found" });
     }
@@ -166,11 +120,7 @@ const updateOrder = (req, res) => {
 };
 
 const deleteOrder = (req, res) => {
-    const userId = getAuthenticatedUserId(req, res);
-    if (!userId) {
-        return;
-    }
-
+    const userId = req.userId;
     const order = getOwnedOrder(req, res, userId);
     if (!order) {
         return;
