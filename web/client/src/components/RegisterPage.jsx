@@ -11,8 +11,11 @@ export function RegisterPage() {
   // State for storing the base64 image data string
   const [profileImage, setProfileImage] = useState('');
   
-  // Validation and server errors state holding messages for each layout section
+  // Validation and server errors state holding messages
   const [errors, setErrors] = useState({});
+  
+  // Success state flag to control post-registration visual confirmation banner
+  const [isSuccess, setIsSuccess] = useState(false);
   
   // React useRef hook to interact with the hidden file input element
   const fileInputRef = useRef(null);
@@ -74,15 +77,12 @@ export function RegisterPage() {
   // Handle asynchronous form submission to the Express REST API
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Clear any previous error states on a new submit attempt
     setErrors({});
     
     if (!validateForm()) {
       return;
     }
 
-    // Build the payload payload structure matching the backend MVC models specifications
     const payload = {
       username: username.trim(),
       password: password,
@@ -91,7 +91,6 @@ export function RegisterPage() {
     };
 
     try {
-      // Execute the request to the relative API endpoint hosted on the same server instance
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
@@ -103,19 +102,19 @@ export function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Capture validation 400 or conflict 409 status messages from controllers
         setErrors({ server: data.error || 'Registration failed. Please try again.' });
         return;
       }
 
-      // Successful registration logic hook
-      console.log('User registered successfully:', data);
+      // Trigger the success pipeline UI transformation state
+      setIsSuccess(true);
       
-      // Temporary inline notification until subtask 1e redirect logic is wired
-      alert('Registration successful!');
+      // APC-163-1e: Wait 2 seconds for UX satisfaction before navigating to login view
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
 
     } catch (err) {
-      // Capture unexpected network pipeline connectivity failures gracefully
       setErrors({ server: 'Network error. Cannot connect to the server backend.' });
     }
   };
@@ -149,6 +148,23 @@ export function RegisterPage() {
         </div>
       )}
 
+      {/* APC-163-1e: Global Server Success Banner Display Module */}
+      {isSuccess && (
+        <div style={{
+          backgroundColor: '#e6f7ed',
+          color: '#2e7d32',
+          padding: '12px',
+          borderRadius: '4px',
+          marginBottom: '16px',
+          fontSize: '14px',
+          border: '1px solid #2e7d32',
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          Registration successful! Redirecting to login... 🚀
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         {/* Username Field */}
         <div style={{ marginBottom: '16px' }}>
@@ -157,6 +173,7 @@ export function RegisterPage() {
             type="text" 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={isSuccess}
             style={{ 
               width: '100%', 
               padding: '10px', 
@@ -175,6 +192,7 @@ export function RegisterPage() {
             type="text" 
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+            disabled={isSuccess}
             style={{ 
               width: '100%', 
               padding: '10px', 
@@ -193,6 +211,7 @@ export function RegisterPage() {
             type="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isSuccess}
             style={{ 
               width: '100%', 
               padding: '10px', 
@@ -211,6 +230,7 @@ export function RegisterPage() {
             type="password" 
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={isSuccess}
             style={{ 
               width: '100%', 
               padding: '10px', 
@@ -230,6 +250,7 @@ export function RegisterPage() {
             accept="image/*"
             ref={fileInputRef}
             onChange={handleImageChange}
+            disabled={isSuccess}
             style={{ display: 'none' }}
           />
 
@@ -246,13 +267,14 @@ export function RegisterPage() {
           <button 
             type="button" 
             onClick={triggerFileSelect}
+            disabled={isSuccess}
             style={{
               padding: '8px 16px',
               backgroundColor: '#f2f2f2',
               color: '#333',
               border: errors.profileImage ? '1px solid #ff4d4d' : '1px solid #ccc',
               borderRadius: '4px',
-              cursor: 'pointer',
+              cursor: isSuccess ? 'not-allowed' : 'pointer',
               fontSize: '14px'
             }}
           >
@@ -263,24 +285,25 @@ export function RegisterPage() {
 
         <button 
           type="submit" 
+          disabled={isSuccess}
           style={{
             width: '100%',
             padding: '12px',
-            backgroundColor: '#009de0',
+            backgroundColor: isSuccess ? '#b3e0f5' : '#009de0',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
             fontSize: '16px',
             fontWeight: 'bold',
-            cursor: 'pointer'
+            cursor: isSuccess ? 'not-allowed' : 'pointer'
           }}
         >
-          Next Step
+          {isSuccess ? 'Registering...' : 'Next Step'}
         </button>
       </form>
       
       <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px' }}>
-        Already have an account? <span style={{ color: '#009de0', cursor: 'pointer' }} onClick={() => navigate('/login')}>Login</span>
+        Already have an account? <span style={{ color: '#009de0', cursor: isSuccess ? 'not-allowed' : 'pointer' }} onClick={() => !isSuccess && navigate('/login')}>Login</span>
       </p>
     </div>
   );
