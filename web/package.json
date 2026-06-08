@@ -4,7 +4,8 @@
   "description": "Exercise 3 — Wolt-style REST API (Node.js + Express MVC)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:client": "npm run build --prefix client"
   },
   "engines": {
     "node": ">=18"
