@@ -22,10 +22,12 @@ export function HomePage() {
           gap: '20px', 
           margin: '24px 0',
           padding: '20px',
-          border: '1px solid #e0e0e0',
+          border: '1px solid var(--border-color)',
           borderRadius: '8px',
           maxWidth: '500px',
-          backgroundColor: '#f9f9f9'
+          backgroundColor: 'var(--bg-card)',
+          color: 'var(--text-main)',
+          transition: 'background-color 0.3s ease, color 0.3s ease'
         }}>
           {user.profileImage && (
             <img 
@@ -36,7 +38,7 @@ export function HomePage() {
           )}
           <div>
             <h3 style={{ margin: '0 0 4px 0' }}>Welcome back, {user.name}!</h3>
-            <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>Account ID: {user.username}</p>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '14px' }}>Account ID: {user.username}</p>
           </div>
         </div>
       )}
@@ -44,7 +46,7 @@ export function HomePage() {
       {/* Internal application navigation layout */}
       <nav style={{ marginBottom: '30px', fontSize: '16px' }}>
         <Link to="/orders" style={{ color: '#009de0', textDecoration: 'none', fontWeight: 'bold' }}>View Order History</Link> 
-        <span style={{ margin: '0 12px', color: '#ccc' }}>|</span> 
+        <span style={{ margin: '0 12px', color: 'var(--border-color)' }}>|</span> 
         <Link to="/restaurant/123" style={{ color: '#009de0', textDecoration: 'none', fontWeight: 'bold' }}>Browse Sample Restaurant</Link>
       </nav>
 
@@ -55,11 +57,14 @@ export function HomePage() {
           onClick={toggleTheme}
           style={{
             padding: '10px 16px',
-            backgroundColor: '#f2f2f2',
-            border: '1px solid #ccc',
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--text-main)',
+            border: '1px solid var(--border-color)',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '14px'
+            fontSize: '14px',
+            fontWeight: 'bold',
+            transition: 'background-color 0.3s ease, color 0.3s ease'
           }}
         >
           Toggle Layout Theme (Active: {theme})
