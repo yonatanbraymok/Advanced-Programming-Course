@@ -41,7 +41,6 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      // Hit the tokens endpoint to verify credentials and receive a JWT
       const response = await fetch('/api/tokens', {
         method: 'POST',
         headers: {
@@ -53,16 +52,12 @@ export function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Capture invalid credentials or backend exceptions gracefully
         setErrors({ server: data.error || 'Invalid username or password' });
         setLoading(false);
         return;
       }
 
-      // Save token and user details to global state and localStorage via the context hook
       login(data.token, data.user);
-      
-      // Redirect authenticated session directly back to the app main dashboard
       navigate('/');
 
     } catch (err) {
@@ -80,7 +75,9 @@ export function LoginPage() {
       fontFamily: 'sans-serif',
       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
       borderRadius: '8px',
-      backgroundColor: '#ffffff'
+      backgroundColor: 'var(--bg-card)',
+      color: 'var(--text-main)',
+      transition: 'background-color 0.3s ease, color 0.3s ease'
     }}>
       <h2 style={{ color: '#009de0', textAlign: 'center', marginBottom: '24px' }}>Login to Wolt</h2>
 
@@ -114,8 +111,11 @@ export function LoginPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.username ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.username ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.username && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.username}</span>}
@@ -133,8 +133,11 @@ export function LoginPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.password ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.password ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.password && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.password}</span>}
@@ -159,7 +162,7 @@ export function LoginPage() {
         </button>
       </form>
 
-      <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px' }}>
+      <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>
         New to Wolt? <span style={{ color: '#009de0', cursor: 'pointer' }} onClick={() => navigate('/register')}>Create an account</span>
       </p>
     </div>
