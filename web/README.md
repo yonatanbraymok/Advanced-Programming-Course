@@ -48,8 +48,8 @@ Product view additionally calls `services/ex2TcpClient` (non-blocking).
 | Method | Path | Auth | Notes |
 |--------|------|------|--------|
 | GET | `/api/health` | No | Smoke test |
-| POST | `/api/users` | No | Register |
-| GET | `/api/users/:id` | No | Profile (no password in response) |
+| POST | `/api/users` | No | Register (see validation rules below) |
+| GET | `/api/users/:id` | No | Profile includes `profileImage`; password never returned |
 | POST | `/api/tokens` | No | Login → returns JWT `token` |
 | GET/POST | `/api/restaurants` | No | List / create |
 | GET/PATCH/DELETE | `/api/restaurants/:id` | No | CRUD |
@@ -76,6 +76,21 @@ JWT payload includes `sub` (user id) and `username`. Orders reject missing or in
 | **Protected** (Bearer JWT) | All `/api/orders` endpoints: `POST`, `GET`, `GET /:id`, `PATCH /:id`, `DELETE /:id` |
 
 Auth middleware is mounted only in `routes/orderRoutes.js`. All other route modules stay public.
+
+### Registration validation (`POST /api/users`)
+
+Server-side rules (independent of client validation):
+
+| Field | Required | Rule |
+|-------|----------|------|
+| `username` | Yes | Non-empty string (trimmed) |
+| `password` | Yes | At least 8 characters with uppercase, lowercase, and a digit |
+| `name` | Yes | Non-empty string (trimmed) |
+| `phone` | No | Defaults to `""` |
+| `address` | No | Defaults to `""` |
+| `profileImage` | No | If sent, must be a non-empty string (URL or base64 data URL) |
+
+Invalid input returns `400` with a descriptive `{ "error": "..." }` message. Duplicate username returns `409`.
 
 ---
 
@@ -128,6 +143,15 @@ chmod +x web/scripts/smoke-jwt-auth.sh
 ```
 
 The script checks: orders return `401` without a token, `200` with a valid Bearer token, and public routes stay open.
+
+Registration validation smoke test:
+
+```bash
+chmod +x web/scripts/smoke-registration.sh
+./web/scripts/smoke-registration.sh
+```
+
+The script checks: weak passwords return `400`, valid registration with `profileImage` returns `201`, and `GET /api/users/:id` includes `profileImage` without `password`.
 
 ---
 
