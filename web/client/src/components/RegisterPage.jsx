@@ -106,10 +106,8 @@ export function RegisterPage() {
         return;
       }
 
-      // Trigger the success pipeline UI transformation state
       setIsSuccess(true);
       
-      // APC-163-1e: Wait 2 seconds for UX satisfaction before navigating to login view
       setTimeout(() => {
         navigate('/login');
       }, 2000);
@@ -127,7 +125,9 @@ export function RegisterPage() {
       fontFamily: 'sans-serif',
       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
       borderRadius: '8px',
-      backgroundColor: '#ffffff'
+      backgroundColor: 'var(--bg-card)',
+      color: 'var(--text-main)',
+      transition: 'background-color 0.3s ease, color 0.3s ease'
     }}>
       <h2 style={{ color: '#009de0', textAlign: 'center', marginBottom: '24px' }}>Create Wolt Account</h2>
       
@@ -148,7 +148,7 @@ export function RegisterPage() {
         </div>
       )}
 
-      {/* APC-163-1e: Global Server Success Banner Display Module */}
+      {/* Global Server Success Banner Display Module */}
       {isSuccess && (
         <div style={{
           backgroundColor: '#e6f7ed',
@@ -178,8 +178,11 @@ export function RegisterPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.username ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.username ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.username && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.username}</span>}
@@ -197,8 +200,11 @@ export function RegisterPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.displayName ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.displayName ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.displayName && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.displayName}</span>}
@@ -216,8 +222,11 @@ export function RegisterPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.password ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.password ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.password && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.password}</span>}
@@ -235,8 +244,11 @@ export function RegisterPage() {
               width: '100%', 
               padding: '10px', 
               borderRadius: '4px', 
-              border: errors.confirmPassword ? '1px solid #ff4d4d' : '1px solid #ccc', 
-              boxSizing: 'border-box' 
+              border: errors.confirmPassword ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           />
           {errors.confirmPassword && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.confirmPassword}</span>}
@@ -270,12 +282,13 @@ export function RegisterPage() {
             disabled={isSuccess}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#f2f2f2',
-              color: '#333',
-              border: errors.profileImage ? '1px solid #ff4d4d' : '1px solid #ccc',
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              border: errors.profileImage ? '1px solid #ff4d4d' : '1px solid var(--border-color)',
               borderRadius: '4px',
               cursor: isSuccess ? 'not-allowed' : 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'background-color 0.3s ease, color 0.3s ease'
             }}
           >
             {profileImage ? 'Change Photo' : 'Select Profile Photo'}
@@ -302,7 +315,7 @@ export function RegisterPage() {
         </button>
       </form>
       
-      <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px' }}>
+      <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>
         Already have an account? <span style={{ color: '#009de0', cursor: isSuccess ? 'not-allowed' : 'pointer' }} onClick={() => !isSuccess && navigate('/login')}>Login</span>
       </p>
     </div>
