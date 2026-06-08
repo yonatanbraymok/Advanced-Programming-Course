@@ -8,13 +8,13 @@ export function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // State for storing the base64 image data string for live preview and upload
+  // State for storing the base64 image data string
   const [profileImage, setProfileImage] = useState('');
   
-  // Validation errors state holding error messages for each field
+  // Validation and server errors state holding messages for each layout section
   const [errors, setErrors] = useState({});
   
-  // React useRef hook to interact directly with the hidden file input element
+  // React useRef hook to interact with the hidden file input element
   const fileInputRef = useRef(null);
   
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ export function RegisterPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Sets the base64 string state once file reading is fully complete
         setProfileImage(reader.result);
       };
       reader.readAsDataURL(file);
@@ -64,7 +63,6 @@ export function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    // Ensure a profile photo has been uploaded by the user
     if (!profileImage) {
       newErrors.profileImage = 'A profile image is required';
     }
@@ -73,15 +71,53 @@ export function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // Handle asynchronous form submission to the Express REST API
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear any previous error states on a new submit attempt
+    setErrors({});
     
     if (!validateForm()) {
       return;
     }
 
-    // Form data is fully verified including the image string metadata
-    console.log('Form is completely valid:', { username, displayName, profileImageLength: profileImage.length });
+    // Build the payload payload structure matching the backend MVC models specifications
+    const payload = {
+      username: username.trim(),
+      password: password,
+      name: displayName.trim(),
+      profileImage: profileImage
+    };
+
+    try {
+      // Execute the request to the relative API endpoint hosted on the same server instance
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Capture validation 400 or conflict 409 status messages from controllers
+        setErrors({ server: data.error || 'Registration failed. Please try again.' });
+        return;
+      }
+
+      // Successful registration logic hook
+      console.log('User registered successfully:', data);
+      
+      // Temporary inline notification until subtask 1e redirect logic is wired
+      alert('Registration successful!');
+
+    } catch (err) {
+      // Capture unexpected network pipeline connectivity failures gracefully
+      setErrors({ server: 'Network error. Cannot connect to the server backend.' });
+    }
   };
 
   return (
@@ -96,6 +132,23 @@ export function RegisterPage() {
     }}>
       <h2 style={{ color: '#009de0', textAlign: 'center', marginBottom: '24px' }}>Create Wolt Account</h2>
       
+      {/* Global Server Error Display Module */}
+      {errors.server && (
+        <div style={{
+          backgroundColor: '#ffe6e6',
+          color: '#ff4d4d',
+          padding: '12px',
+          borderRadius: '4px',
+          marginBottom: '16px',
+          fontSize: '14px',
+          border: '1px solid #ff4d4d',
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          {errors.server}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         {/* Username Field */}
         <div style={{ marginBottom: '16px' }}>
@@ -169,11 +222,9 @@ export function RegisterPage() {
           {errors.confirmPassword && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.confirmPassword}</span>}
         </div>
 
-        {/* Photo File Picker with useRef and Live Preview */}
+        {/* Photo File Picker Container */}
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>Profile Photo</label>
-          
-          {/* Hidden HTML input file element mapped to fileInputRef */}
           <input 
             type="file" 
             accept="image/*"
@@ -182,7 +233,6 @@ export function RegisterPage() {
             style={{ display: 'none' }}
           />
 
-          {/* Conditional rendering for live profile photo image preview */}
           {profileImage ? (
             <div style={{ marginBottom: '12px' }}>
               <img 
