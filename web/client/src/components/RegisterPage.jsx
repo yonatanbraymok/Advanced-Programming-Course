@@ -66,9 +66,7 @@ export function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (!profileImage) {
-      newErrors.profileImage = 'A profile image is required';
-    }
+    // Removed the strict mandatory profile image guard to make it optional
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -83,11 +81,14 @@ export function RegisterPage() {
       return;
     }
 
+    // Fallback to a default safe Wolt-styled blue 'W' avatar if left blank
+    const defaultWoltAvatar = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23009de0%22/><text x=%2250%22 y=%2265%22 font-family=%22Arial, sans-serif%22 font-size=%2245%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>W</text></svg>';
+
     const payload = {
       username: username.trim(),
       password: password,
       name: displayName.trim(),
-      profileImage: profileImage
+      profileImage: profileImage || defaultWoltAvatar
     };
 
     try {
@@ -131,7 +132,6 @@ export function RegisterPage() {
     }}>
       <h2 style={{ color: '#009de0', textAlign: 'center', marginBottom: '24px' }}>Create Wolt Account</h2>
       
-      {/* Global Server Error Display Module */}
       {errors.server && (
         <div style={{
           backgroundColor: '#ffe6e6',
@@ -148,7 +148,6 @@ export function RegisterPage() {
         </div>
       )}
 
-      {/* Global Server Success Banner Display Module */}
       {isSuccess && (
         <div style={{
           backgroundColor: '#e6f7ed',
@@ -166,7 +165,6 @@ export function RegisterPage() {
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* Username Field */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Username</label>
           <input 
@@ -188,7 +186,6 @@ export function RegisterPage() {
           {errors.username && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.username}</span>}
         </div>
 
-        {/* Display Name Field */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Display Name</label>
           <input 
@@ -210,7 +207,6 @@ export function RegisterPage() {
           {errors.displayName && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.displayName}</span>}
         </div>
 
-        {/* Password Field */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Password</label>
           <input 
@@ -232,7 +228,6 @@ export function RegisterPage() {
           {errors.password && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.password}</span>}
         </div>
 
-        {/* Confirm Password Field */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Confirm Password</label>
           <input 
@@ -254,9 +249,9 @@ export function RegisterPage() {
           {errors.confirmPassword && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.confirmPassword}</span>}
         </div>
 
-        {/* Photo File Picker Container */}
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>Profile Photo</label>
+          <label style={{ display: 'block', marginBottom: '2px', fontWeight: 'bold', textAlign: 'left' }}>Profile Photo</label>
+          <span style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'left' }}>Optional - a default avatar will be assigned if left blank</span>
           <input 
             type="file" 
             accept="image/*"
@@ -284,7 +279,7 @@ export function RegisterPage() {
               padding: '8px 16px',
               backgroundColor: 'var(--bg-app)',
               color: 'var(--text-main)',
-              border: errors.profileImage ? '1px solid #ff4d4d' : '1px solid var(--border-color)',
+              border: '1px solid var(--border-color)',
               borderRadius: '4px',
               cursor: isSuccess ? 'not-allowed' : 'pointer',
               fontSize: '14px',
@@ -293,7 +288,6 @@ export function RegisterPage() {
           >
             {profileImage ? 'Change Photo' : 'Select Profile Photo'}
           </button>
-          {errors.profileImage && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.profileImage}</span>}
         </div>
 
         <button 
@@ -316,7 +310,7 @@ export function RegisterPage() {
       </form>
       
       <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>
-        Already have an account? <span style={{ color: '#009de0', cursor: isSuccess ? 'not-allowed' : 'pointer' }} onClick={() => !isSuccess && navigate('/login')}>Login</span>
+        Already have an account? <span style={{ color: '#009de0', cursor: 'pointer' }} onClick={() => !isSuccess && navigate('/login')}>Login</span>
       </p>
     </div>
   );
