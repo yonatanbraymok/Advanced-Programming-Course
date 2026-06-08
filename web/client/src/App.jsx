@@ -6,19 +6,28 @@ import { PrivateRoute } from './contexts/PrivateRoute';
 import { RegisterPage } from './components/RegisterPage';
 import { LoginPage } from './components/LoginPage';
 import { HomePage } from './components/HomePage';
+import { Navbar } from './components/Navbar';
+
+// Layout Wrapper component to keep Navbar persistent across all protected views
+const ProtectedLayout = ({ children }) => (
+  <PrivateRoute>
+    <Navbar /> {/* Renders safely on top of authenticated pages */}
+    {children}
+  </PrivateRoute>
+);
 
 // Temporary placeholder components for remaining application views
 const RestaurantPlaceholder = () => (
-  <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+  <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
     <h2>Restaurant Detail Page (Protected Screen) 🍔</h2>
-    <Link to="/">Back to Home</Link>
+    <Link to="/" style={{ color: '#009de0' }}>Back to Home</Link>
   </div>
 );
 
 const OrdersPlaceholder = () => (
-  <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+  <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
     <h2>Order History Page (Protected Screen) 📦</h2>
-    <Link to="/">Back to Home</Link>
+    <Link to="/" style={{ color: '#009de0' }}>Back to Home</Link>
   </div>
 );
 
@@ -32,23 +41,23 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Application Routes fenced by PrivateRoute */}
+            {/* Protected Application Routes fenced by ProtectedLayout */}
             <Route path="/" element={
-              <PrivateRoute>
-                <HomePage /> {/* Connected the real HomePage */}
-              </PrivateRoute>
+              <ProtectedLayout>
+                <HomePage />
+              </ProtectedLayout>
             } />
             
             <Route path="/restaurant/:id" element={
-              <PrivateRoute>
+              <ProtectedLayout>
                 <RestaurantPlaceholder />
-              </PrivateRoute>
+              </ProtectedLayout>
             } />
             
             <Route path="/orders" element={
-              <PrivateRoute>
+              <ProtectedLayout>
                 <OrdersPlaceholder />
-              </PrivateRoute>
+              </ProtectedLayout>
             } />
           </Routes>
         </BrowserRouter>
