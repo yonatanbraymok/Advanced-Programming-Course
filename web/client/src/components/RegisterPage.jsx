@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function RegisterPage() {
@@ -8,26 +8,49 @@ export function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  // State for storing the base64 image data string for live preview and upload
+  const [profileImage, setProfileImage] = useState('');
+  
   // Validation errors state holding error messages for each field
   const [errors, setErrors] = useState({});
   
+  // React useRef hook to interact directly with the hidden file input element
+  const fileInputRef = useRef(null);
+  
   const navigate = useNavigate();
+
+  // Handle image selection and conversion to base64 data string
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Sets the base64 string state once file reading is fully complete
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Trigger click on the hidden input field using the useRef token reference
+  const triggerFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   // Validate fields according to the assignment hardening specifications
   const validateForm = () => {
     const newErrors = {};
 
-    // Username validation
     if (!username.trim()) {
       newErrors.username = 'Username is required';
     }
 
-    // Display name validation
     if (!displayName.trim()) {
       newErrors.displayName = 'Display name is required';
     }
 
-    // Password strength check: minimum 8 characters, uppercase, lowercase, and a digit
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!password) {
       newErrors.password = 'Password is required';
@@ -35,29 +58,30 @@ export function RegisterPage() {
       newErrors.password = 'Password must be at least 8 characters long and include uppercase, lowercase, and a digit';
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    // Ensure a profile photo has been uploaded by the user
+    if (!profileImage) {
+      newErrors.profileImage = 'A profile image is required';
+    }
+
     setErrors(newErrors);
-    // Returns true only if there are no validation errors detected
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle local form submission event with validation guarding
   const handleSubmit = (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      // Blocks submission if any field fails client side validation metrics
       return;
     }
 
-    // Form is completely valid on client side, ready for the next subtasks
-    console.log('Form is valid. Ready to register:', { username, displayName });
+    // Form data is fully verified including the image string metadata
+    console.log('Form is completely valid:', { username, displayName, profileImageLength: profileImage.length });
   };
 
   return (
@@ -128,7 +152,7 @@ export function RegisterPage() {
         </div>
 
         {/* Confirm Password Field */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Confirm Password</label>
           <input 
             type="password" 
@@ -143,6 +167,48 @@ export function RegisterPage() {
             }}
           />
           {errors.confirmPassword && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.confirmPassword}</span>}
+        </div>
+
+        {/* Photo File Picker with useRef and Live Preview */}
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>Profile Photo</label>
+          
+          {/* Hidden HTML input file element mapped to fileInputRef */}
+          <input 
+            type="file" 
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            style={{ display: 'none' }}
+          />
+
+          {/* Conditional rendering for live profile photo image preview */}
+          {profileImage ? (
+            <div style={{ marginBottom: '12px' }}>
+              <img 
+                src={profileImage} 
+                alt="Profile Preview" 
+                style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #009de0' }} 
+              />
+            </div>
+          ) : null}
+
+          <button 
+            type="button" 
+            onClick={triggerFileSelect}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#f2f2f2',
+              color: '#333',
+              border: errors.profileImage ? '1px solid #ff4d4d' : '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            {profileImage ? 'Change Photo' : 'Select Profile Photo'}
+          </button>
+          {errors.profileImage && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.profileImage}</span>}
         </div>
 
         <button 
