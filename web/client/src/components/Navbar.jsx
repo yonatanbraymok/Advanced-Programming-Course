@@ -4,12 +4,9 @@ import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 
 export function Navbar() {
+  // Extract user session and logout handler
   const { user, logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const navigate = useNavigate();
-
-  // If user session is not active, do not render the navigation top bar
-  if (!user) return null;
 
   return (
     <header style={{
@@ -22,14 +19,14 @@ export function Navbar() {
       transition: 'background-color 0.3s ease, border-color 0.3s ease',
       fontFamily: 'sans-serif'
     }}>
-      {/* Right Side: Wolt Branded Link directing back to Dashboard Home */}
+      {/* Right Side: Wolt Logo visible to everyone */}
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <h1 style={{ color: '#009de0', margin: 0, fontSize: '24px', fontWeight: 'bold' }}>Wolt</h1>
         </Link>
       </div>
 
-      {/* Left Side Theme Toggle, Session Logout, and Profile Avatar */}
+      {/* Left Side: Theme Toggle (Public) + Profile controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button 
           type="button"
@@ -49,37 +46,42 @@ export function Navbar() {
           Theme: {theme}
         </button>
 
-        <button 
-          type="button"
-          onClick={logout}
-          style={{
-            padding: '8px 14px',
-            backgroundColor: '#ff4d4d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '20px',
-            cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 'bold'
-          }}
-        >
-          Logout
-        </button>
+        {/* Render private session links only if the user profile dataset exists */}
+        {user && (
+          <>
+            <button 
+              type="button"
+              onClick={logout}
+              style={{
+                padding: '8px 14px',
+                backgroundColor: '#ff4d4d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 'bold'
+              }}
+            >
+              Logout
+            </button>
 
-        {user.profileImage && (
-          <img 
-            src={user.profileImage} 
-            alt="User Profile" 
-            title={`Logged in as ${user.name}`}
-            style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '50%', 
-              objectFit: 'cover', 
-              border: '2px solid #009de0',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }} 
-          />
+            {user.profileImage && (
+              <img 
+                src={user.profileImage} 
+                alt="User Profile" 
+                title={`Logged in as ${user.name}`}
+                style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '50%', 
+                  objectFit: 'cover', 
+                  border: '2px solid #009de0',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }} 
+              />
+            )}
+          </>
         )}
       </div>
     </header>

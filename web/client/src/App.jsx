@@ -8,14 +8,6 @@ import { LoginPage } from './components/LoginPage';
 import { HomePage } from './components/HomePage';
 import { Navbar } from './components/Navbar';
 
-// Layout Wrapper component to keep Navbar persistent across all protected views
-const ProtectedLayout = ({ children }) => (
-  <PrivateRoute>
-    <Navbar /> {/* Renders safely on top of authenticated pages */}
-    {children}
-  </PrivateRoute>
-);
-
 // Temporary placeholder components for remaining application views
 const RestaurantPlaceholder = () => (
   <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
@@ -36,28 +28,29 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>
+          <Navbar /> {/* Rendered globally across all public and protected routes */}
           <Routes>
             {/* Public Authentication Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Application Routes fenced by ProtectedLayout */}
+            {/* Protected Application Routes fenced directly by PrivateRoute */}
             <Route path="/" element={
-              <ProtectedLayout>
+              <PrivateRoute>
                 <HomePage />
-              </ProtectedLayout>
+              </PrivateRoute>
             } />
             
             <Route path="/restaurant/:id" element={
-              <ProtectedLayout>
+              <PrivateRoute>
                 <RestaurantPlaceholder />
-              </ProtectedLayout>
+              </PrivateRoute>
             } />
             
             <Route path="/orders" element={
-              <ProtectedLayout>
+              <PrivateRoute>
                 <OrdersPlaceholder />
-              </ProtectedLayout>
+              </PrivateRoute>
             } />
           </Routes>
         </BrowserRouter>
