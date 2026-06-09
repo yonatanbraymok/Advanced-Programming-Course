@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export function RegisterPage() {
+function RegisterPage() {
   // Controlled form state fields
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -66,8 +66,6 @@ export function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    // Removed the strict mandatory profile image guard to make it optional
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,7 +79,7 @@ export function RegisterPage() {
       return;
     }
 
-    // Fallback to a default safe Wolt-styled blue 'W' avatar if left blank
+    // Fallback to a default safe Wolt-styled blue W avatar if left blank
     const defaultWoltAvatar = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23009de0%22/><text x=%2250%22 y=%2265%22 font-family=%22Arial, sans-serif%22 font-size=%2245%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>W</text></svg>';
 
     const payload = {
@@ -315,3 +313,4 @@ export function RegisterPage() {
     </div>
   );
 }
+export { RegisterPage };
