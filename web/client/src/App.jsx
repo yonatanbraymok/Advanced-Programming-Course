@@ -6,15 +6,8 @@ import { PrivateRoute } from './contexts/PrivateRoute';
 import { RegisterPage } from './components/RegisterPage';
 import { LoginPage } from './components/LoginPage';
 import { HomePage } from './components/HomePage';
+import { RestaurantDetailPage } from './components/RestaurantDetailPage';
 import { Navbar } from './components/Navbar';
-
-// Temporary placeholder components for remaining application views
-const RestaurantPlaceholder = () => (
-  <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
-    <h2>Restaurant Detail Page (Protected Screen) 🍔</h2>
-    <Link to="/" style={{ color: '#009de0' }}>Back to Home</Link>
-  </div>
-);
 
 const OrdersPlaceholder = () => (
   <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
@@ -28,7 +21,7 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>
-          <Navbar /> {/* Rendered globally across all public and protected routes */}
+          <Navbar />
           <Routes>
             {/* Public Authentication Routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -43,7 +36,7 @@ function App() {
             
             <Route path="/restaurant/:id" element={
               <PrivateRoute>
-                <RestaurantPlaceholder />
+                <RestaurantDetailPage /> {/* Connected the RestaurantDetailPage */}
               </PrivateRoute>
             } />
             
