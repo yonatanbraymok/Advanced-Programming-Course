@@ -7,15 +7,16 @@ export function RestaurantList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Search query and cuisine filter states
+  // States for search inputs and backend global search data tracking
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState({ restaurants: [], products: [] });
+  const [searchLoading, setSearchLoading] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   
-  // Extract the current authenticated JWT token from the global context
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Fetch the active restaurants array from the server API endpoints
+  // Fetch the active baseline restaurants array for initial browse mode
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -48,14 +49,49 @@ export function RestaurantList() {
     }
   }, [token]);
 
-  // Extract unique cuisine categories dynamically from the loaded dataset
+  // Query the global search endpoint whenever the input field changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ restaurants: [], products: [] });
+      return;
+    }
+
+    // Debounce network pipeline traffic to improve client rendering metrics
+    const delayDebounceFn = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const response = await fetch(`/api/search/${encodeURIComponent(searchQuery.trim())}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          setSearchResults({
+            restaurants: data.restaurants || [],
+            products: data.products || []
+          });
+        }
+      } catch (err) {
+        // Fallback to empty records gracefully on server timeout triggers
+        setSearchResults({ restaurants: [], products: [] });
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, token]);
+
+  // Extract unique cuisine categories dynamically from base catalog
   const cuisines = ['All', ...new Set(restaurants.map(r => r.cuisine).filter(Boolean))];
 
-  // Derive the filtered restaurants list based on active user query metrics
+  // Client-side filtering configuration active only during general browsing mode
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    const matchesSearch = restaurant.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCuisine = selectedCuisine === 'All' || restaurant.cuisine === selectedCuisine;
-    return matchesSearch && matchesCuisine;
+    return selectedCuisine === 'All' || restaurant.cuisine === selectedCuisine;
   });
 
   if (loading) {
@@ -66,9 +102,11 @@ export function RestaurantList() {
     return <div style={{ color: '#ff4d4d', textAlign: 'center', marginTop: '40px', fontWeight: 'bold' }}>{error}</div>;
   }
 
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
     <div style={{ padding: '20px 0' }}>
-      {/* APC-164-1b: Interactive Search and Filter Control Tray */}
+      {/* Search Input Module Row Frame */}
       <div style={{ 
         marginBottom: '24px', 
         display: 'flex', 
@@ -82,11 +120,11 @@ export function RestaurantList() {
       }}>
         <div>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--text-main)' }}>
-            Search Restaurants
+            Search Restaurants & Dishes
           </label>
           <input 
             type="text"
-            placeholder="Type restaurant name..."
+            placeholder="Search for restaurants or specific food items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -103,82 +141,191 @@ export function RestaurantList() {
           />
         </div>
 
-        {/* Dynamic Category Pill Filters */}
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--text-main)' }}>
-            Filter by Cuisine
-          </label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {cuisines.map((cuisine) => {
-              const isActive = selectedCuisine === cuisine;
-              return (
-                <button
-                  key={cuisine}
-                  type="button"
-                  onClick={() => setSelectedCuisine(cuisine)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    border: '1px solid #009de0',
-                    backgroundColor: isActive ? '#009de0' : 'var(--bg-app)',
-                    color: isActive ? '#ffffff' : 'var(--text-main)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {cuisine}
-                </button>
-              );
-            })}
+        {/* Hide Cuisine filters dynamically when a global search query is active */}
+        {!isSearching && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--text-main)' }}>
+              Filter by Cuisine
+            </label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {cuisines.map((cuisine) => {
+                const isActive = selectedCuisine === cuisine;
+                return (
+                  <button
+                    key={cuisine}
+                    type="button"
+                    onClick={() => setSelectedCuisine(cuisine)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      border: '1px solid #009de0',
+                      backgroundColor: isActive ? '#009de0' : 'var(--bg-app)',
+                      color: isActive ? '#ffffff' : 'var(--text-main)',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {cuisine}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '10px', color: 'var(--text-main)' }}>
-        {selectedCuisine !== 'All' ? `${selectedCuisine} Spots` : 'Popular Restaurants'} ({filteredRestaurants.length})
-      </h3>
-      
-      {filteredRestaurants.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', marginTop: '16px' }}>No restaurants match your search criteria.</p>
-      ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '20px',
-          marginTop: '20px'
-        }}>
-          {filteredRestaurants.map((restaurant) => (
-            <div 
-              key={restaurant.id || restaurant._id}
-              onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-                transition: 'transform 0.2s ease, background-color 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <img 
-                src={restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant'} 
-                alt={restaurant.name}
-                style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-              />
-              <div style={{ padding: '16px' }}>
-                <h4 style={{ margin: '0 0 8px 0', color: 'var(--text-main)' }}>{restaurant.name}</h4>
-                <p style={{ margin: '0 0 12px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
-                  {restaurant.cuisine || 'International'} • ⭐️ {restaurant.rating || 'N/A'}
-                </p>
-                <span style={{ color: '#009de0', fontSize: '14px', fontWeight: 'bold' }}>View Menu →</span>
-              </div>
+      {/* Conditional Rendering Layer: Server Search Mode vs Base Browse Mode */}
+      {isSearching ? (
+        <div>
+          <h3 style={{ color: 'var(--text-main)', borderBottom: '2px solid var(--border-color)', paddingBottom: '10px' }}>
+            Search Results for "{searchQuery}"
+          </h3>
+
+          {searchLoading ? (
+            <p style={{ color: 'var(--text-muted)', marginTop: '16px' }}>Searching database collections...</p>
+          ) : (
+            <div>
+              {/* SECTION A: Matching Restaurants Row Block */}
+              <h4 style={{ color: '#009de0', marginTop: '24px', marginBottom: '12px' }}>
+                Matching Restaurants ({searchResults.restaurants.length})
+              </h4>
+              {searchResults.restaurants.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>No restaurants found matching criteria.</p>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                  {searchResults.restaurants.map((restaurant) => (
+                    <div 
+                      key={restaurant.id || restaurant._id}
+                      onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                        transition: 'transform 0.2s ease, background-color 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      <img 
+                        src={restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant'} 
+                        alt={restaurant.name}
+                        style={{ width: '100%', height: '140px', objectFit: 'cover' }}
+                      />
+                      <div style={{ padding: '16px' }}>
+                        <h4 style={{ margin: '0 0 6px 0', color: 'var(--text-main)' }}>{restaurant.name}</h4>
+                        <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '13px' }}>
+                          {restaurant.cuisine || 'International'} • ⭐️ {restaurant.rating || 'N/A'}
+                        </p>
+                        <span style={{ color: '#009de0', fontSize: '13px', fontWeight: 'bold' }}>View Menu →</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '30px 0' }} />
+
+              {/* SECTION B: Matching Products/Dishes Row Block */}
+              <h4 style={{ color: '#009de0', marginTop: '20px', marginBottom: '12px' }}>
+                Matching Dishes ({searchResults.products.length})
+              </h4>
+              {searchResults.products.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>No specific dishes match your keyword.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {searchResults.products.map((product) => (
+                    <div 
+                      key={product.id || product._id}
+                      onClick={() => {
+                        // Navigate safely to the parent restaurant card if reference ID parameter links exist
+                        if (product.restaurantId) {
+                          navigate(`/restaurant/${product.restaurantId}`);
+                        } else {
+                          alert(`Found dish: ${product.name}. Head to its matching restaurant menu to order!`);
+                        }
+                      }}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '8px',
+                        padding: '14px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-app)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-card)'}
+                    >
+                      <div>
+                        <h5 style={{ margin: '0 0 4px 0', color: 'var(--text-main)' }}>{product.name}</h5>
+                        <p style={{ margin: '0 0 6px 0', color: 'var(--text-muted)', fontSize: '13px' }}>{product.description}</p>
+                        <span style={{ color: '#009de0', fontWeight: 'bold', fontSize: '14px' }}>₪{(product.price || 0).toFixed(2)}</span>
+                      </div>
+                      {product.image && (
+                        <img src={product.image} alt={product.name} style={{ width: '60px', height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
+          )}
+        </div>
+      ) : (
+        /* Normal Baseline Browsing Catalog Layout View */
+        <div>
+          <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '10px', color: 'var(--text-main)' }}>
+            {selectedCuisine !== 'All' ? `${selectedCuisine} Spots` : 'Popular Restaurants'} ({filteredRestaurants.length})
+          </h3>
+          
+          {filteredRestaurants.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', marginTop: '16px' }}>No restaurants match your selected cuisine filter.</p>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '20px',
+              marginTop: '20px'
+            }}>
+              {filteredRestaurants.map((restaurant) => (
+                <div 
+                  key={restaurant.id || restaurant._id}
+                  onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                    transition: 'transform 0.2s ease, background-color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <img 
+                    src={restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant'} 
+                    alt={restaurant.name}
+                    style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+                  />
+                  <div style={{ padding: '16px' }}>
+                    <h4 style={{ margin: '0 0 8px 0', color: 'var(--text-main)' }}>{restaurant.name}</h4>
+                    <p style={{ margin: '0 0 12px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
+                      {restaurant.cuisine || 'International'} • ⭐️ {restaurant.rating || 'N/A'}
+                    </p>
+                    <span style={{ color: '#009de0', fontSize: '14px', fontWeight: 'bold' }}>View Menu →</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
