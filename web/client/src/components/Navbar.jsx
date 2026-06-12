@@ -34,36 +34,82 @@ export function Navbar() {
       transition: 'background-color 0.3s ease, border-color 0.3s ease',
       fontFamily: 'sans-serif'
     }}>
-      {/* Right Side: Wolt Logo visible to everyone */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      {/* Left Side: Wolt Logo and Theme Toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <h1 style={{ color: '#009de0', margin: 0, fontSize: '24px', fontWeight: 'bold' }}>Wolt</h1>
         </Link>
-      </div>
-
-      {/* Left Side: Theme and Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button 
           type="button"
           onClick={toggleTheme}
           style={{
-            padding: '8px 14px',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             backgroundColor: 'var(--bg-app)',
             color: 'var(--text-main)',
             border: '1px solid var(--border-color)',
-            borderRadius: '20px',
             cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 'bold',
-            transition: 'background-color 0.3s ease, color 0.3s ease'
+            fontSize: '16px',
+            transition: 'background-color 0.3s ease, color 0.3s ease, transform 0.2s ease'
           }}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          Theme: {theme}
+          {theme === 'light' ? '🌙' : '☀️'}
         </button>
+      </div>
+
+      {/* Right Side: Navigation Links */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
 
 
 
-        {/* Private links */}
+        {/* Public links for guests */}
+        {!user && (
+          <>
+            <button 
+              type="button"
+              onClick={() => navigate('/login')}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'transparent',
+                color: '#009de0',
+                border: '1px solid #009de0',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 'bold',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Login
+            </button>
+            <button 
+              type="button"
+              onClick={() => navigate('/register')}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#009de0',
+                color: 'white',
+                border: 'none',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 'bold',
+                transition: 'background-color 0.2s ease'
+              }}
+            >
+              Sign Up
+            </button>
+          </>
+        )}
+
+        {/* Private links for authenticated users */}
         {user && (
           <>
             <button 
@@ -159,21 +205,6 @@ export function Navbar() {
               `}
             </style>
 
-            {user.profileImage && (
-              <img 
-                src={user.profileImage} 
-                alt="User Profile" 
-                title={`Logged in as ${user.name}`}
-                style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '50%', 
-                  objectFit: 'cover', 
-                  border: '2px solid #009de0',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }} 
-              />
-            )}
           </>
         )}
       </div>

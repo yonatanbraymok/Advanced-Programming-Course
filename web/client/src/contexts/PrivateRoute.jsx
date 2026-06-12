@@ -8,7 +8,7 @@ export function PrivateRoute({ children }) {
   // Wait for AuthProvider to finish loading state from localStorage
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '100px', fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', color: 'var(--text-main)', fontFamily: 'sans-serif' }}>
         <h3>Loading authentication state...</h3>
       </div>
     );

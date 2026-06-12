@@ -22,9 +22,10 @@ export function RestaurantList() {
       try {
         const response = await fetch('/api/restaurants', {
           method: 'GET',
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           }
         });
 
@@ -44,9 +45,7 @@ export function RestaurantList() {
       }
     };
 
-    if (token) {
-      fetchRestaurants();
-    }
+    fetchRestaurants();
   }, [token]);
 
   // Query the global search endpoint whenever the input field changes
@@ -62,9 +61,10 @@ export function RestaurantList() {
       try {
         const response = await fetch(`/api/search/${encodeURIComponent(searchQuery.trim())}`, {
           method: 'GET',
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           }
         });
 
@@ -95,7 +95,7 @@ export function RestaurantList() {
   });
 
   if (loading) {
-    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)' }}>Loading available restaurants...</h3>;
+    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)', fontFamily: 'sans-serif' }}>Loading available restaurants...</h3>;
   }
 
   if (error) {
