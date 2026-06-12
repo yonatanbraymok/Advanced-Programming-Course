@@ -6,5 +6,13 @@ export default defineConfig({
   build: {
     outDir: 'build', // Output directory matches the Express server configuration
     emptyOutDir: true
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   }
 })

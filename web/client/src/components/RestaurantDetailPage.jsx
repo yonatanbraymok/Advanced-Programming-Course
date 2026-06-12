@@ -1,19 +1,23 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { CartContext } from '../contexts/CartContext';
+import { ProductCard } from './ProductCard';
 
 export function RestaurantDetailPage() {
-  // Extract the dynamic id parameter from the active route URL
+  // Get restaurant id from URL
   const { id } = useParams();
   
   const [restaurant, setRestaurant] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
   const { token } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
 
-  // Fetch specific restaurant profile details from the backend MVC controllers
+  // Fetch restaurant details
   useEffect(() => {
     const fetchRestaurantDetail = async () => {
       try {
@@ -33,9 +37,21 @@ export function RestaurantDetailPage() {
           return;
         }
 
+        // Fetch menu
+        const menuResponse = await fetch(`/api/restaurants/${id}/products`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const menuData = await menuResponse.json();
+
         setRestaurant(data);
+        setMenuItems(menuData || []);
       } catch (err) {
-        setError('Network error. Failed to connect to the restaurant API pipeline.');
+        setError('Network error. Failed to connect to the server.');
       } finally {
         setLoading(false);
       }
@@ -82,7 +98,7 @@ export function RestaurantDetailPage() {
         ← Back to Restaurants
       </button>
 
-      {/* Restaurant Header Jumbotron Card */}
+      {/* Restaurant Header */}
       {restaurant && (
         <>
           <div style={{
@@ -113,12 +129,12 @@ export function RestaurantDetailPage() {
             </div>
           </div>
 
-          {/* Menu Items Interactive Grid Layout */}
+          {/* Menu Items */}
           <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '10px', color: 'var(--text-main)' }}>
             Menu Items
           </h3>
 
-          {!restaurant.menu || restaurant.menu.length === 0 ? (
+          {!menuItems || menuItems.length === 0 ? (
             <p style={{ color: 'var(--text-muted)' }}>No menu items listed for this restaurant yet.</p>
           ) : (
             <div style={{
@@ -127,39 +143,13 @@ export function RestaurantDetailPage() {
               gap: '16px',
               marginTop: '20px'
             }}>
-              {restaurant.menu.map((item) => (
-                <div 
-                  key={item.id || item._id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-                    transition: 'background-color 0.3s ease, border-color 0.3s ease'
-                  }}
-                >
-                  <div style={{ flex: 1, paddingRight: '16px' }}>
-                    <h4 style={{ margin: '0 0 6px 0', color: 'var(--text-main)' }}>{item.name}</h4>
-                    <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
-                      {item.description || 'No description available.'}
-                    </p>
-                    <span style={{ color: '#009de0', fontWeight: 'bold', fontSize: '16px' }}>
-                      ₪{(item.price || 0).toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {item.image && (
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      style={{ width: '80px', height: '80px', borderRadius: '6px', objectFit: 'cover' }}
-                    />
-                  )}
-                </div>
+              {menuItems.map((item) => (
+                <ProductCard 
+                  key={item.id || item._id} 
+                  item={item} 
+                  restaurantId={restaurant.id || restaurant._id} 
+                  onAddToCart={addToCart} 
+                />
               ))}
             </div>
           )}

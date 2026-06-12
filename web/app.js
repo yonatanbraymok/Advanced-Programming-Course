@@ -16,7 +16,10 @@ app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Fallback route for React Router (SPA) - redirects non-API GET requests to index.html
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        return next();
+    }
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 

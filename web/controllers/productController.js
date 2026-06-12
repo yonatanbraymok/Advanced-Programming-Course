@@ -10,7 +10,8 @@ const getProducts = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
     const menu = productModel.getByRestaurantId(id);
-    return res.status(200).json(menu);
+    const fullMenu = restaurant.menu ? [...restaurant.menu, ...menu] : menu;
+    return res.status(200).json(fullMenu);
 };
 
 // Handles POST /api/restaurants/:id/products.
