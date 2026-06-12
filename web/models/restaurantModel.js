@@ -1,5 +1,39 @@
-// In-memory volatile storage for restaurants
-const restaurants = [];
+// In-memory volatile storage for restaurants populated with safe default initial listings
+const restaurants = [
+  {
+    id: 'rest_burger_123',
+    name: 'Burger Palace',
+    cuisine: 'Burgers',
+    rating: 4.8,
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600',
+    menu: [
+      { id: 'prod_b1', name: 'Classic Burger', description: 'Juicy beef patty with lettuce, tomato, onions and secret sauce', price: 45, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150' },
+      { id: 'prod_b2', name: 'Cheese Fries', description: 'Crispy golden fries drenched in melted cheddar cheese layers', price: 22, image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=150' }
+    ]
+  },
+  {
+    id: 'rest_sushi_456',
+    name: 'Sushi Zen',
+    cuisine: 'Asian',
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600',
+    menu: [
+      { id: 'prod_s1', name: 'Salmon Combo Box', description: '8 pieces of premium spicy salmon maki rolls and 4 pieces of nigiri', price: 58, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=150' },
+      { id: 'prod_s2', name: 'Miso Soup', description: 'Traditional Japanese hot broth with tofu cubes and scallions', price: 15, image: 'https://images.unsplash.com/photo-1542358821-67a3a34421b6?w=150' }
+    ]
+  },
+  {
+    id: 'rest_pizza_789',
+    name: 'Pizza Bella',
+    cuisine: 'Italian',
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
+    menu: [
+      { id: 'prod_p1', name: 'Margherita Pizza', description: 'Fresh mozzarella cheese, signature tomato sauce, and aromatic basil', price: 50, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150' },
+      { id: 'prod_p2', name: 'Garlic Bread', description: 'Toasted crispy baguette slices smothered in rich garlic herb butter', price: 18, image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=150' }
+    ]
+  }
+];
 
 // Generate a random ID (consistent with userModel)
 const generateId = () => {
@@ -14,10 +48,12 @@ const getAll = () => {
 // Creates a new restaurant object, stores it in memory, and returns it
 const create = (name, description = '') => {
     const newRestaurant = {
-        id: generateId(), // Swapped crypto for our manual generator
+        id: generateId(),
         name: name,
-        // Keep description optional for backward compatibility with older payloads.
-        description: description
+        description: description,
+        cuisine: 'International',
+        rating: 5.0,
+        menu: []
     };
     restaurants.push(newRestaurant);
     return newRestaurant;
@@ -37,7 +73,6 @@ const update = (id, name, description) => {
     if (description !== undefined) {
         restaurant.description = description;
     } else if (restaurant.description === undefined) {
-        // Older in-memory records may not have this field yet.
         restaurant.description = '';
     }
     return restaurant;
