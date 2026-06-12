@@ -5,6 +5,7 @@ const restaurants = [
     name: 'Burger Palace',
     cuisine: 'Burgers',
     rating: 4.8,
+    location: { x: 0, y: 0 },
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600',
     menu: [
       { id: 'prod_b1', name: 'Classic Burger', description: 'Juicy beef patty with lettuce, tomato, onions and secret sauce', price: 45, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150' },
@@ -16,6 +17,7 @@ const restaurants = [
     name: 'Sushi Zen',
     cuisine: 'Asian',
     rating: 4.9,
+    location: { x: 5, y: 5 },
     image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600',
     menu: [
       { id: 'prod_s1', name: 'Salmon Combo Box', description: '8 pieces of premium spicy salmon maki rolls and 4 pieces of nigiri', price: 58, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=150' },
@@ -27,6 +29,7 @@ const restaurants = [
     name: 'Pizza Bella',
     cuisine: 'Italian',
     rating: 4.6,
+    location: { x: 10, y: 10 },
     image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
     menu: [
       { id: 'prod_p1', name: 'Margherita Pizza', description: 'Fresh mozzarella cheese, signature tomato sauce, and aromatic basil', price: 50, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150' },

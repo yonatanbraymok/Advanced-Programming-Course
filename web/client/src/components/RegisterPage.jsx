@@ -6,6 +6,8 @@ function RegisterPage() {
   // Controlled form state fields
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [locationX, setLocationX] = useState('');
+  const [locationY, setLocationY] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
@@ -55,6 +57,14 @@ function RegisterPage() {
       newErrors.displayName = 'Display name is required';
     }
 
+    if (locationX === '' || isNaN(Number(locationX))) {
+      newErrors.locationX = 'Valid X coordinate is required';
+    }
+
+    if (locationY === '' || isNaN(Number(locationY))) {
+      newErrors.locationY = 'Valid Y coordinate is required';
+    }
+
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!password) {
       newErrors.password = 'Password is required';
@@ -88,6 +98,10 @@ function RegisterPage() {
       username: username.trim(),
       password: password,
       name: displayName.trim(),
+      location: {
+        x: Number(locationX),
+        y: Number(locationY)
+      },
       profileImage: profileImage || defaultWoltAvatar
     };
 
@@ -179,7 +193,7 @@ function RegisterPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Username</label>
           <input 
@@ -222,10 +236,63 @@ function RegisterPage() {
           {errors.displayName && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.displayName}</span>}
         </div>
 
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Location (X)</label>
+            <input 
+              type="number" 
+              step="any"
+              name="locationX"
+              autoComplete="nope"
+              value={locationX}
+              onChange={(e) => setLocationX(e.target.value)}
+              disabled={isSuccess}
+              style={{ 
+                width: '100%', 
+                padding: '10px', 
+                borderRadius: '4px', 
+                border: errors.locationX ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+                backgroundColor: 'var(--bg-app)',
+                color: 'var(--text-main)',
+                boxSizing: 'border-box',
+                transition: 'background-color 0.3s ease, color 0.3s ease'
+              }}
+            />
+            {errors.locationX && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.locationX}</span>}
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Location (Y)</label>
+            <input 
+              type="number" 
+              step="any"
+              name="locationY"
+              autoComplete="nope"
+              value={locationY}
+              onChange={(e) => setLocationY(e.target.value)}
+              disabled={isSuccess}
+              style={{ 
+                width: '100%', 
+                padding: '10px', 
+                borderRadius: '4px', 
+                border: errors.locationY ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+                backgroundColor: 'var(--bg-app)',
+                color: 'var(--text-main)',
+                boxSizing: 'border-box',
+                transition: 'background-color 0.3s ease, color 0.3s ease'
+              }}
+            />
+            {errors.locationY && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.locationY}</span>}
+          </div>
+        </div>
+
         <div style={{ marginBottom: '16px' }}>
+          {/* Dummy hidden input to absorb Chrome's aggressive password manager heuristic */}
+          <input type="text" name="fakeusernameremembered" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, border: 'none', pointerEvents: 'none' }} tabIndex="-1" aria-hidden="true" />
+          
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Password</label>
           <input 
             type="password" 
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSuccess}
@@ -247,6 +314,7 @@ function RegisterPage() {
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Confirm Password</label>
           <input 
             type="password" 
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isSuccess}

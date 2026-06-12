@@ -23,7 +23,6 @@ export function RestaurantDetailPage() {
       try {
         const response = await fetch(`/api/restaurants/${id}`, {
           method: 'GET',
-          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` })
@@ -40,7 +39,6 @@ export function RestaurantDetailPage() {
 
         // Fetch menu
         const menuResponse = await fetch(`/api/restaurants/${id}/products`, {
-          method: 'GET',
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -119,15 +117,34 @@ export function RestaurantDetailPage() {
               position: 'absolute',
               bottom: 0,
               left: 0,
-              right: 0,
-              padding: '24px',
-              background: 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0))',
-              color: '#ffffff'
+              padding: '30px 70px 30px 30px',
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              borderTopRightRadius: '150px',
+              boxShadow: '4px -4px 15px rgba(0,0,0,0.15)'
             }}>
-              <h2 style={{ margin: '0 0 6px 0', fontSize: '28px' }}>{restaurant.name}</h2>
-              <p style={{ margin: 0, fontSize: '16px', opacity: 0.9 }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '28px', fontWeight: 'bold', color: '#009de0' }}>{restaurant.name}</h2>
+              <p style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 'bold' }}>
                 {restaurant.cuisine} • ⭐️ {restaurant.rating || 'N/A'}
               </p>
+              {restaurant.location && (
+                <p style={{ margin: '0 0 6px 0', fontSize: '14px', color: 'var(--text-muted)' }}>
+                  📍 Location: [{restaurant.location.x}, {restaurant.location.y}]
+                </p>
+              )}
+              {restaurant.distance !== undefined && (() => {
+                const baseTime = 15 + Math.round(restaurant.distance * 5);
+                return (
+                  <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ backgroundColor: 'var(--bg-app)', border: '1px solid var(--border-color)', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold' }}>
+                      📍 {restaurant.distance.toFixed(1)} km away
+                    </span>
+                    <span style={{ backgroundColor: '#009de0', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold' }}>
+                      🛵 {Math.max(0, baseTime - 5)}-{baseTime + 5} mins
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

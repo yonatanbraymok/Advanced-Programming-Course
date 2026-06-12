@@ -221,6 +221,12 @@ export function RestaurantList() {
                         <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '13px' }}>
                           {restaurant.cuisine || 'International'} • ⭐️ {restaurant.rating || 'N/A'}
                         </p>
+                        {restaurant.distance !== undefined && (
+                          <div style={{ marginBottom: '8px', display: 'inline-block', backgroundColor: '#e6f7ff', color: '#009de0', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                            📍 {restaurant.distance.toFixed(1)} km away
+                          </div>
+                        )}
+                        <br />
                         <span style={{ color: '#009de0', fontSize: '13px', fontWeight: 'bold' }}>View Menu →</span>
                       </div>
                     </div>
@@ -317,9 +323,15 @@ export function RestaurantList() {
                   />
                   <div style={{ padding: '16px' }}>
                     <h4 style={{ margin: '0 0 8px 0', color: 'var(--text-main)' }}>{restaurant.name}</h4>
-                    <p style={{ margin: '0 0 12px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
+                    <p style={{ margin: '0 0 8px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
                       {restaurant.cuisine || 'International'} • ⭐️ {restaurant.rating || 'N/A'}
                     </p>
+                    {restaurant.distance !== undefined && (
+                      <div style={{ marginBottom: '12px', display: 'inline-block', backgroundColor: '#e6f7ff', color: '#009de0', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                        📍 {restaurant.distance.toFixed(1)} km away
+                      </div>
+                    )}
+                    <br />
                     <span style={{ color: '#009de0', fontSize: '14px', fontWeight: 'bold' }}>View Menu →</span>
                   </div>
                 </div>

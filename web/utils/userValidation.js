@@ -44,9 +44,23 @@ const validateProfileImage = (profileImage) => {
     return null;
 };
 
+// Location validation for X, Y coordinates
+const validateLocation = (location) => {
+    if (!location || typeof location !== 'object') {
+        return 'Location coordinates are required';
+    }
+    
+    const { x, y } = location;
+    if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
+        return 'Location coordinates must be valid numbers';
+    }
+    return null;
+};
+
 module.exports = {
     validateUsername,
     validateName,
     validatePassword,
     validateProfileImage,
+    validateLocation,
 };
