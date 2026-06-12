@@ -15,23 +15,6 @@ export function HomePage() {
         </h2>
       )}
 
-      {user?.role === 'restaurant_owner' && (
-        <div style={{ marginBottom: '24px', display: 'flex', gap: '12px' }}>
-            <button 
-              onClick={() => navigate('/owner/restaurants/edit')}
-              style={{ padding: '12px 24px', backgroundColor: '#009de0', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}
-            >
-              + Add Restaurant
-            </button>
-            <button 
-              onClick={() => navigate('/owner/restaurants')}
-              style={{ padding: '12px 24px', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}
-            >
-              ✏️ Edit Restaurants
-            </button>
-        </div>
-      )}
-      
       {/* Render the dynamic interactive restaurant grid listing */}
       <RestaurantList />
     </div>

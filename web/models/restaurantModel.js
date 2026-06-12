@@ -3,6 +3,7 @@ const restaurants = [
   {
     id: 'rest_burger_123',
     name: 'Burger Palace',
+    description: 'The best gourmet burgers in town, crafted with 100% premium local beef, fresh organic veggies, and our signature secret sauces that will leave you craving more.',
     cuisine: 'Burgers',
     rating: 4.8,
     location: { x: 0, y: 0 },
@@ -15,6 +16,7 @@ const restaurants = [
   {
     id: 'rest_sushi_456',
     name: 'Sushi Zen',
+    description: 'Authentic Japanese culinary experience featuring fresh, hand-rolled sushi, delicate sashimi, and traditional hot kitchen specialties prepared by master chefs.',
     cuisine: 'Asian',
     rating: 4.9,
     location: { x: 5, y: 5 },
@@ -27,6 +29,7 @@ const restaurants = [
   {
     id: 'rest_pizza_789',
     name: 'Pizza Bella',
+    description: 'Rustic wood-fired pizzas made with imported Italian flour, San Marzano tomatoes, and fresh mozzarella cheese for a true taste of Napoli.',
     cuisine: 'Italian',
     rating: 4.6,
     location: { x: 10, y: 10 },

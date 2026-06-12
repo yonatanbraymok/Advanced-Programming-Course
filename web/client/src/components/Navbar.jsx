@@ -124,6 +124,28 @@ export function Navbar() {
               </span>
             </div>
 
+            {user.role === 'restaurant_owner' && (
+              <button 
+                type="button"
+                onClick={() => navigate('/owner/restaurants')}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: '#009de0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🍽️ My Restaurants
+              </button>
+            )}
+
             <button 
               type="button"
               onClick={() => navigate('/orders')}

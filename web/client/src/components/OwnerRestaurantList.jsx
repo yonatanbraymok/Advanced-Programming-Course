@@ -46,12 +46,6 @@ function OwnerRestaurantList() {
     <div style={{ maxWidth: '800px', margin: '40px auto', padding: '0 20px', fontFamily: 'sans-serif', color: 'var(--text-main)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <h2 style={{ margin: 0 }}>My Restaurants</h2>
-        <button 
-          onClick={() => navigate('/owner/restaurants/edit')}
-          style={{ padding: '10px 20px', backgroundColor: '#009de0', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          + Add New Restaurant
-        </button>
       </div>
 
       {restaurants.length === 0 ? (
@@ -92,17 +86,40 @@ function OwnerRestaurantList() {
               <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <h3 style={{ margin: '0 0 8px 0' }}>{restaurant.name}</h3>
                 <p style={{ color: 'var(--text-muted)', margin: '0 0 16px 0', fontSize: '14px' }}>{restaurant.cuisine}</p>
-                <div style={{ marginTop: 'auto' }}>
+                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
                   <button 
                     onClick={() => navigate(`/owner/restaurants/edit/${restaurant.id}`)}
-                    style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-app)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    style={{ padding: '6px 16px', backgroundColor: 'var(--bg-app)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
                   >
-                    ✏️ Edit Details
+                    Edit ✏️
                   </button>
                 </div>
               </div>
             </div>
           ))}
+
+          {/* Add New Restaurant Card */}
+          <div 
+            onClick={() => navigate('/owner/restaurants/edit')}
+            style={{ 
+              backgroundColor: 'transparent', 
+              borderRadius: '8px', 
+              border: '2px dashed var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              minHeight: '260px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#009de0'; e.currentTarget.style.backgroundColor = 'rgba(0,157,224,0.05)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            <span style={{ fontSize: '48px', color: '#009de0', marginBottom: '8px', lineHeight: '1' }}>+</span>
+            <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '18px' }}>Add Restaurant</span>
+          </div>
+
         </div>
       )}
     </div>
