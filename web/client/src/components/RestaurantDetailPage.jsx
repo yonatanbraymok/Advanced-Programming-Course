@@ -148,6 +148,23 @@ export function RestaurantDetailPage() {
             </div>
           </div>
 
+          {/* About Segment */}
+          {restaurant.description && (
+            <div style={{
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '30px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              border: '1px solid var(--border-color)'
+            }}>
+              <h3 style={{ margin: '0 0 12px 0', color: '#009de0' }}>About {restaurant.name}</h3>
+              <p style={{ margin: 0, color: 'var(--text-main)', lineHeight: '1.6', fontSize: '15px' }}>
+                {restaurant.description}
+              </p>
+            </div>
+          )}
+
           {/* Menu Items */}
           <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '10px', color: 'var(--text-main)' }}>
             Menu Items

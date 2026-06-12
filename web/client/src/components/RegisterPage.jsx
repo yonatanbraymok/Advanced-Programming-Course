@@ -10,6 +10,8 @@ function RegisterPage() {
   const [locationY, setLocationY] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('customer');
+  const [step, setStep] = useState(1);
   
   // State for storing the base64 image data string
   const [profileImage, setProfileImage] = useState('');
@@ -57,12 +59,14 @@ function RegisterPage() {
       newErrors.displayName = 'Display name is required';
     }
 
-    if (locationX === '' || isNaN(Number(locationX))) {
-      newErrors.locationX = 'Valid X coordinate is required';
-    }
+    if (role === 'customer') {
+      if (locationX === '' || isNaN(Number(locationX))) {
+        newErrors.locationX = 'Valid X coordinate is required';
+      }
 
-    if (locationY === '' || isNaN(Number(locationY))) {
-      newErrors.locationY = 'Valid Y coordinate is required';
+      if (locationY === '' || isNaN(Number(locationY))) {
+        newErrors.locationY = 'Valid Y coordinate is required';
+      }
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -98,12 +102,16 @@ function RegisterPage() {
       username: username.trim(),
       password: password,
       name: displayName.trim(),
-      location: {
+      profileImage: profileImage || defaultWoltAvatar,
+      role: role
+    };
+
+    if (role === 'customer') {
+      payload.location = {
         x: Number(locationX),
         y: Number(locationY)
-      },
-      profileImage: profileImage || defaultWoltAvatar
-    };
+      };
+    }
 
     try {
       const response = await fetch('/api/users', {
@@ -194,7 +202,67 @@ function RegisterPage() {
       )}
 
       <form onSubmit={handleSubmit} autoComplete="off">
-        <div style={{ marginBottom: '16px' }}>
+        {step === 1 ? (
+          <div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>I am registering as a...</label>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div 
+                  onClick={() => !isSuccess && setRole('customer')}
+                  style={{
+                    flex: 1,
+                    padding: '16px',
+                    textAlign: 'center',
+                    borderRadius: '8px',
+                    border: role === 'customer' ? '2px solid #009de0' : '2px solid var(--border-color)',
+                    backgroundColor: role === 'customer' ? 'rgba(0,157,224,0.05)' : 'var(--bg-app)',
+                    cursor: isSuccess ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}>👤</span>
+                  <span style={{ fontWeight: 'bold', color: role === 'customer' ? '#009de0' : 'var(--text-main)', fontSize: '14px' }}>Customer</span>
+                </div>
+                <div 
+                  onClick={() => !isSuccess && setRole('restaurant_owner')}
+                  style={{
+                    flex: 1,
+                    padding: '16px',
+                    textAlign: 'center',
+                    borderRadius: '8px',
+                    border: role === 'restaurant_owner' ? '2px solid #009de0' : '2px solid var(--border-color)',
+                    backgroundColor: role === 'restaurant_owner' ? 'rgba(0,157,224,0.05)' : 'var(--bg-app)',
+                    cursor: isSuccess ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}>🏪</span>
+                  <span style={{ fontWeight: 'bold', color: role === 'restaurant_owner' ? '#009de0' : 'var(--text-main)', fontSize: '14px' }}>Restaurant Owner</span>
+                </div>
+              </div>
+            </div>
+            
+            <button 
+              type="button" 
+              onClick={() => setStep(2)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#009de0',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              Continue to Details
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Username</label>
           <input 
             type="text" 
@@ -236,8 +304,9 @@ function RegisterPage() {
           {errors.displayName && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.displayName}</span>}
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-          <div style={{ flex: 1 }}>
+        {role === 'customer' && (
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ flex: 1 }}>
             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Location (X)</label>
             <input 
               type="number" 
@@ -284,6 +353,7 @@ function RegisterPage() {
             {errors.locationY && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.locationY}</span>}
           </div>
         </div>
+        )}
 
         <div style={{ marginBottom: '16px' }}>
           {/* Dummy hidden input to absorb Chrome's aggressive password manager heuristic */}
@@ -373,23 +443,45 @@ function RegisterPage() {
           </button>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={isSuccess}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: isSuccess ? '#b3e0f5' : '#009de0',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: isSuccess ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {isSuccess ? 'Registering...' : 'Next Step'}
-        </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setStep(1)}
+                disabled={isSuccess}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: isSuccess ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Back
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSuccess}
+                style={{
+                  flex: 2,
+                  padding: '12px',
+                  backgroundColor: isSuccess ? '#b3e0f5' : '#009de0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: isSuccess ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isSuccess ? 'Registering...' : 'Complete Registration'}
+              </button>
+            </div>
+          </div>
+        )}
       </form>
       
       <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>

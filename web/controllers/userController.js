@@ -5,10 +5,11 @@ const {
     validatePassword,
     validateProfileImage,
     validateLocation,
+    validateRole,
 } = require('../utils/userValidation');
 
 const registerUser = (req, res) => {
-    const { username, password, name, phone, address, profileImage, location } = req.body;
+    const { username, password, name, phone, address, profileImage, location, role } = req.body;
 
     // Run validators in order and return the first error found.
     const checks = [
@@ -17,6 +18,7 @@ const registerUser = (req, res) => {
         validateName(name),
         validateProfileImage(profileImage),
         validateLocation(location),
+        validateRole(role)
     ];
 
     for (const error of checks) {
@@ -42,7 +44,8 @@ const registerUser = (req, res) => {
         phone: phone || '',
         address: address || '',
         profileImage: profileImage || null,
-        location: location
+        location: location,
+        role: role || 'customer'
     });
 
     res.status(201).json({

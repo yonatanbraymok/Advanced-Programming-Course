@@ -46,21 +46,29 @@ const validateProfileImage = (profileImage) => {
 
 // Location validation for X, Y coordinates
 const validateLocation = (location) => {
-    if (!location || typeof location !== 'object') {
-        return 'Location coordinates are required';
+    if (location !== undefined) {
+        if (typeof location !== 'object' || location === null) {
+            return "Location must be an object with x and y coordinates";
+        }
+        if (typeof location.x !== 'number' || typeof location.y !== 'number') {
+            return "Location must include valid numeric x and y coordinates";
+        }
     }
-    
-    const { x, y } = location;
-    if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
-        return 'Location coordinates must be valid numbers';
+    return null;
+};
+
+const validateRole = (role) => {
+    if (role !== undefined && role !== 'customer' && role !== 'restaurant_owner') {
+        return "Role must be either 'customer' or 'restaurant_owner'";
     }
     return null;
 };
 
 module.exports = {
     validateUsername,
-    validateName,
     validatePassword,
+    validateName,
     validateProfileImage,
     validateLocation,
+    validateRole
 };

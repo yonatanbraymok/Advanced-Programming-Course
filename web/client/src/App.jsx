@@ -9,6 +9,8 @@ import { HomePage } from './components/HomePage';
 import { RestaurantDetailPage } from './components/RestaurantDetailPage';
 import { OrdersPage } from './components/OrdersPage';
 import { Navbar } from './components/Navbar';
+import { OwnerRestaurantList } from './components/OwnerRestaurantList';
+import { RestaurantEditor } from './components/RestaurantEditor';
 import { CartProvider } from './contexts/CartContext';
 
 function App() {
@@ -31,6 +33,18 @@ function App() {
               <Route path="/orders" element={
                 <PrivateRoute>
                   <OrdersPage />
+                </PrivateRoute>
+              } />
+
+              <Route path="/owner/restaurants" element={
+                <PrivateRoute>
+                  <OwnerRestaurantList />
+                </PrivateRoute>
+              } />
+
+              <Route path="/owner/restaurants/edit/:id?" element={
+                <PrivateRoute>
+                  <RestaurantEditor />
                 </PrivateRoute>
               } />
             </Routes>

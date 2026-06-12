@@ -86,8 +86,8 @@ export function RestaurantList() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery, token]);
 
-  // Extract unique cuisine categories dynamically from base catalog
-  const cuisines = ['All', ...new Set(restaurants.map(r => r.cuisine).filter(Boolean))];
+  // Fixed cuisine categories dynamically required by the user
+  const cuisines = ['All', 'Burgers', 'Asian', 'Italian', 'Other'];
 
   // Client-side filtering configuration active only during general browsing mode
   const filteredRestaurants = restaurants.filter((restaurant) => {

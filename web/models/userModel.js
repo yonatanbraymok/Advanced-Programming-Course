@@ -28,6 +28,7 @@ const User = {
             address: userData.address,
             location: userData.location || { x: 0, y: 0 },
             profileImage: userData.profileImage || null,
+            role: userData.role || 'customer'
         };
         users.push(newUser);
         return newUser;

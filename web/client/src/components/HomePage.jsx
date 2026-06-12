@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { RestaurantList } from './RestaurantList';
 
 export function HomePage() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div style={{ padding: '30px', fontFamily: 'sans-serif' }}>
@@ -12,7 +14,7 @@ export function HomePage() {
           Welcome back, {user.name}! 👋
         </h2>
       )}
-      
+
       {/* Render the dynamic interactive restaurant grid listing */}
       <RestaurantList />
     </div>

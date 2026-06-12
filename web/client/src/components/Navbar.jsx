@@ -112,6 +112,40 @@ export function Navbar() {
         {/* Private links for authenticated users */}
         {user && (
           <>
+            {/* User Profile Display */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '8px' }}>
+              <img 
+                src={user.profileImage || 'https://via.placeholder.com/150'} 
+                alt={user.name} 
+                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+              />
+              <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '14px' }}>
+                {user.name}
+              </span>
+            </div>
+
+            {user.role === 'restaurant_owner' && (
+              <button 
+                type="button"
+                onClick={() => navigate('/owner/restaurants')}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: '#009de0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🍽️ My Restaurants
+              </button>
+            )}
+
             <button 
               type="button"
               onClick={() => navigate('/orders')}

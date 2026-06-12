@@ -26,22 +26,37 @@ const getRestaurants = (req, res) => {
     return res.status(200).json(data);
 };
 
+// Handles GET /api/restaurants/my
+const getMyRestaurants = (req, res) => {
+    if (!req.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+    const data = restaurantModel.getByOwnerId(req.userId);
+    return res.status(200).json(data);
+};
+
 // Handles POST /api/restaurants
 const createRestaurant = (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, cuisine, location, image, menu } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim() === '') {
         return res.status(400).json({ error: "Name is required" });
     }
 
-    if (description !== undefined && typeof description !== 'string') {
-        return res.status(400).json({ error: "Description must be a string" });
+    if (!req.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const newRestaurant = restaurantModel.create(
-        name.trim(),
-        description !== undefined ? description.trim() : ''
-    );
+    const payload = {
+        name: name.trim(),
+        description: description !== undefined ? description.trim() : '',
+        cuisine,
+        location,
+        image,
+        menu
+    };
+
+    const newRestaurant = restaurantModel.create(req.userId, payload);
     
    
     return res.status(201).json({
@@ -78,21 +93,25 @@ const getRestaurantById = (req, res) => {
 // Handles PATCH /api/restaurants/:id.
 const updateRestaurant = (req, res) => {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, cuisine, location, image, menu } = req.body;
 
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-        return res.status(400).json({ error: "Name is required" });
+    if (!req.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (description !== undefined && typeof description !== 'string') {
-        return res.status(400).json({ error: "Description must be a string" });
+    if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
+        return res.status(400).json({ error: "Name must be a valid string" });
     }
 
-    const updatedRestaurant = restaurantModel.update(
-        id,
-        name.trim(),
-        description !== undefined ? description.trim() : undefined
-    );
+    const payload = {};
+    if (name !== undefined) payload.name = name.trim();
+    if (description !== undefined) payload.description = description.trim();
+    if (cuisine !== undefined) payload.cuisine = cuisine.trim();
+    if (location !== undefined) payload.location = location;
+    if (image !== undefined) payload.image = image;
+    if (menu !== undefined) payload.menu = menu;
+
+    const updatedRestaurant = restaurantModel.update(id, req.userId, payload);
 
     if (!updatedRestaurant) {
         return res.status(404).json({ error: "Restaurant not found" });
@@ -117,6 +136,7 @@ const deleteRestaurant = (req, res) => {
 
 module.exports = {
     getRestaurants,
+    getMyRestaurants,
     createRestaurant,
     getRestaurantById,
     updateRestaurant,

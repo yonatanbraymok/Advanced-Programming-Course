@@ -21,6 +21,7 @@ const loginUser = (req, res) => {
     const token = signToken({
         userId: validUser.id,
         username: validUser.username,
+        role: validUser.role
     });
 
     res.status(200).json({
@@ -30,7 +31,8 @@ const loginUser = (req, res) => {
             id: validUser.id,
             username: validUser.username,
             name: validUser.name,
-            profileImage: validUser.profileImage
+            profileImage: validUser.profileImage,
+            role: validUser.role
         }
     });
 };
