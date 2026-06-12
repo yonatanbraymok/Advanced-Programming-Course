@@ -23,9 +23,10 @@ export function RestaurantDetailPage() {
       try {
         const response = await fetch(`/api/restaurants/${id}`, {
           method: 'GET',
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           }
         });
 
@@ -40,9 +41,10 @@ export function RestaurantDetailPage() {
         // Fetch menu
         const menuResponse = await fetch(`/api/restaurants/${id}/products`, {
           method: 'GET',
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           }
         });
 
@@ -57,13 +59,13 @@ export function RestaurantDetailPage() {
       }
     };
 
-    if (token && id) {
+    if (id) {
       fetchRestaurantDetail();
     }
   }, [id, token]);
 
   if (loading) {
-    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)' }}>Loading menu options...</h3>;
+    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)', fontFamily: 'sans-serif' }}>Loading menu options...</h3>;
   }
 
   if (error) {

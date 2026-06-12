@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 
 export function ProductCard({ item, restaurantId, onAddToCart }) {
+  const { token } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleAddClick = () => {
+    if (!token) {
+      const confirmLogin = window.confirm("You must be logged in to order. Would you like to log in now?");
+      if (confirmLogin) {
+        navigate('/login');
+      }
+      return;
+    }
+    onAddToCart(restaurantId, item);
+  };
   return (
     <div 
       style={{
@@ -33,7 +48,7 @@ export function ProductCard({ item, restaurantId, onAddToCart }) {
         />
       )}
       <button 
-        onClick={() => onAddToCart(restaurantId, item)}
+        onClick={handleAddClick}
         style={{
           marginLeft: '16px',
           padding: '8px 16px',

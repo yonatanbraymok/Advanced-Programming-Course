@@ -24,17 +24,9 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
 
               {/* Protected Routes */}
-              <Route path="/" element={
-                <PrivateRoute>
-                  <HomePage />
-                </PrivateRoute>
-              } />
+              <Route path="/" element={<HomePage />} />
               
-              <Route path="/restaurant/:id" element={
-                <PrivateRoute>
-                  <RestaurantDetailPage />
-                </PrivateRoute>
-              } />
+              <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
               
               <Route path="/orders" element={
                 <PrivateRoute>

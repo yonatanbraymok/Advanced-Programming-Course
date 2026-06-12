@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 
 function RegisterPage() {
   // Controlled form state fields
@@ -21,6 +22,7 @@ function RegisterPage() {
   const fileInputRef = useRef(null);
   
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   // Handle image selection and conversion to base64 data string
   const handleImageChange = (e) => {
@@ -105,10 +107,25 @@ function RegisterPage() {
         return;
       }
 
+      // Automatically log the user in after successful registration
+      try {
+        const loginResponse = await fetch('/api/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: payload.username, password: payload.password })
+        });
+        const loginData = await loginResponse.json();
+        if (loginResponse.ok && loginData.token && loginData.user) {
+          login(loginData.token, loginData.user);
+        }
+      } catch (err) {
+        // Fallback to manual login if auto-login fails gracefully
+      }
+
       setIsSuccess(true);
       
       setTimeout(() => {
-        navigate('/login');
+        navigate('/');
       }, 2000);
 
     } catch (err) {
@@ -158,7 +175,7 @@ function RegisterPage() {
           fontWeight: 'bold',
           textAlign: 'center'
         }}>
-          Registration successful! Redirecting to login... 🚀
+          Registration successful! Redirecting to Dashboard... 🚀
         </div>
       )}
 
