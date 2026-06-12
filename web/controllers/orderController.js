@@ -28,6 +28,9 @@ const createOrder = (req, res) => {
         return res.status(404).json({ error: "Restaurant not found" });
     }
 
+    let totalPrice = 0;
+    const enrichedItems = [];
+
     // Validate all products exist and belong to the same restaurant.
     for (const item of items) {
         const product = Product.getById(item.productId);
@@ -39,9 +42,18 @@ const createOrder = (req, res) => {
         if (product.restaurantId !== restaurantId) {
             return res.status(400).json({ error: `Product ${item.productId} does not belong to this restaurant` });
         }
+
+        enrichedItems.push({
+            productId: item.productId,
+            quantity: item.quantity,
+            name: product.name,
+            price: product.price
+        });
+        totalPrice += product.price * item.quantity;
     }
 
-    const newOrder = Order.create(userId, restaurantId, items);
+    const newOrder = Order.create(userId, restaurantId, enrichedItems);
+    newOrder.totalPrice = totalPrice; // Append total price
     
     res.status(201).json({
         message: "Order created successfully",

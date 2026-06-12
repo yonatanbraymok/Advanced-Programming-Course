@@ -1,4 +1,5 @@
 // In-memory volatile storage for products
+const restaurantModel = require('./restaurantModel');
 const products = [];
 
 // Generate a random ID 
@@ -32,7 +33,22 @@ const create = (restaurantId, name, price, description = '') => {
 
 // Finds a specific product by its unique ID
 const getById = (productId) => {
-    return products.find(p => p.id === productId);
+    // 1. Check volatile memory first
+    const product = products.find(p => p.id === productId);
+    if (product) return product;
+
+    // 2. Fallback to hardcoded menus inside restaurants
+    const allRestaurants = restaurantModel.getAll();
+    for (const restaurant of allRestaurants) {
+        if (restaurant.menu) {
+            const found = restaurant.menu.find(p => p.id === productId);
+            if (found) {
+                // Attach restaurantId dynamically so controller validations pass
+                return { ...found, restaurantId: restaurant.id };
+            }
+        }
+    }
+    return undefined;
 };
 
 // Updates an existing product fields directly
