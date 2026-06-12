@@ -13,7 +13,7 @@ RUN npm install
 # Copy the rest of the MVC application code
 COPY web/ .
 
-# Build the React client app
+# Build the React client app (Exercise 4 Front-End Integration)
 RUN cd client && npm install && npm run build
 
 # Expose the port the Express server runs on
