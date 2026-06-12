@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { OrderCard } from './OrderCard';
+import { OrderDetailModal } from './OrderDetailModal';
 
 export function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -44,7 +47,7 @@ export function OrdersPage() {
   }, [token]);
 
   if (loading) {
-    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)' }}>Loading your order history...</h3>;
+    return <h3 style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-main)', fontFamily: 'sans-serif' }}>Loading your order history...</h3>;
   }
 
   return (
@@ -93,55 +96,20 @@ export function OrdersPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {orders.map((order) => (
-            <div 
-              key={order.id || order._id}
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                padding: '20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                transition: 'background-color 0.3s ease, border-color 0.3s ease'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '12px' }}>
-                <div>
-                  <span style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block' }}>ORDER ID</span>
-                  <span style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '14px' }}>#{order.id || order._id}</span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: '12px', 
-                    fontSize: '12px', 
-                    fontWeight: 'bold',
-                    backgroundColor: order.status === 'completed' ? '#e6f7ed' : '#fff3cd',
-                    color: order.status === 'completed' ? '#2e7d32' : '#856404'
-                  }}>
-                    {order.status || 'processing'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Order Items List Breakdown Nested Segment */}
-              <div style={{ marginBottom: '16px' }}>
-                {order.items && order.items.map((item, index) => (
-                  <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--text-main)', marginBottom: '6px' }}>
-                    <span>{item.quantity}x {item.name || 'Menu Product Item'}</span>
-                    <span style={{ color: 'var(--text-muted)' }}>₪{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
-                <span style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>Total Amount</span>
-                <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#009de0' }}>
-                  ₪{(order.totalPrice || 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
+            <OrderCard 
+              key={order.id || order._id} 
+              order={order} 
+              onViewDetails={(id) => setSelectedOrderId(id)} 
+            />
           ))}
         </div>
+      )}
+
+      {selectedOrderId && (
+        <OrderDetailModal 
+          orderId={selectedOrderId} 
+          onClose={() => setSelectedOrderId(null)} 
+        />
       )}
     </div>
   );
