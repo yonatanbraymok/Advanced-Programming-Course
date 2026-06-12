@@ -6,8 +6,8 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Parse JSON request bodies
-app.use(express.json());
+// Increase JSON payload limit to handle large image strings
+app.use(express.json({ limit: '50mb' }));
 
 // Mount feature routers under /api
 app.use('/api', apiRoutes);

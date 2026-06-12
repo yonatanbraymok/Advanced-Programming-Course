@@ -3,13 +3,14 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PrivateRoute } from './contexts/PrivateRoute';
+import { RegisterPage } from './components/RegisterPage';
 
-// Temporary placeholder components for routing verification
+// Temporary placeholder components for remaining screens
 const HomePlaceholder = () => (
   <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
     <h2>Home Page (Protected Screen) 🏠</h2>
     <nav>
-      <Link to="/orders">View Orders</Link> | <Link to="/restaurant/123">View Restaurant 123</Link>
+      <Link to="/orders">View Orders</Link> | <Link to="/restaurant/123">View Restaurant 123</Link> | <Link to="/register">Go to Register</Link>
     </nav>
   </div>
 );
@@ -18,13 +19,6 @@ const LoginPlaceholder = () => (
   <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
     <h2>Login Page 🔑</h2>
     <Link to="/register">Don't have an account? Register</Link>
-  </div>
-);
-
-const RegisterPlaceholder = () => (
-  <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-    <h2>Registration Page 📝</h2>
-    <Link to="/login">Already have an account? Login</Link>
   </div>
 );
 
@@ -50,7 +44,7 @@ function App() {
           <Routes>
             {/* Public Authentication Routes */}
             <Route path="/login" element={<LoginPlaceholder />} />
-            <Route path="/register" element={<RegisterPlaceholder />} />
+            <Route path="/register" element={<RegisterPage />} /> {/* Connected the real RegisterPage */}
 
             {/* Protected Application Routes fenced by PrivateRoute */}
             <Route path="/" element={
