@@ -8,14 +8,21 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing token and user data on app mount
+  // Check for existing token and user data on app mount with defensive guarding
   useEffect(() => {
     const storedToken = localStorage.getItem('jwt_token');
     const storedUser = localStorage.getItem('user_data');
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    // Hardened check to ensure storedUser is neither null nor the string literal undefined
+    if (storedToken && storedUser && storedUser !== 'undefined') {
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        // Clear corrupted storage items gracefully if parsing fails
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_data');
+      }
     }
     setLoading(false);
   }, []);
