@@ -19,7 +19,7 @@ const restaurants = [
     image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600',
     menu: [
       { id: 'prod_s1', name: 'Salmon Combo Box', description: '8 pieces of premium spicy salmon maki rolls and 4 pieces of nigiri', price: 58, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=150' },
-      { id: 'prod_s2', name: 'Miso Soup', description: 'Traditional Japanese hot broth with tofu cubes and scallions', price: 15, image: 'https://images.unsplash.com/photo-1542358821-67a3a34421b6?w=150' }
+      { id: 'prod_s2', name: 'Miso Soup', description: 'Traditional Japanese hot broth with tofu cubes and scallions', price: 15, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Miso_soup_by_Roozitaa.jpg/320px-Miso_soup_by_Roozitaa.jpg' }
     ]
   },
   {
@@ -30,7 +30,7 @@ const restaurants = [
     image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
     menu: [
       { id: 'prod_p1', name: 'Margherita Pizza', description: 'Fresh mozzarella cheese, signature tomato sauce, and aromatic basil', price: 50, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150' },
-      { id: 'prod_p2', name: 'Garlic Bread', description: 'Toasted crispy baguette slices smothered in rich garlic herb butter', price: 18, image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=150' }
+      { id: 'prod_p2', name: 'Garlic Bread', description: 'Toasted crispy baguette slices smothered in rich garlic herb butter', price: 18, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Garlic_bread.jpg/320px-Garlic_bread.jpg' }
     ]
   }
 ];
