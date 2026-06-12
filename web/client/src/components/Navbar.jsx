@@ -112,6 +112,18 @@ export function Navbar() {
         {/* Private links for authenticated users */}
         {user && (
           <>
+            {/* User Profile Display */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '8px' }}>
+              <img 
+                src={user.profileImage || 'https://via.placeholder.com/150'} 
+                alt={user.name} 
+                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+              />
+              <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '14px' }}>
+                {user.name}
+              </span>
+            </div>
+
             <button 
               type="button"
               onClick={() => navigate('/orders')}
