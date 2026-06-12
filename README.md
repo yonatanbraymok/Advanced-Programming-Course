@@ -134,12 +134,12 @@ Web listens on `http://localhost:3000` (or `PORT` from environment).
 # C++ tests
 docker compose run --rm tests
 
-# Ex2 + web together
+# Ex2 + web (Express + React) together
 docker compose up --build server web
 ```
 
-- Web: `http://localhost:3000`
-- Ex2: `localhost:8080`
+- Web App (React UI): `http://localhost:3000`
+- Ex2 TCP server: `localhost:8080`
 
 **Interactive Ex2 client (optional):**
 
@@ -232,7 +232,8 @@ Exercise 3 code is frozen for grading on branch **`TASK-3-DONE`**. Development c
 
 ```
 ├── src/              # Ex2 C++ recommender + TCP server
-├── web/              # Ex3 Node.js Express MVC API
+├── web/              # Ex3 Node.js Express API
+│   ├── client/       # Ex4 Vite React App
 ├── tests/            # C++ GTest
 ├── data/             # Ex2 persistence (runtime)
 ├── docs/             # Architecture diagrams

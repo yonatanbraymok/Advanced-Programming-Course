@@ -9,38 +9,41 @@ import { HomePage } from './components/HomePage';
 import { RestaurantDetailPage } from './components/RestaurantDetailPage';
 import { OrdersPage } from './components/OrdersPage';
 import { Navbar } from './components/Navbar';
+import { CartProvider } from './contexts/CartContext';
 
 function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            {/* Public Authentication Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+        <CartProvider>
+          <BrowserRouter>
+            <Navbar />
+            <Routes>
+              {/* Public Authentication Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Application Routes fenced directly by PrivateRoute */}
-            <Route path="/" element={
-              <PrivateRoute>
-                <HomePage />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/restaurant/:id" element={
-              <PrivateRoute>
-                <RestaurantDetailPage />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/orders" element={
-              <PrivateRoute>
-                <OrdersPage /> {/* Connected the OrdersPage */}
-              </PrivateRoute>
-            } />
-          </Routes>
-        </BrowserRouter>
+              {/* Protected Routes */}
+              <Route path="/" element={
+                <PrivateRoute>
+                  <HomePage />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/restaurant/:id" element={
+                <PrivateRoute>
+                  <RestaurantDetailPage />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/orders" element={
+                <PrivateRoute>
+                  <OrdersPage />
+                </PrivateRoute>
+              } />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
       </ThemeProvider>
     </AuthProvider>
   );

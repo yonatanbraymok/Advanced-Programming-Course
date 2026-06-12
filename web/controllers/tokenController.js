@@ -26,6 +26,12 @@ const loginUser = (req, res) => {
     res.status(200).json({
         message: "Login successful",
         token,
+        user: {
+            id: validUser.id,
+            username: validUser.username,
+            name: validUser.name,
+            profileImage: validUser.profileImage
+        }
     });
 };
 
