@@ -26,6 +26,7 @@ const User = {
             name: userData.name,
             phone: userData.phone,
             address: userData.address,
+            location: userData.location || { x: 0, y: 0 },
             profileImage: userData.profileImage || null,
         };
         users.push(newUser);
