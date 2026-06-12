@@ -48,15 +48,23 @@ const getAll = () => {
   return restaurants;
 };
 
+// Retrieves restaurants owned by a specific user
+const getByOwnerId = (ownerId) => {
+  return restaurants.filter(r => r.ownerId === ownerId);
+};
+
 // Creates a new restaurant object, stores it in memory, and returns it
-const create = (name, description = '') => {
+const create = (ownerId, payload) => {
   const newRestaurant = {
     id: generateId(),
-    name: name,
-    description: description,
-    cuisine: 'International',
-    rating: 5.0,
-    menu: []
+    ownerId: ownerId,
+    name: payload.name,
+    description: payload.description || '',
+    cuisine: payload.cuisine || 'International',
+    rating: 5.0, // Default rating
+    location: payload.location || { x: 0, y: 0 },
+    image: payload.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
+    menu: payload.menu || []
   };
   restaurants.push(newRestaurant);
   return newRestaurant;
@@ -68,16 +76,18 @@ const getById = (id) => {
 };
 
 // Updates an existing restaurant fields
-const update = (id, name, description) => {
+const update = (id, ownerId, payload) => {
   const restaurant = getById(id);
-  if (!restaurant) return null;
+  // Ensure the restaurant exists and the user is the owner
+  if (!restaurant || restaurant.ownerId !== ownerId) return null;
 
-  restaurant.name = name;
-  if (description !== undefined) {
-    restaurant.description = description;
-  } else if (restaurant.description === undefined) {
-    restaurant.description = '';
-  }
+  if (payload.name !== undefined) restaurant.name = payload.name;
+  if (payload.description !== undefined) restaurant.description = payload.description;
+  if (payload.cuisine !== undefined) restaurant.cuisine = payload.cuisine;
+  if (payload.location !== undefined) restaurant.location = payload.location;
+  if (payload.image !== undefined) restaurant.image = payload.image;
+  if (payload.menu !== undefined) restaurant.menu = payload.menu;
+  
   return restaurant;
 };
 
@@ -92,6 +102,7 @@ const remove = (id) => {
 
 module.exports = {
   getAll,
+  getByOwnerId,
   create,
   getById,
   update,

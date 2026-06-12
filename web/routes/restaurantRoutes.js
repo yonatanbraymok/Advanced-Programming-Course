@@ -10,6 +10,7 @@ router.get('/', optionalAuthenticate, restaurantController.getRestaurants);
 router.post('/', authenticate, restaurantController.createRestaurant);
 
 // Specific restaurant resource endpoints by ID
+router.get('/my', authenticate, restaurantController.getMyRestaurants);
 router.get('/:id', optionalAuthenticate, restaurantController.getRestaurantById);
 router.patch('/:id', authenticate, restaurantController.updateRestaurant);
 router.delete('/:id', authenticate, restaurantController.deleteRestaurant);
