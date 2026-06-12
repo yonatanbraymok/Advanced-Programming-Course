@@ -5,7 +5,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 export function CartSidebar({ isOpen, onClose }) {
   const { cartItems, restaurantId, removeFromCart, updateQuantity, clearCart, cartTotal } = useContext(CartContext);
-  const { token } = useContext(AuthContext);
+  const { token, logout } = useContext(AuthContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -37,8 +37,17 @@ export function CartSidebar({ isOpen, onClose }) {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          navigate('/login');
+          onClose();
+          return;
+        }
         throw new Error(data.error || 'Failed to place order');
       }
+
+      // Show confirmation with orderId
+      window.alert(`Order placed successfully! Your Order ID is: ${data.orderId}`);
 
       clearCart();
       onClose();
