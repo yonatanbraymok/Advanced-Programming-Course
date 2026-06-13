@@ -1,4 +1,4 @@
-# Advanced Programming Course — Exercise 3
+# Advanced Programming Course — Exercise 4
 
 ---
 ## Notes for TA
@@ -6,9 +6,10 @@
 Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
 ---
 
-This repository contains a **Wolt-style food delivery REST API** (Exercise 3) built with **Node.js + Express (MVC)**, integrated with the **Exercise 2 C++ TCP recommender server**.
+This repository contains a **Wolt-style food delivery Full Stack Application** (Exercise 4) built with a **React Frontend (Vite)**, a **Node.js + Express (MVC) REST API**, integrated with the **Exercise 2 C++ TCP recommender server**.
 
-- **Web API (Ex3):** JSON REST under `/api/*`, in-memory data, no HTML views.
+- **Frontend (Ex4):** React UI built with Vite under `web/client`.
+- **Web API (Ex3):** JSON REST under `/api/*`, in-memory data.
 - **Recommender (Ex2):** Line-based TCP protocol on port `8080`, persisted in `data/users_products.txt`.
 
 ---
@@ -36,11 +37,11 @@ This repository contains a **Wolt-style food delivery REST API** (Exercise 3) bu
 
 ## Architecture
 
-### Exercise 3 — full stack
+### Exercise 4 — full stack
 
 ![Exercise 3 architecture](docs/architecture-ex3.svg)
 
-HTTP clients talk to the Express app. On **product view**, the web server opens a TCP client connection to the C++ server (fire-and-forget; API still returns JSON immediately).
+HTTP clients (React Frontend) talk to the Express app via `/api/*`. On **product view**, the web server opens a TCP client connection to the C++ server (fire-and-forget; API still returns JSON immediately).
 
 ### Exercise 2 — C++ recommender (detail)
 
@@ -222,9 +223,9 @@ Expected: `200` with `{"restaurants":[...],"products":[...]}` (case-insensitive)
 
 ---
 
-## Exercise 3 branch for TA
+## Exercise 4 branch for TA
 
-Exercise 3 code is frozen for grading on branch **`TASK-3-DONE`**. Development continues on **`main`** and feature branches so next submissions do not mix.
+Exercise 4 code is frozen for grading on branch **`TASK-4-DONE`**. Development continues on **`main`** and feature branches so next submissions do not mix.
 
 ---
 

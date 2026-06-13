@@ -177,13 +177,13 @@ function RestaurantEditor() {
         {menu.map((item, index) => (
           <div key={index} style={{ backgroundColor: 'var(--bg-app)', padding: '20px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h4 style={{ margin: 0 }}>Meal #{index + 1}</h4>
+              <h4 style={{ margin: 0 }}>Item #{index + 1}</h4>
               <button type="button" onClick={() => handleRemoveMenuItem(index)} style={{ padding: '4px 8px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
             </div>
 
             <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
               <div style={{ flex: 2 }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>Meal Name</label>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>Item Name</label>
                 <input type="text" required value={item.name} onChange={e => handleMenuChange(index, 'name', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', boxSizing: 'border-box' }} />
               </div>
               <div style={{ flex: 1 }}>
@@ -209,7 +209,7 @@ function RestaurantEditor() {
           onClick={handleAddMenuItem}
           style={{ width: '100%', padding: '12px', backgroundColor: 'var(--bg-app)', color: '#009de0', border: '2px dashed #009de0', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '32px' }}
         >
-          <span>+ Add Meal</span>
+          <span>+ Add Item</span>
         </button>
 
         <button 
