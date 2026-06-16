@@ -47,7 +47,7 @@ const getById = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product) return product;
 
-    // 2. Fallback to hardcoded menus inside restaurants
+    // 2. Fallback to menu items embedded in restaurant seed data
     const allRestaurants = restaurantModel.getAll();
     for (const restaurant of allRestaurants) {
         if (restaurant.menu) {
