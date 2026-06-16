@@ -12,9 +12,19 @@ const getByRestaurantId = (restaurantId) => {
     return products.filter(p => p.restaurantId === restaurantId);
 };
 
-// Retrieves all products from volatile memory.
+// Retrieves all products from volatile memory and hardcoded menus
 const getAll = () => {
-    return products;
+    const allProducts = [...products];
+    const allRestaurants = restaurantModel.getAll();
+    for (const restaurant of allRestaurants) {
+        if (restaurant.menu) {
+            for (const product of restaurant.menu) {
+                // Attach restaurantId dynamically so controller validations pass
+                allProducts.push({ ...product, restaurantId: restaurant.id });
+            }
+        }
+    }
+    return allProducts;
 };
 
 // Creates a new menu product and stores it in memory

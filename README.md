@@ -106,41 +106,48 @@ docker compose build
 
 ## How to run
 
-### Native
+### Native (Local Development)
 
-**Terminal 1 — Ex2 server:**
+To run the application locally with full Hot Module Replacement (HMR) for the frontend, you will need **three** terminals.
 
+**Terminal 1 — Ex2 Server (C++ Recommender):**
 ```bash
 ./build/app 8080
 ```
 
-**Terminal 2 — Web server:**
-
+**Terminal 2 — Web API Server (Node.js):**
 ```bash
 cd web
+npm install # if you haven't yet
 npm start
 ```
+*The backend API will listen on `http://localhost:3000` (or `PORT` from environment).*
 
-Web listens on `http://localhost:3000` (or `PORT` from environment).
+**Terminal 3 — Frontend UI (React + Vite):**
+```bash
+cd web/client
+npm install # if you haven't yet
+npm run dev
+```
+*The frontend development server will run on **`http://localhost:5173`**. Open this link in your browser. All API calls are automatically proxied to `localhost:3000`.*
 
 **C++ unit tests:**
-
 ```bash
 ./build/tests_runner
 ```
 
-### Docker
+### Docker (Production-like)
 
 ```bash
 # C++ tests
 docker compose run --rm tests
 
-# Ex2 + web (Express + React) together
+# Run the entire stack (Ex2 Server + Express API + React UI)
 docker compose up --build server web
 ```
 
-- Web App (React UI): `http://localhost:3000`
-- Ex2 TCP server: `localhost:8080`
+- **Web App (React UI & API):** `http://localhost:3000` (The Express server automatically serves the built React app)
+- **Ex2 TCP server:** `localhost:8080`
 
 **Interactive Ex2 client (optional):**
 
@@ -242,3 +249,29 @@ Exercise 4 code is frozen for grading on branch **`TASK-4-DONE`**. Development c
 ├── .env.example      # Environment template (copy to .env)
 └── Dockerfile.*
 ```
+
+---
+
+## Screenshots
+
+
+### 1. Login Page
+![Login Page](docs/screenshots/login.png)
+
+### 2. Registration Role selection
+![Registration Role selection](docs/screenshots/role.png)
+
+### 3. Registration Page
+![Registration Page](docs/screenshots/register.png)
+
+### 4. Home Page (Restaurants)
+![Home Page](docs/screenshots/home.png)
+
+### 5. Restaurant Menu Page
+![Menu Page](docs/screenshots/menu.png)
+
+### 6. Cart and Order Confirmation
+![Cart Page](docs/screenshots/cart.png)
+
+### 7. Orders screen
+![Orders Page](docs/screenshots/orders.png)

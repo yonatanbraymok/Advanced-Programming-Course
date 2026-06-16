@@ -6,14 +6,14 @@ export function LoginPage() {
   // Controlled fields for user credentials
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
+
   // State for tracking client or server side validation errors
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  
+
   // Consume the global login trigger from our AuthContext infrastructure
   const { login } = useContext(AuthContext);
-  
+
   const navigate = useNavigate();
 
   // Basic client side validation before reaching out to the API backend
@@ -100,51 +100,35 @@ export function LoginPage() {
 
       <form onSubmit={handleSubmit}>
         {/* Username Field */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Username</label>
-          <input 
-            type="text" 
+        <div className="floating-label-group">
+          <input
+            type="text"
+            className={`floating-input ${errors.username ? 'error' : ''}`}
+            placeholder=" "
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              borderRadius: '4px', 
-              border: errors.username ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
-              backgroundColor: 'var(--bg-app)',
-              color: 'var(--text-main)',
-              boxSizing: 'border-box',
-              transition: 'background-color 0.3s ease, color 0.3s ease'
-            }}
           />
+          <label className="floating-label">Username</label>
           {errors.username && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.username}</span>}
         </div>
 
         {/* Password Field */}
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Password</label>
-          <input 
-            type="password" 
+        <div className="floating-label-group">
+          <input
+            type="password"
+            className={`floating-input ${errors.password ? 'error' : ''}`}
+            placeholder=" "
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              borderRadius: '4px', 
-              border: errors.password ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
-              backgroundColor: 'var(--bg-app)',
-              color: 'var(--text-main)',
-              boxSizing: 'border-box',
-              transition: 'background-color 0.3s ease, color 0.3s ease'
-            }}
           />
+          <label className="floating-label">Password</label>
           {errors.password && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.password}</span>}
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
           style={{
             width: '100%',

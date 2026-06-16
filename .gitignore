@@ -18,4 +18,5 @@ src/__pycache__/
 web/node_modules/
 .env
 .env.*
-!.env.example
+!.env.example
+
