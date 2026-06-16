@@ -21,3 +21,67 @@ body {
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Modern Floating Label Inputs */
+.floating-label-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 16px 12px 12px 12px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: transparent; /* Keep transparent so bg-card shows */
+  color: var(--text-main);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+/* Ensure the input takes the parent's background so the label can cover it cleanly if needed */
+.floating-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px var(--bg-card) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+}
+
+.floating-input:focus {
+  border-color: #009de0;
+  box-shadow: 0 0 0 1px #009de0;
+}
+
+.floating-input.error {
+  border-color: #ff4d4d;
+}
+
+.floating-input.error:focus {
+  box-shadow: 0 0 0 1px #ff4d4d;
+}
+
+.floating-label {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  padding: 0 4px;
+  background-color: var(--bg-card); /* Covers the input border */
+}
+
+/* Float the label when input is focused or not empty */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0;
+  font-size: 12px;
+  color: #009de0;
+}
+
+.floating-input.error:focus ~ .floating-label,
+.floating-input.error:not(:placeholder-shown) ~ .floating-label {
+  color: #ff4d4d;
+}

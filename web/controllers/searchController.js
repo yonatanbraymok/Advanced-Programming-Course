@@ -18,8 +18,7 @@ const searchByQuery = (req, res) => {
         .getAll()
         .filter((restaurant) => {
             const name = (restaurant.name || '').toLowerCase();
-            const description = (restaurant.description || '').toLowerCase();
-            return name.includes(normalizedQuery) || description.includes(normalizedQuery);
+            return name.includes(normalizedQuery);
         });
 
     // Get all products that match the query
@@ -27,8 +26,7 @@ const searchByQuery = (req, res) => {
         .getAll()
         .filter((product) => {
             const name = (product.name || '').toLowerCase();
-            const description = (product.description || '').toLowerCase();
-            return name.includes(normalizedQuery) || description.includes(normalizedQuery);
+            return name.includes(normalizedQuery);
         });
 
     // Return the matches

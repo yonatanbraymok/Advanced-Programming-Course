@@ -262,10 +262,11 @@ function RegisterPage() {
           </div>
         ) : (
           <div>
-            <div style={{ marginBottom: '16px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Username</label>
           <input 
             type="text" 
+            placeholder="Enter a Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isSuccess}
@@ -287,6 +288,7 @@ function RegisterPage() {
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Display Name</label>
           <input 
             type="text" 
+            placeholder="Enter a Display Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             disabled={isSuccess}
@@ -313,6 +315,7 @@ function RegisterPage() {
               step="any"
               name="locationX"
               autoComplete="nope"
+              placeholder="X Coordinate"
               value={locationX}
               onChange={(e) => setLocationX(e.target.value)}
               disabled={isSuccess}
@@ -336,6 +339,7 @@ function RegisterPage() {
               step="any"
               name="locationY"
               autoComplete="nope"
+              placeholder="Y Coordinate"
               value={locationY}
               onChange={(e) => setLocationY(e.target.value)}
               disabled={isSuccess}
@@ -363,6 +367,7 @@ function RegisterPage() {
           <input 
             type="password" 
             autoComplete="new-password"
+            placeholder="Min 8 chars, 1 uppercase, 1 digit"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSuccess}
@@ -385,6 +390,7 @@ function RegisterPage() {
           <input 
             type="password" 
             autoComplete="new-password"
+            placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isSuccess}
