@@ -2,11 +2,13 @@ import React, { useContext } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { AuthContext } from '../contexts/AuthContext';
+import { CartContext } from '../contexts/CartContext';
 
 export default function RestaurantScreen({ route, navigation }) {
   const { restaurant } = route.params;
   const { colors } = useContext(ThemeContext);
   const { userToken } = useContext(AuthContext);
+  const { addToCart, cartCount } = useContext(CartContext);
 
   const handleAddToCart = (item) => {
     if (!userToken) {
@@ -20,7 +22,26 @@ export default function RestaurantScreen({ route, navigation }) {
       );
       return;
     }
-    Alert.alert('Coming Soon', `Added ${item.name} to your cart. Cart system is under construction!`);
+    
+    const addedDirectly = addToCart(restaurant.id || restaurant._id, item, 1);
+    if (addedDirectly) {
+      Alert.alert('Added to Cart', `${item.name} has been added to your cart.`);
+    }
+  };
+
+  const handleCartPress = () => {
+    if (!userToken) {
+      Alert.alert(
+        "Login Required",
+        "You need to log in to view your cart. Do you want to log in now?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Log In", onPress: () => navigation.navigate('Login') }
+        ]
+      );
+      return;
+    }
+    navigation.navigate('Cart');
   };
 
   const renderHeader = () => (
@@ -29,11 +50,23 @@ export default function RestaurantScreen({ route, navigation }) {
         style={styles.backButton} 
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
+        <Text style={[styles.backButtonText, { color: '#fff' }]}>← Back</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.cartButton} 
+        onPress={handleCartPress}
+      >
+        <Text style={styles.cartButtonIcon}>🛒</Text>
+        {cartCount > 0 && (
+          <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
+            <Text style={styles.cartBadgeText}>{cartCount}</Text>
+          </View>
+        )}
       </TouchableOpacity>
       
       <Image 
-        source={{ uri: restaurant.image || 'https://via.placeholder.com/800x400?text=Restaurant+Image' }} 
+        source={{ uri: restaurant.image || 'https://via.placeholder.com/600x300?text=Wolt+Menu' }} 
         style={styles.heroImage} 
       />
       <View style={[styles.infoCard, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
@@ -142,6 +175,38 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  cartButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartButtonIcon: {
+    fontSize: 18,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  cartBadgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   infoCard: {
     marginHorizontal: 16,

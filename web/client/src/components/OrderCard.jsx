@@ -7,15 +7,25 @@ export function OrderCard({ order, onViewDetails }) {
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
-        padding: '20px',
+        overflow: 'hidden',
         boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
         transition: 'background-color 0.3s ease, border-color 0.3s ease'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '12px' }}>
+      {order.restaurantImage && (
+        <div style={{
+          width: '100%',
+          height: '120px',
+          backgroundImage: `url(${order.restaurantImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }} />
+      )}
+      <div style={{ padding: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '12px' }}>
         <div>
-          <span style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block' }}>ORDER ID</span>
-          <span style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '14px' }}>#{order.id || order._id}</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block' }}>FROM</span>
+          <span style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '14px' }}>{order.restaurantName || 'Unknown Restaurant'}</span>
         </div>
         <div style={{ textAlign: 'right' }}>
           <span style={{ 
@@ -61,6 +71,7 @@ export function OrderCard({ order, onViewDetails }) {
         >
           View Details
         </button>
+      </div>
       </div>
     </div>
   );

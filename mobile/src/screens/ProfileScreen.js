@@ -89,6 +89,13 @@ export default function ProfileScreen({ navigation }) {
         
         <View style={styles.divider} />
 
+        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Orders')}>
+          <Text style={[styles.rowText, { color: colors.text }]}>Order History</Text>
+          <Text style={[styles.arrow, { color: colors.textSecondary }]}>{'>'}</Text>
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
         <View style={styles.row}>
           <Text style={[styles.rowText, { color: colors.text }]}>Dark Mode</Text>
           <Switch

@@ -10,6 +10,8 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import RestaurantScreen from '../screens/RestaurantScreen';
+import CartScreen from '../screens/CartScreen';
+import OrdersScreen from '../screens/OrdersScreen';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 
@@ -101,6 +103,8 @@ export default function AppNavigator() {
         {/* Main App (Visible to everyone) */}
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+        <Stack.Screen name="Cart" component={CartScreen} />
+        <Stack.Screen name="Orders" component={OrdersScreen} />
         
         {/* Auth Screens (Stacked on top when needed) */}
         <Stack.Screen name="Login" component={LoginScreen} />
