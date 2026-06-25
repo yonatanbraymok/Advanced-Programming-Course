@@ -4,8 +4,11 @@
 
 // config loads env vars (including required JWT_SECRET) before the server starts.
 const config = require('./config');
+const { connect } = require('./db');
 const app = require('./app');
 
-app.listen(config.port, () => {
-    console.log(`Web server listening on http://localhost:${config.port}`);
+connect().then(() => {
+    app.listen(config.port, () => {
+        console.log(`Web server listening on http://localhost:${config.port}`);
+    });
 });

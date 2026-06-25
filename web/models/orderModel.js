@@ -1,66 +1,49 @@
-// In-memory volatile storage for orders
-const orders = [];
+const mongoose = require('mongoose');
 
-// Generate a random ID 
-const generateId = () => {
-    return 'order_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-};
+const OrderSchema = new mongoose.Schema(
+    {
+        userId: { type: String, required: true },
+        restaurantId: { type: String, required: true },
+        items: [
+            {
+                _id: false,
+                productId: String,
+                quantity: Number,
+                name: String,
+                price: Number,
+            },
+        ],
+        status: { type: String, default: 'Pending' },
+        totalPrice: { type: Number },
+    },
+    { timestamps: true }
+);
+
+OrderSchema.set('toJSON', {
+    virtuals: true,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    },
+});
+
+const OrderModel = mongoose.model('Order', OrderSchema);
 
 const Order = {
-    // Retrieves all orders (we will filter this by user in the controller)
-    getAll: () => {
-        return orders;
+    getAll: (filter = {}) => OrderModel.find(filter),
+
+    create: (userId, restaurantId, items, totalPrice) =>
+        new OrderModel({ userId, restaurantId, items, totalPrice }).save(),
+
+    getById: (id) => OrderModel.findById(id).catch(() => null),
+
+    update: (id, patchData) =>
+        OrderModel.findByIdAndUpdate(id, patchData, { new: true }),
+
+    remove: async (id) => {
+        const deleted = await OrderModel.findByIdAndDelete(id);
+        return !!deleted;
     },
-
-    // Creates a new order object and stores it
-    create: (userId, restaurantId, items) => {
-        const newOrder = {
-            id: generateId(),
-            userId: userId, 
-            restaurantId: restaurantId,
-            items: items || [], // Array of objects like { productId: "prod_123", quantity: 2 }
-            status: 'Pending', 
-            createdAt: new Date().toISOString()
-        };
-        orders.push(newOrder);
-        return newOrder;
-    },
-
-    // Finds a specific order by ID 
-    getById: (id) => {
-        return orders.find(order => order.id === id);
-    },
-
-    // Updates mutable order fields (status/items) and returns the updated object.
-    update: (id, patchData) => {
-        const order = orders.find(currentOrder => currentOrder.id === id);
-        if (!order) {
-            return null;
-        }
-
-        // If the status is provided, update the status
-        if (Object.prototype.hasOwnProperty.call(patchData, 'status')) {
-            order.status = patchData.status;
-        }
-
-        // If the items are provided, update the items
-        if (Object.prototype.hasOwnProperty.call(patchData, 'items')) {
-            order.items = patchData.items;
-        }
-
-        return order;
-    },
-
-    // Removes an order by id and returns true only when deletion happened.
-    remove: (id) => {
-        const index = orders.findIndex(order => order.id === id);
-        if (index === -1) {
-            return false;
-        }
-
-        orders.splice(index, 1);
-        return true;
-    }
 };
 
 module.exports = Order;

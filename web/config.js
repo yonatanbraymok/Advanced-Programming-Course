@@ -13,4 +13,5 @@ module.exports = {
     ex2ServerPort: Number(process.env.EX2_SERVER_PORT || 8080),
     jwtSecret,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    mongodbUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/wolt',
 };

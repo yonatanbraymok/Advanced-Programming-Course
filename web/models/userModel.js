@@ -1,57 +1,60 @@
-// In-memory array to store our users
-const users = [];
+const mongoose = require('mongoose');
 
-// A simple manual hash function 
+// A simple manual hash function (same as Ex4 in-memory model).
 const manualHash = (password) => {
     let hash = 0;
     for (let i = 0; i < password.length; i++) {
         const char = password.charCodeAt(i);
         hash = (hash << 5) - hash + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
-    return hash.toString(); 
+    return hash.toString();
 };
 
-// Generate a random ID 
-const generateId = () => {
-    return 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-};
+const UserSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true, trim: true },
+    password: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
+    phone: { type: String, default: '' },
+    address: { type: String, default: '' },
+    location: {
+        x: { type: Number, default: 0 },
+        y: { type: Number, default: 0 },
+    },
+    profileImage: { type: String, default: null },
+    role: { type: String, default: 'customer' },
+});
+
+UserSchema.set('toJSON', {
+    virtuals: true,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    },
+});
+
+const UserModel = mongoose.model('User', UserSchema);
 
 const User = {
-    create: (userData) => {
-        const newUser = {
-            id: generateId(), 
-            username: userData.username, 
-            password: manualHash(userData.password), // Stored as a hash
-            name: userData.name,
-            phone: userData.phone,
-            address: userData.address,
-            location: userData.location || { x: 0, y: 0 },
-            profileImage: userData.profileImage || null,
-            role: userData.role || 'customer'
-        };
-        users.push(newUser);
-        return newUser;
-    },
-    
-    findByUsername: (username) => {
-        return users.find(user => user.username === username);
+    create: async (userData) => {
+        const newUser = new UserModel({
+            ...userData,
+            password: manualHash(userData.password),
+        });
+        return newUser.save();
     },
 
-    findById: (id) => {
-        return users.find(user => user.id === id);
-    },
-    validateLogin: (username, rawPassword) => {
-        const user = users.find(u => u.username === username);
-        
-        // If the user doesn't exist, or the hashes don't match, return null
+    findByUsername: async (username) => UserModel.findOne({ username }),
+
+    findById: async (id) => UserModel.findById(id),
+
+    validateLogin: async (username, rawPassword) => {
+        const user = await UserModel.findOne({ username });
         if (!user || user.password !== manualHash(rawPassword)) {
             return null;
         }
-        
-        return user; // Credentials are valid!
-    }
+        return user;
+    },
 };
-
 
 module.exports = User;

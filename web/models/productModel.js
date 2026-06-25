@@ -1,97 +1,101 @@
-// In-memory volatile storage for products
+const mongoose = require('mongoose');
 const restaurantModel = require('./restaurantModel');
-const products = [];
 
-// Generate a random ID 
-const generateId = () => {
-    return 'prod_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-};
+const ProductSchema = new mongoose.Schema({
+    restaurantId: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true },
+    description: { type: String, default: '' },
+    image: { type: String, default: '' },
+});
 
-// Retrieves all products belonging to a specific restaurant
-const getByRestaurantId = (restaurantId) => {
-    return products.filter(p => p.restaurantId === restaurantId);
-};
+ProductSchema.set('toJSON', {
+    virtuals: true,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    },
+});
 
-// Retrieves all products from volatile memory and hardcoded menus
-const getAll = () => {
-    const allProducts = [...products];
-    const allRestaurants = restaurantModel.getAll();
-    for (const restaurant of allRestaurants) {
-        if (restaurant.menu) {
-            for (const product of restaurant.menu) {
-                // Attach restaurantId dynamically so controller validations pass
-                allProducts.push({ ...product, restaurantId: restaurant.id });
-            }
-        }
+const Product = mongoose.model('Product', ProductSchema);
+
+const toPlainMenuItem = (menuItem, restaurantId) => {
+    if (menuItem && typeof menuItem.toJSON === 'function') {
+        return { ...menuItem.toJSON(), restaurantId };
     }
-    return allProducts;
-};
-
-// Creates a new menu product and stores it in memory
-const create = (restaurantId, name, price, description = '') => {
-    const newProduct = {
-        id: generateId(), // Swapped crypto for our manual generator
-        restaurantId: restaurantId,
-        name: name,
-        price: price,
-        // Keep optional to avoid breaking old requests.
-        description: description
-    };
-    products.push(newProduct);
-    return newProduct;
-};
-
-// Finds a specific product by its unique ID
-const getById = (productId) => {
-    // 1. Check volatile memory first
-    const product = products.find(p => p.id === productId);
-    if (product) return product;
-
-    // 2. Fallback to menu items embedded in restaurant seed data
-    const allRestaurants = restaurantModel.getAll();
-    for (const restaurant of allRestaurants) {
-        if (restaurant.menu) {
-            const found = restaurant.menu.find(p => p.id === productId);
-            if (found) {
-                // Attach restaurantId dynamically so controller validations pass
-                return { ...found, restaurantId: restaurant.id };
-            }
-        }
-    }
-    return undefined;
-};
-
-// Updates an existing product fields directly
-const update = (productId, name, price, description) => {
-    const product = getById(productId);
-    if (!product) return null;
-
-    product.name = name;
-    product.price = price;
-    if (description !== undefined) {
-        product.description = description;
-    } else if (product.description === undefined) {
-        product.description = '';
-    }
-
-    return product;
-};
-
-// Deletes a product from the in-memory storage
-const remove = (productId) => {
-    const index = products.findIndex(p => p.id === productId);
-    if (index === -1) return false;
-
-    products.splice(index, 1);
-    return true;
+    return { ...menuItem, restaurantId };
 };
 
 module.exports = {
-    getByRestaurantId,
-    getAll,
-    create,
-    getById,
-    update,
-    remove,
-    products
+    getByRestaurantId: (restaurantId) => Product.find({ restaurantId }),
+
+    getAll: async () => {
+        const [products, restaurants] = await Promise.all([
+            Product.find(),
+            restaurantModel.getAll(),
+        ]);
+
+        const menuItems = restaurants.flatMap((restaurant) =>
+            (restaurant.menu || []).map((menuItem) =>
+                toPlainMenuItem(menuItem, restaurant.id)
+            )
+        );
+
+        return [...products, ...menuItems];
+    },
+
+    getById: async (productId) => {
+        const product = await Product.findById(productId).catch(() => null);
+        if (product) {
+            return product;
+        }
+
+        const restaurants = await restaurantModel.getAll();
+        for (const restaurant of restaurants) {
+            const found = (restaurant.menu || []).find((menuItem) => menuItem.id === productId);
+            if (found) {
+                return toPlainMenuItem(found, restaurant.id);
+            }
+        }
+
+        return null;
+    },
+
+    create: (restaurantId, name, price, description = '') =>
+        new Product({ restaurantId, name, price, description }).save(),
+
+    update: async (productId, name, price, description) => {
+        const patch = { name, price };
+        if (description !== undefined) {
+            patch.description = description;
+        }
+
+        const updated = await Product.findByIdAndUpdate(productId, patch, { new: true });
+        if (updated) {
+            return updated;
+        }
+
+        const restaurants = await restaurantModel.getAll();
+        for (const restaurant of restaurants) {
+            const menuItem = (restaurant.menu || []).find((item) => item.id === productId);
+            if (menuItem) {
+                menuItem.name = name;
+                menuItem.price = price;
+                if (description !== undefined) {
+                    menuItem.description = description;
+                } else if (menuItem.description === undefined) {
+                    menuItem.description = '';
+                }
+                await restaurant.save();
+                return toPlainMenuItem(menuItem, restaurant.id);
+            }
+        }
+
+        return null;
+    },
+
+    remove: async (productId) => {
+        const deleted = await Product.findByIdAndDelete(productId);
+        return !!deleted;
+    },
 };
