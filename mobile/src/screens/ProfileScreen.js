@@ -94,7 +94,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={[styles.arrow, { color: colors.textSecondary }]}>{'>'}</Text>
         </TouchableOpacity>
 
-        {profile.role === 'restaurant_owner' && (
+        {profile?.role === 'restaurant_owner' && (
           <>
             <View style={styles.divider} />
 
