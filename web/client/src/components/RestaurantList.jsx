@@ -6,13 +6,13 @@ export function RestaurantList() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // States for search inputs and backend global search data tracking
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState({ restaurants: [], products: [] });
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('All');
-  
+
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -107,10 +107,10 @@ export function RestaurantList() {
   return (
     <div style={{ padding: '20px 0' }}>
       {/* Search Input Module Row Frame */}
-      <div style={{ 
-        marginBottom: '24px', 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <div style={{
+        marginBottom: '24px',
+        display: 'flex',
+        flexDirection: 'column',
         gap: '16px',
         backgroundColor: 'var(--bg-card)',
         padding: '20px',
@@ -122,7 +122,7 @@ export function RestaurantList() {
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--text-main)' }}>
             Search Restaurants & Dishes
           </label>
-          <input 
+          <input
             type="text"
             placeholder="Search for restaurants or specific food items..."
             value={searchQuery}
@@ -196,7 +196,7 @@ export function RestaurantList() {
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                   {searchResults.restaurants.map((restaurant) => (
-                    <div 
+                    <div
                       key={restaurant.id || restaurant._id}
                       onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
                       style={{
@@ -211,8 +211,8 @@ export function RestaurantList() {
                       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                     >
-                      <img 
-                        src={restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant'} 
+                      <img
+                        src={restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg'}
                         alt={restaurant.name}
                         style={{ width: '100%', height: '140px', objectFit: 'cover' }}
                       />
@@ -245,7 +245,7 @@ export function RestaurantList() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {searchResults.products.map((product) => (
-                    <div 
+                    <div
                       key={product.id || product._id}
                       onClick={() => {
                         // Navigate safely to the parent restaurant card if reference ID parameter links exist
@@ -290,7 +290,7 @@ export function RestaurantList() {
           <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '10px', color: 'var(--text-main)' }}>
             {selectedCuisine !== 'All' ? `${selectedCuisine} Spots` : 'Popular Restaurants'} ({filteredRestaurants.length})
           </h3>
-          
+
           {filteredRestaurants.length === 0 ? (
             <p style={{ color: 'var(--text-muted)', marginTop: '16px' }}>No restaurants match your selected cuisine filter.</p>
           ) : (
@@ -301,7 +301,7 @@ export function RestaurantList() {
               marginTop: '20px'
             }}>
               {filteredRestaurants.map((restaurant) => (
-                <div 
+                <div
                   key={restaurant.id || restaurant._id}
                   onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
                   style={{
@@ -316,8 +316,8 @@ export function RestaurantList() {
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                  <img 
-                    src={restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant'} 
+                  <img
+                    src={restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg'}
                     alt={restaurant.name}
                     style={{ width: '100%', height: '150px', objectFit: 'cover' }}
                   />

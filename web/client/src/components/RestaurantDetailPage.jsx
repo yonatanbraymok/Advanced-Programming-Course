@@ -109,7 +109,7 @@ export function RestaurantDetailPage() {
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}>
             <img 
-              src={restaurant.image || 'https://via.placeholder.com/800x300?text=Wolt+Menu'} 
+              src={restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg'} 
               alt={restaurant.name} 
               style={{ width: '100%', height: '260px', objectFit: 'cover' }}
             />

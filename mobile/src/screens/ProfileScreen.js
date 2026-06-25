@@ -73,7 +73,7 @@ export default function ProfileScreen({ navigation }) {
       {profile && (
         <View style={styles.profileHeader}>
           <Image 
-            source={{ uri: profile.profileImage || 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wolt_logo.svg/1024px-Wolt_logo.svg.png' }} 
+            source={{ uri: (profile.profileImage && !profile.profileImage.startsWith('data:image/svg')) ? profile.profileImage : 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1' }} 
             style={[styles.avatar, { backgroundColor: '#009de0' }]} 
           />
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}</Text>
@@ -93,6 +93,17 @@ export default function ProfileScreen({ navigation }) {
           <Text style={[styles.rowText, { color: colors.text }]}>Order History</Text>
           <Text style={[styles.arrow, { color: colors.textSecondary }]}>{'>'}</Text>
         </TouchableOpacity>
+
+        {profile.role === 'restaurant_owner' && (
+          <>
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OwnerRestaurants')}>
+              <Text style={[styles.rowText, { color: colors.text }]}>My Restaurants</Text>
+              <Text style={[styles.arrow, { color: colors.textSecondary }]}>{'>'}</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
         <View style={styles.divider} />
 

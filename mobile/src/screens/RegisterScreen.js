@@ -65,15 +65,13 @@ export default function RegisterScreen({ navigation }) {
       name, 
       phone, 
       role,
-      profileImage: profileImage || 'https://via.placeholder.com/150/cccccc/ffffff?text=Avatar',
+      profileImage: profileImage || 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1',
     };
 
-    if (role === 'customer') {
-      userData.location = {
-        x: Number(locX) || 0,
-        y: Number(locY) || 0
-      };
-    }
+    userData.location = {
+      x: Number(locX) || 0,
+      y: Number(locY) || 0
+    };
     
     const result = await register(userData);
     setLoading(false);
@@ -155,11 +153,29 @@ export default function RegisterScreen({ navigation }) {
       <View style={styles.phoneContainer}>
         <PhoneInput
           ref={phoneInput}
-          defaultValue={phone}
+          value={(() => {
+            const digits = phone.replace(/^\+972/, '').replace(/\D/g, '');
+            let f = '';
+            if (digits.length > 0) f += digits.substring(0, 2);
+            if (digits.length > 2) f += ' ' + digits.substring(2, 5);
+            if (digits.length > 5) f += ' ' + digits.substring(5, 9);
+            return f;
+          })()}
           defaultCode="IL"
           layout="first"
-          onChangeFormattedText={(text) => {
-            setPhone(text);
+          onChangeText={(text) => {
+            const raw = text.replace(/\D/g, '');
+            setPhone('+972' + raw);
+          }}
+          textInputProps={{
+            value: (() => {
+              const digits = phone.replace(/^\+972/, '').replace(/\D/g, '');
+              let f = '';
+              if (digits.length > 0) f += digits.substring(0, 2);
+              if (digits.length > 2) f += ' ' + digits.substring(2, 5);
+              if (digits.length > 5) f += ' ' + digits.substring(5, 9);
+              return f;
+            })()
           }}
           containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
           textContainerStyle={[styles.phoneTextContainer, { backgroundColor: colors.surface }]}
@@ -170,9 +186,8 @@ export default function RegisterScreen({ navigation }) {
         />
       </View>
 
-      {role === 'customer' && (
         <>
-          <Text style={[styles.subLabel, { color: colors.textSecondary }]}>Delivery Location Coordinates</Text>
+          <Text style={[styles.subLabel, { color: colors.textSecondary }]}>Location Coordinates</Text>
           <View style={styles.row}>
             <TextInput
               style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
@@ -192,7 +207,6 @@ export default function RegisterScreen({ navigation }) {
             />
           </View>
         </>
-      )}
 
       <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleRegister} disabled={loading}>
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Register</Text>}

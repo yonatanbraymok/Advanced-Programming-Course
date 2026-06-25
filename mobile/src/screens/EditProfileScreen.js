@@ -131,11 +131,29 @@ export default function EditProfileScreen({ route, navigation }) {
         <Text style={[styles.label, { color: colors.textSecondary }]}>Phone Number</Text>
         <View style={styles.phoneContainer}>
           <PhoneInput
-            defaultValue={phone}
+            value={(() => {
+              const digits = phone.replace(/^\+972/, '').replace(/\D/g, '');
+              let f = '';
+              if (digits.length > 0) f += digits.substring(0, 2);
+              if (digits.length > 2) f += ' ' + digits.substring(2, 5);
+              if (digits.length > 5) f += ' ' + digits.substring(5, 9);
+              return f;
+            })()}
             defaultCode="IL"
             layout="first"
-            onChangeFormattedText={(text) => {
-              setPhone(text);
+            onChangeText={(text) => {
+              const raw = text.replace(/\D/g, '');
+              setPhone('+972' + raw);
+            }}
+            textInputProps={{
+              value: (() => {
+                const digits = phone.replace(/^\+972/, '').replace(/\D/g, '');
+                let f = '';
+                if (digits.length > 0) f += digits.substring(0, 2);
+                if (digits.length > 2) f += ' ' + digits.substring(2, 5);
+                if (digits.length > 5) f += ' ' + digits.substring(5, 9);
+                return f;
+              })()
             }}
             containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
             textContainerStyle={{ backgroundColor: colors.surface, borderRadius: 8 }}
@@ -145,25 +163,27 @@ export default function EditProfileScreen({ route, navigation }) {
           />
         </View>
 
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Location Coordinates</Text>
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-            placeholder="Location X"
-            placeholderTextColor={colors.textSecondary}
-            value={locX}
-            onChangeText={setLocX}
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-            placeholder="Location Y"
-            placeholderTextColor={colors.textSecondary}
-            value={locY}
-            onChangeText={setLocY}
-            keyboardType="numeric"
-          />
-        </View>
+          <>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Location Coordinates</Text>
+            <View style={styles.row}>
+              <TextInput
+                style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                placeholder="Location X"
+                placeholderTextColor={colors.textSecondary}
+                value={locX}
+                onChangeText={setLocX}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                placeholder="Location Y"
+                placeholderTextColor={colors.textSecondary}
+                value={locY}
+                onChangeText={setLocY}
+                keyboardType="numeric"
+              />
+            </View>
+          </>
 
         <Text style={[styles.label, { color: colors.textSecondary }]}>New Password (leave blank to keep)</Text>
         <TextInput

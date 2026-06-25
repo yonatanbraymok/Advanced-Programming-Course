@@ -66,7 +66,7 @@ export default function RestaurantScreen({ route, navigation }) {
       </TouchableOpacity>
       
       <Image 
-        source={{ uri: restaurant.image || 'https://via.placeholder.com/600x300?text=Wolt+Menu' }} 
+        source={{ uri: restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg' }} 
         style={styles.heroImage} 
       />
       <View style={[styles.infoCard, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
@@ -112,11 +112,10 @@ export default function RestaurantScreen({ route, navigation }) {
       </View>
       
       <View style={styles.menuItemAction}>
-        {item.image ? (
-          <Image source={{ uri: item.image }} style={styles.menuItemImage} />
-        ) : (
-          <View style={[styles.menuItemPlaceholder, { backgroundColor: colors.background }]} />
-        )}
+        <Image 
+          source={{ uri: item.image || 'https://blogs.biomedcentral.com/on-medicine/wp-content/uploads/sites/6/2019/09/iStock-1131794876.t5d482e40.m800.xtDADj9SvTVFjzuNeGuNUUGY4tm5d6UGU5tkKM0s3iPk-620x342.jpg' }} 
+          style={styles.menuItemImage} 
+        />
         <TouchableOpacity 
           style={[styles.addButton, { backgroundColor: colors.primary }]}
           onPress={() => handleAddToCart(item)}

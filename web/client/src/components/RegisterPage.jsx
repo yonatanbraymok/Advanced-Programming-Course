@@ -1,6 +1,8 @@
 import React, { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 function RegisterPage() {
   // Controlled form state fields
@@ -69,14 +71,12 @@ function RegisterPage() {
       }
     }
 
-    if (role === 'customer') {
-      if (locationX === '' || isNaN(Number(locationX))) {
-        newErrors.locationX = 'Valid X coordinate is required';
-      }
+    if (locationX === '' || isNaN(Number(locationX))) {
+      newErrors.locationX = 'Valid X coordinate is required';
+    }
 
-      if (locationY === '' || isNaN(Number(locationY))) {
-        newErrors.locationY = 'Valid Y coordinate is required';
-      }
+    if (locationY === '' || isNaN(Number(locationY))) {
+      newErrors.locationY = 'Valid Y coordinate is required';
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -106,7 +106,7 @@ function RegisterPage() {
     }
 
     // Fallback to a default safe Wolt-styled blue W avatar if left blank
-    const defaultWoltAvatar = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23009de0%22/><text x=%2250%22 y=%2265%22 font-family=%22Arial, sans-serif%22 font-size=%2245%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>W</text></svg>';
+    const defaultWoltAvatar = 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1';
 
     const payload = {
       username: username.trim(),
@@ -117,12 +117,10 @@ function RegisterPage() {
       role: role
     };
 
-    if (role === 'customer') {
-      payload.location = {
-        x: Number(locationX),
-        y: Number(locationY)
-      };
-    }
+    payload.location = {
+      x: Number(locationX),
+      y: Number(locationY)
+    };
 
     try {
       const response = await fetch('/api/users', {
@@ -319,30 +317,35 @@ function RegisterPage() {
 
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Phone Number</label>
-          <input 
-            type="tel" 
-            placeholder="+972501234567"
+          <PhoneInput 
+            country={'il'}
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={phone => setPhone('+' + phone)}
             disabled={isSuccess}
-            style={{ 
+            masks={{ il: '.. ... ....' }}
+            inputStyle={{ 
               width: '100%', 
-              padding: '10px', 
+              height: '42px',
               borderRadius: '4px', 
               border: errors.phone ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
               backgroundColor: 'var(--bg-app)',
               color: 'var(--text-main)',
-              boxSizing: 'border-box',
-              transition: 'background-color 0.3s ease, color 0.3s ease',
               fontFamily: 'monospace',
               fontSize: '16px',
               letterSpacing: '1px'
+            }}
+            buttonStyle={{
+              backgroundColor: 'var(--bg-app)',
+              borderColor: errors.phone ? '#ff4d4d' : 'var(--border-color)',
+            }}
+            dropdownStyle={{
+              backgroundColor: 'var(--bg-card)',
+              color: '#000'
             }}
           />
           {errors.phone && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.phone}</span>}
         </div>
 
-        {role === 'customer' && (
           <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
             <div style={{ flex: 1 }}>
             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Location (X)</label>
@@ -393,7 +396,6 @@ function RegisterPage() {
             {errors.locationY && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.locationY}</span>}
           </div>
         </div>
-        )}
 
         <div style={{ marginBottom: '16px' }}>
           {/* Dummy hidden input to absorb Chrome's aggressive password manager heuristic */}

@@ -40,13 +40,11 @@ export function ProductCard({ item, restaurantId, onAddToCart }) {
         </span>
       </div>
       
-      {item.image && (
-        <img 
-          src={item.image} 
-          alt={item.name} 
-          style={{ width: '80px', height: '80px', borderRadius: '6px', objectFit: 'cover' }}
-        />
-      )}
+      <img 
+        src={item.image || 'https://blogs.biomedcentral.com/on-medicine/wp-content/uploads/sites/6/2019/09/iStock-1131794876.t5d482e40.m800.xtDADj9SvTVFjzuNeGuNUUGY4tm5d6UGU5tkKM0s3iPk-620x342.jpg'} 
+        alt={item.name} 
+        style={{ width: '80px', height: '80px', borderRadius: '6px', objectFit: 'cover' }}
+      />
       <button 
         onClick={handleAddClick}
         style={{
