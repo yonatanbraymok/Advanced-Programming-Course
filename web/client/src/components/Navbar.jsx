@@ -113,16 +113,40 @@ export function Navbar() {
         {user && (
           <>
             {/* User Profile Display */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '8px' }}>
+            <button 
+              onClick={() => navigate('/edit-profile')}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                marginRight: '8px',
+                padding: '4px 8px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
+                textAlign: 'left',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-app)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              title="Edit Profile"
+            >
               <img 
-                src={user.profileImage || 'https://via.placeholder.com/150'} 
+                src={user.profileImage || 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23009de0%22/><text x=%2250%22 y=%2265%22 font-family=%22Arial, sans-serif%22 font-size=%2245%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>W</text></svg>'} 
                 alt={user.name} 
-                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #009de0', backgroundColor: '#009de0' }}
               />
-              <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '14px' }}>
-                {user.name}
-              </span>
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '14px' }}>
+                  {user.name}
+                </span>
+                <span style={{ color: '#009de0', fontSize: '11px', fontWeight: 'bold' }}>
+                  Edit Profile ✏️
+                </span>
+              </div>
+            </button>
 
             {user.role === 'restaurant_owner' && (
               <button 

@@ -35,7 +35,6 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
-  // Helper function to handle logout
   const logout = () => {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_data');
@@ -43,9 +42,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  // Provide authentication state and helpers to the application tree
+  const updateUser = (newUserData) => {
+    localStorage.setItem('user_data', JSON.stringify(newUserData));
+    setUser(newUserData);
+  };
+
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated: !!token, loading }}>
+    <AuthContext.Provider value={{ token, user, login, logout, updateUser, isAuthenticated: !!token, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,6 +12,7 @@ import { Navbar } from './components/Navbar';
 import { OwnerRestaurantList } from './components/OwnerRestaurantList';
 import { RestaurantEditor } from './components/RestaurantEditor';
 import { CartProvider } from './contexts/CartContext';
+import { EditProfilePage } from './components/EditProfilePage';
 
 function App() {
   return (
@@ -33,6 +34,12 @@ function App() {
               <Route path="/orders" element={
                 <PrivateRoute>
                   <OrdersPage />
+                </PrivateRoute>
+              } />
+
+              <Route path="/edit-profile" element={
+                <PrivateRoute>
+                  <EditProfilePage />
                 </PrivateRoute>
               } />
 

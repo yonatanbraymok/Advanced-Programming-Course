@@ -1,0 +1,8 @@
+feat(mobile): implement dark mode, edit profile, and restaurant details
+
+- Added Dark Mode theme across the entire mobile application via ThemeContext.
+- Updated Register and Edit Profile screens on mobile to achieve full field parity with web (including Role, Password, Confirm Password, and Location).
+- Fixed navigation logic to pop to Home after a successful registration.
+- Created Restaurant Page to view restaurant details, ratings, and its full menu list.
+- Implemented real-time distance sorting and ETA delivery calculations on the Home screen and Restaurant Cards based on user location.
+- Replaced forced login redirects with polite 'Login Required' prompts for unauthenticated browsing.

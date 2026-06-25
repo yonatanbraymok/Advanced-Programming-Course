@@ -6,6 +6,7 @@ function RegisterPage() {
   // Controlled form state fields
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [phone, setPhone] = useState('');
   const [locationX, setLocationX] = useState('');
   const [locationY, setLocationY] = useState('');
   const [password, setPassword] = useState('');
@@ -59,6 +60,15 @@ function RegisterPage() {
       newErrors.displayName = 'Display name is required';
     }
 
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else {
+      const phoneRegex = /^\+?[0-9]{9,15}$/;
+      if (!phoneRegex.test(phone)) {
+        newErrors.phone = 'Please enter a valid phone number (e.g., +972501234567)';
+      }
+    }
+
     if (role === 'customer') {
       if (locationX === '' || isNaN(Number(locationX))) {
         newErrors.locationX = 'Valid X coordinate is required';
@@ -102,6 +112,7 @@ function RegisterPage() {
       username: username.trim(),
       password: password,
       name: displayName.trim(),
+      phone: phone.trim(),
       profileImage: profileImage || defaultWoltAvatar,
       role: role
     };
@@ -304,6 +315,31 @@ function RegisterPage() {
             }}
           />
           {errors.displayName && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.displayName}</span>}
+        </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Phone Number</label>
+          <input 
+            type="tel" 
+            placeholder="+972501234567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            disabled={isSuccess}
+            style={{ 
+              width: '100%', 
+              padding: '10px', 
+              borderRadius: '4px', 
+              border: errors.phone ? '1px solid #ff4d4d' : '1px solid var(--border-color)', 
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.3s ease, color 0.3s ease',
+              fontFamily: 'monospace',
+              fontSize: '16px',
+              letterSpacing: '1px'
+            }}
+          />
+          {errors.phone && <span style={{ color: '#ff4d4d', fontSize: '13px', display: 'block', marginTop: '4px' }}>{errors.phone}</span>}
         </div>
 
         {role === 'customer' && (
