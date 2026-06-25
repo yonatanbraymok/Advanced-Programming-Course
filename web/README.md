@@ -10,7 +10,7 @@ This document describes the **Exercise 3** Node.js + Express MVC layout for cont
 
 - **Node.js** (>= 18)
 - **Express** only (no extra npm dependencies per course rules)
-- In-memory models (data lost on restart)
+- In-memory models (data lost on restart; restaurants reloaded from `data/restaurants.json`)
 - JSON API under `/api/*`
 
 ---
