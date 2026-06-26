@@ -12,6 +12,8 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import RestaurantScreen from '../screens/RestaurantScreen';
 import CartScreen from '../screens/CartScreen';
 import OrdersScreen from '../screens/OrdersScreen';
+import OwnerRestaurantsScreen from '../screens/OwnerRestaurantsScreen';
+import EditRestaurantScreen from '../screens/EditRestaurantScreen';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 
@@ -105,6 +107,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Restaurant" component={RestaurantScreen} />
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="Orders" component={OrdersScreen} />
+        <Stack.Screen name="OwnerRestaurants" component={OwnerRestaurantsScreen} />
+        <Stack.Screen name="EditRestaurant" component={EditRestaurantScreen} />
         
         {/* Auth Screens (Stacked on top when needed) */}
         <Stack.Screen name="Login" component={LoginScreen} />

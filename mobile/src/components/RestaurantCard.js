@@ -2,13 +2,13 @@ import React, { useContext } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemeContext } from '../contexts/ThemeContext';
 
-export default function RestaurantCard({ restaurant, onPress }) {
+export default function RestaurantCard({ restaurant, onPress, children }) {
   const { colors } = useContext(ThemeContext);
 
   return (
     <TouchableOpacity style={[styles.card, { backgroundColor: colors.surface }]} onPress={onPress} activeOpacity={0.9}>
       <Image 
-        source={{ uri: restaurant.image || 'https://via.placeholder.com/300x150?text=Wolt+Restaurant' }} 
+        source={{ uri: restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg' }} 
         style={styles.image} 
       />
       <View style={styles.infoContainer}>
@@ -29,6 +29,7 @@ export default function RestaurantCard({ restaurant, onPress }) {
             </View>
           );
         })()}
+        {children}
       </View>
     </TouchableOpacity>
   );

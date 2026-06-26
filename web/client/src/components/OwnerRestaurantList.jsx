@@ -34,6 +34,23 @@ function OwnerRestaurantList() {
     fetchMyRestaurants();
   }, [token]);
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this restaurant?')) {
+      try {
+        const response = await fetch(`/api/restaurants/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error('Failed to delete');
+        setRestaurants(restaurants.filter(r => r.id !== id && r._id !== id));
+      } catch (err) {
+        alert('Could not delete restaurant');
+      }
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Loading your portfolio...</div>;
   }
@@ -79,16 +96,22 @@ function OwnerRestaurantList() {
               flexDirection: 'column'
             }}>
               <img 
-                src={restaurant.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600'} 
+                src={restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg'} 
                 alt={restaurant.name} 
                 style={{ width: '100%', height: '160px', objectFit: 'cover' }}
               />
               <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <h3 style={{ margin: '0 0 8px 0' }}>{restaurant.name}</h3>
                 <p style={{ color: 'var(--text-muted)', margin: '0 0 16px 0', fontSize: '14px' }}>{restaurant.cuisine}</p>
-                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between' }}>
                   <button 
-                    onClick={() => navigate(`/owner/restaurants/edit/${restaurant.id}`)}
+                    onClick={() => handleDelete(restaurant.id || restaurant._id)}
+                    style={{ padding: '6px 16px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    🗑️ Delete
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/owner/restaurants/edit/${restaurant.id || restaurant._id}`)}
                     style={{ padding: '6px 16px', backgroundColor: 'var(--bg-app)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
                   >
                     Edit ✏️

@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export function EditProfilePage() {
   const { user, token, updateUser } = useContext(AuthContext);
@@ -22,7 +24,7 @@ export function EditProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const defaultWoltAvatar = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23009de0%22/><text x=%2250%22 y=%2265%22 font-family=%22Arial, sans-serif%22 font-size=%2245%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>W</text></svg>';
+  const defaultWoltAvatar = 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1';
 
   useEffect(() => {
     // If not logged in, redirect home
@@ -173,7 +175,7 @@ export function EditProfilePage() {
             
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <img 
-                src={formData.profileImage || defaultWoltAvatar} 
+                src={(formData.profileImage && !formData.profileImage.startsWith('data:image/svg')) ? formData.profileImage : defaultWoltAvatar} 
                 alt="Avatar Preview" 
                 style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #009de0', backgroundColor: '#009de0' }}
               />
@@ -244,14 +246,14 @@ export function EditProfilePage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-secondary)' }}>Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
+              <PhoneInput
+                country={'il'}
                 value={formData.phone}
-                onChange={handleChange}
-                placeholder="+972501234567"
-                style={{
-                  padding: '12px 16px',
+                onChange={phone => setFormData({ ...formData, phone: '+' + phone })}
+                masks={{ il: '.. ... ....' }}
+                inputStyle={{
+                  width: '100%',
+                  height: '46px',
                   borderRadius: '8px',
                   border: '1px solid var(--border-color)',
                   backgroundColor: 'var(--bg-app)',
@@ -259,6 +261,14 @@ export function EditProfilePage() {
                   fontSize: '16px',
                   fontFamily: 'monospace',
                   letterSpacing: '1px'
+                }}
+                buttonStyle={{
+                  backgroundColor: 'var(--bg-app)',
+                  borderColor: 'var(--border-color)',
+                }}
+                dropdownStyle={{
+                  backgroundColor: 'var(--bg-card)',
+                  color: '#000'
                 }}
               />
             </div>
