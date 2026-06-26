@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import PhoneInput from 'react-native-phone-number-input';
 import { AuthContext } from '../contexts/AuthContext';
@@ -90,113 +90,137 @@ export default function EditProfileScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.primary }]}>Edit Profile</Text>
-
-      {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
-
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-        {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        ) : (
-          <View style={[styles.imagePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.imagePlaceholderText, { color: colors.textSecondary }]}>Change Picture</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-
-      <Text style={[styles.label, { color: colors.textSecondary }]}>Username</Text>
-      <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-      />
-
-      <Text style={[styles.label, { color: colors.textSecondary }]}>Full Name</Text>
-      <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-        value={name}
-        onChangeText={setName}
-      />
-
-      <Text style={[styles.label, { color: colors.textSecondary }]}>Phone Number</Text>
-      <View style={styles.phoneContainer}>
-        <PhoneInput
-          defaultValue={phone}
-          defaultCode="IL"
-          layout="first"
-          onChangeFormattedText={(text) => {
-            setPhone(text);
-          }}
-          containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          textContainerStyle={{ backgroundColor: colors.surface, borderRadius: 8 }}
-          codeTextStyle={{ color: colors.text }}
-          textInputStyle={{ color: colors.text }}
-          withDarkTheme={colors.background === '#121212'}
-        />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={[styles.backButtonText, { color: colors.text }]}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: colors.text }]}>Edit Profile</Text>
       </View>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
 
-      <Text style={[styles.label, { color: colors.textSecondary }]}>Location Coordinates</Text>
-      <View style={styles.row}>
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <View style={[styles.imagePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.imagePlaceholderText, { color: colors.textSecondary }]}>Change Picture</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Username</Text>
         <TextInput
-          style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-          placeholder="Location X"
-          placeholderTextColor={colors.textSecondary}
-          value={locX}
-          onChangeText={setLocX}
-          keyboardType="numeric"
+          style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
         />
+
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Full Name</Text>
         <TextInput
-          style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-          placeholder="Location Y"
-          placeholderTextColor={colors.textSecondary}
-          value={locY}
-          onChangeText={setLocY}
-          keyboardType="numeric"
+          style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+          value={name}
+          onChangeText={setName}
         />
-      </View>
 
-      <Text style={[styles.label, { color: colors.textSecondary }]}>New Password (leave blank to keep)</Text>
-      <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholder="Min 8 chars, 1 uppercase, 1 digit"
-        placeholderTextColor={colors.textSecondary}
-      />
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Phone Number</Text>
+        <View style={styles.phoneContainer}>
+          <PhoneInput
+            defaultValue={phone}
+            defaultCode="IL"
+            layout="first"
+            onChangeFormattedText={(text) => {
+              setPhone(text);
+            }}
+            containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            textContainerStyle={{ backgroundColor: colors.surface, borderRadius: 8 }}
+            codeTextStyle={{ color: colors.text }}
+            textInputStyle={{ color: colors.text }}
+            withDarkTheme={colors.background === '#121212'}
+          />
+        </View>
 
-      <Text style={[styles.label, { color: colors.textSecondary }]}>Confirm New Password</Text>
-      <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Location Coordinates</Text>
+        <View style={styles.row}>
+          <TextInput
+            style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+            placeholder="Location X"
+            placeholderTextColor={colors.textSecondary}
+            value={locX}
+            onChangeText={setLocX}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={[styles.input, styles.halfInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+            placeholder="Location Y"
+            placeholderTextColor={colors.textSecondary}
+            value={locY}
+            onChangeText={setLocY}
+            keyboardType="numeric"
+          />
+        </View>
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleSave} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save Changes</Text>}
-      </TouchableOpacity>
-      
-      <TouchableOpacity style={[styles.cancelButton, { borderColor: colors.border }]} onPress={() => navigation.goBack()} disabled={loading}>
-        <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancel</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>New Password (leave blank to keep)</Text>
+        <TextInput
+          style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholder="Min 8 chars, 1 uppercase, 1 digit"
+          placeholderTextColor={colors.textSecondary}
+        />
+
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Confirm New Password</Text>
+        <TextInput
+          style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleSave} disabled={loading}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save Changes</Text>}
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={[styles.cancelButton, { borderColor: colors.border }]} onPress={() => navigation.goBack()} disabled={loading}>
+          <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 20,
-    paddingTop: 50,
+    flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+  },
+  backButton: {
+    backgroundColor: 'rgba(128,128,128,0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 16,
+  },
+  backButtonText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center'
+  },
+  scrollContent: {
+    padding: 20,
   },
   imagePicker: {
     alignSelf: 'center',

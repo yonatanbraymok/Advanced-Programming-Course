@@ -67,7 +67,22 @@ const getUserOrders = async (req, res, next) => {
     try {
         const userId = req.userId;
         const userOrders = await Order.getAll({ userId });
-        res.status(200).json(userOrders);
+        
+        // Populate restaurantName and restaurantImage
+        const populatedOrders = [];
+        for (const order of userOrders) {
+            const restaurant = await Restaurant.getById(order.restaurantId);
+            populatedOrders.push({
+                ...order.toJSON(),
+                restaurantName: restaurant ? restaurant.name : 'Unknown Restaurant',
+                restaurantImage: restaurant ? restaurant.image : null
+            });
+        }
+        
+        // Sort from newest to oldest
+        populatedOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        res.status(200).json(populatedOrders);
     } catch (err) {
         next(err);
     }

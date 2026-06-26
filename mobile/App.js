@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { AuthProvider } from './src/contexts/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
+import { CartProvider } from './src/contexts/CartContext';
 
 export default function App() {
   return (
@@ -10,7 +11,9 @@ export default function App() {
       <StatusBar style="auto" />
       <ThemeProvider>
         <AuthProvider>
-          <AppNavigator />
+          <CartProvider>
+            <AppNavigator />
+          </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </View>

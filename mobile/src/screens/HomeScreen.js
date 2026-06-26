@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
+import { CartContext } from '../contexts/CartContext';
 import RestaurantCard from '../components/RestaurantCard';
 
 // Using 10.0.2.2 which is the special alias to your host loopback interface in the Android Emulator
@@ -13,6 +14,7 @@ const CUISINES = ['All', 'Burgers', 'Asian', 'Italian', 'Other'];
 export default function HomeScreen({ navigation }) {
   const { userToken } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
+  const { cartCount } = useContext(CartContext);
 
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,15 +90,40 @@ export default function HomeScreen({ navigation }) {
 
   const displayData = searchQuery.trim().length > 0 ? searchResults : filteredRestaurants;
 
+  const handleCartPress = () => {
+    if (!userToken) {
+      Alert.alert(
+        "Login Required",
+        "You need to log in to view your cart. Do you want to log in now?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Log In", onPress: () => navigation.navigate('Login') }
+        ]
+      );
+      return;
+    }
+    navigation.navigate('Cart');
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTopRow}>
         <Text style={[styles.title, { color: colors.text }]}>Discovery</Text>
-        {!userToken && (
-          <TouchableOpacity style={[styles.headerLoginBtn, { backgroundColor: colors.primary }]} onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.headerLoginText}>Log In</Text>
+        <View style={styles.headerRightControls}>
+          <TouchableOpacity style={[styles.cartIconContainer, { backgroundColor: colors.surface }]} onPress={handleCartPress}>
+            <Text style={styles.cartIconText}>🛒</Text>
+            {cartCount > 0 && (
+              <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles.cartBadgeText}>{cartCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
-        )}
+          {!userToken && (
+            <TouchableOpacity style={[styles.headerLoginBtn, { backgroundColor: colors.primary }]} onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.headerLoginText}>Log In</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       
       <View style={[styles.searchContainer, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
@@ -212,6 +239,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     marginTop: 10,
+  },
+  headerRightControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cartIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  cartIconText: {
+    fontSize: 20,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   headerLoginBtn: {
     backgroundColor: '#009de0',
