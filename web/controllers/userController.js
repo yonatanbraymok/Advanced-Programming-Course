@@ -74,7 +74,70 @@ const getUserProfile = async (req, res, next) => {
     }
 };
 
+const getCurrentUser = async (req, res, next) => {
+    try {
+        const userId = req.userId;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const { password, ...safeUserProfile } = user.toJSON();
+        res.status(200).json(safeUserProfile);
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateUserProfile = async (req, res, next) => {
+    try {
+        const userId = req.userId;
+        const { username, password, name, phone, address, location, profileImage } = req.body;
+        
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (username) {
+            const trimmedUsername = username.trim();
+            if (trimmedUsername !== user.username) {
+                const existingUser = await User.findByUsername(trimmedUsername);
+                if (existingUser) {
+                    return res.status(409).json({ error: 'Username already exists' });
+                }
+                user.username = trimmedUsername;
+            }
+        }
+
+        if (password) {
+            const { validatePassword } = require('../utils/userValidation');
+            const passError = validatePassword(password);
+            if (passError) {
+                return res.status(400).json({ error: passError });
+            }
+            user.password = User.manualHash(password);
+        }
+
+        if (name) user.name = name.trim();
+        if (phone !== undefined) user.phone = phone;
+        if (address !== undefined) user.address = address;
+        if (location) user.location = location;
+        if (profileImage !== undefined) user.profileImage = profileImage;
+        
+        await user.save();
+        
+        const { password: _pw, ...safeUserProfile } = user.toJSON();
+        res.status(200).json(safeUserProfile);
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     registerUser,
     getUserProfile,
+    getCurrentUser,
+    updateUserProfile,
 };

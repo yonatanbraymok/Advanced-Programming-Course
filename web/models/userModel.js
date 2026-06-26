@@ -57,4 +57,5 @@ const User = {
     },
 };
 
+User.manualHash = manualHash;
 module.exports = User;

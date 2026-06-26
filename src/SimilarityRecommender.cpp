@@ -68,11 +68,11 @@ ProductList SimilarityRecommender::recommend(UserId userId, ProductId productId,
     });
 
     ProductList result;
-    for (const auto& [product, _] : scored) {
+    for (const auto& pair : scored) {
         if (result.size() >= limit) {
             break;
         }
-        result.push_back(product);
+        result.push_back(pair.first);
     }
     return result;
 }
