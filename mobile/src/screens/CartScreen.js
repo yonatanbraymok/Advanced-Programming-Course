@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CartContext } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function CartScreen({ navigation }) {
   const { cartItems, cartTotal, restaurantId, updateQuantity, clearCart } = useContext(CartContext);
@@ -33,34 +32,21 @@ export default function CartScreen({ navigation }) {
 
     setIsOrdering(true);
     try {
-      const itemsPayload = cartItems.map(item => ({
+      const itemsPayload = cartItems.map((item) => ({
         productId: item.product.id || item.product._id,
-        quantity: item.quantity
+        quantity: item.quantity,
       }));
 
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify({
-          restaurantId: restaurantId,
-          items: itemsPayload
-        })
+      await api.createOrder({
+        restaurantId,
+        items: itemsPayload,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert("Success", "Your order has been placed!");
-        clearCart();
-        navigation.navigate('MainTabs', { screen: 'HomeTab' });
-      } else {
-        Alert.alert("Error", data.error || "Failed to place order.");
-      }
+      Alert.alert('Success', 'Your order has been placed!');
+      clearCart();
+      navigation.navigate('MainTabs', { screen: 'HomeTab' });
     } catch (error) {
-      Alert.alert("Error", "Could not connect to the server.");
+      Alert.alert('Error', error.message || 'Could not connect to the server.');
     } finally {
       setIsOrdering(false);
     }
@@ -114,7 +100,7 @@ export default function CartScreen({ navigation }) {
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Your cart is empty.</Text>
           <TouchableOpacity 
             style={[styles.browseBtn, { backgroundColor: colors.primary }]} 
-            onPress={() => navigation.navigate('HomeTab')}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'HomeTab' })}
           >
             <Text style={styles.browseBtnText}>Browse Restaurants</Text>
           </TouchableOpacity>

@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Swi
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function ProfileScreen({ navigation }) {
   const { logout, userToken } = useContext(AuthContext);
@@ -26,15 +25,8 @@ export default function ProfileScreen({ navigation }) {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data);
-      }
+      const data = await api.fetchCurrentUser();
+      setProfile(data);
     } catch (error) {
       console.error('Failed to fetch profile', error);
     } finally {
@@ -75,7 +67,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.profileHeader}>
           <Image 
             source={{ uri: (profile.profileImage && !profile.profileImage.includes('loading.io') && !profile.profileImage.startsWith('data:image/svg')) ? profile.profileImage : DEFAULT_WOLT_AVATAR }} 
-            style={[styles.avatar, { backgroundColor: '#009de0' }]} 
+            style={[styles.avatar, { backgroundColor: colors.primary }]} 
           />
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}</Text>
           <Text style={[styles.username, { color: colors.textSecondary }]}>@{profile.username}</Text>
@@ -88,7 +80,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={[styles.arrow, { color: colors.textSecondary }]}>{'>'}</Text>
         </TouchableOpacity>
         
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Orders')}>
           <Text style={[styles.rowText, { color: colors.text }]}>Order History</Text>
@@ -97,7 +89,7 @@ export default function ProfileScreen({ navigation }) {
 
         {profile?.role === 'restaurant_owner' && (
           <>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OwnerRestaurants')}>
               <Text style={[styles.rowText, { color: colors.text }]}>My Restaurants</Text>
@@ -106,7 +98,7 @@ export default function ProfileScreen({ navigation }) {
           </>
         )}
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         <View style={styles.row}>
           <Text style={[styles.rowText, { color: colors.text }]}>Dark Mode</Text>

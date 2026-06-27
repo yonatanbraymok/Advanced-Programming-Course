@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import PhoneInput from 'react-native-phone-number-input';
 import { AuthContext } from '../contexts/AuthContext';
@@ -53,15 +53,16 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
+      base64: true,
     });
 
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]?.base64) {
+      setProfileImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
     }
   };
 
@@ -91,7 +92,16 @@ export default function RegisterScreen({ navigation }) {
     if (!result.success) {
       setErrorMsg(result.error);
     } else {
-      navigation.popToTop();
+      Alert.alert('Account created', 'Please log in.', [
+        {
+          text: 'OK',
+          onPress: () =>
+            navigation.reset({
+              index: 1,
+              routes: [{ name: 'MainTabs' }, { name: 'Login' }],
+            }),
+        },
+      ]);
     }
   };
 
@@ -104,16 +114,26 @@ export default function RegisterScreen({ navigation }) {
       <Text style={[styles.label, { color: colors.textSecondary }]}>I am registering as a...</Text>
       <View style={styles.roleContainer}>
         <TouchableOpacity 
-          style={[styles.roleButton, role === 'customer' ? styles.roleButtonActive : { borderColor: colors.border, backgroundColor: colors.surface }]} 
+          style={[
+            styles.roleButton,
+            role === 'customer'
+              ? [styles.roleButtonActive, { borderColor: colors.primary, backgroundColor: `${colors.primary}0D` }]
+              : { borderColor: colors.border, backgroundColor: colors.card },
+          ]} 
           onPress={() => setRole('customer')}
         >
-          <Text style={[styles.roleText, role === 'customer' ? styles.roleTextActive : { color: colors.text }]}>👤 Customer</Text>
+          <Text style={[styles.roleText, role === 'customer' ? { color: colors.primary } : { color: colors.text }]}>👤 Customer</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.roleButton, role === 'restaurant_owner' ? styles.roleButtonActive : { borderColor: colors.border, backgroundColor: colors.surface }]} 
+          style={[
+            styles.roleButton,
+            role === 'restaurant_owner'
+              ? [styles.roleButtonActive, { borderColor: colors.primary, backgroundColor: `${colors.primary}0D` }]
+              : { borderColor: colors.border, backgroundColor: colors.card },
+          ]} 
           onPress={() => setRole('restaurant_owner')}
         >
-          <Text style={[styles.roleText, role === 'restaurant_owner' ? styles.roleTextActive : { color: colors.text }]}>🏪 Owner</Text>
+          <Text style={[styles.roleText, role === 'restaurant_owner' ? { color: colors.primary } : { color: colors.text }]}>🏪 Owner</Text>
         </TouchableOpacity>
       </View>
 
@@ -121,14 +141,14 @@ export default function RegisterScreen({ navigation }) {
         {profileImage ? (
           <Image source={{ uri: profileImage }} style={styles.profileImage} />
         ) : (
-          <View style={[styles.imagePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.imagePlaceholder, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.imagePlaceholderText, { color: colors.textSecondary }]}>Choose Profile Picture</Text>
           </View>
         )}
       </TouchableOpacity>
 
       <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: fieldErrors.username ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: fieldErrors.username ? 4 : 15 }]}
+        style={[styles.input, { backgroundColor: colors.card, borderColor: fieldErrors.username ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: fieldErrors.username ? 4 : 15 }]}
         placeholder="Username"
         placeholderTextColor={colors.textSecondary}
         value={username}

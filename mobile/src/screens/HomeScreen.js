@@ -1,16 +1,26 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  SectionList,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { CartContext } from '../contexts/CartContext';
 import RestaurantCard from '../components/RestaurantCard';
-
-// Using 10.0.2.2 which is the special alias to your host loopback interface in the Android Emulator
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 const CUISINES = ['All', 'Burgers', 'Asian', 'Italian', 'Other'];
+const EMPTY_SEARCH_RESULTS = { restaurants: [], products: [] };
 
 export default function HomeScreen({ navigation }) {
   const { userToken } = useContext(AuthContext);
@@ -20,13 +30,14 @@ export default function HomeScreen({ navigation }) {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState(EMPTY_SEARCH_RESULTS);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('All');
 
-  // Fetch initial restaurants on focus
+  const isSearchActive = searchQuery.trim().length > 0;
+
   useFocusEffect(
     useCallback(() => {
       fetchRestaurants();
@@ -36,15 +47,9 @@ export default function HomeScreen({ navigation }) {
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/restaurants`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(userToken && { 'Authorization': `Bearer ${userToken}` })
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch restaurants');
-      const data = await response.json();
+      const data = await api.fetchRestaurants();
       setRestaurants(Array.isArray(data) ? data : data.restaurants || []);
+      setError(null);
     } catch (err) {
       console.error(err);
       setError('Could not connect to the server. Make sure the Node backend is running.');
@@ -53,10 +58,9 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // Debounced Search Effect
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
+    if (!isSearchActive) {
+      setSearchResults(EMPTY_SEARCH_RESULTS);
       setIsSearching(false);
       return;
     }
@@ -64,41 +68,39 @@ export default function HomeScreen({ navigation }) {
     const delayDebounceFn = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/search/${encodeURIComponent(searchQuery.trim())}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(userToken && { 'Authorization': `Bearer ${userToken}` })
-          }
+        const data = await api.searchRestaurants(searchQuery.trim());
+        setSearchResults({
+          restaurants: data.restaurants || [],
+          products: data.products || [],
         });
-        const data = await response.json();
-        if (response.ok) {
-          setSearchResults(data.restaurants || []);
-        }
       } catch (err) {
         console.error('Search error', err);
-        setSearchResults([]);
+        setSearchResults(EMPTY_SEARCH_RESULTS);
       } finally {
         setIsSearching(false);
       }
-    }, 400);
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery]);
+  }, [searchQuery, isSearchActive]);
 
-  const filteredRestaurants = restaurants.filter(r => 
-    selectedCuisine === 'All' || r.cuisine === selectedCuisine
+  const filteredRestaurants = restaurants.filter(
+    (r) => selectedCuisine === 'All' || r.cuisine === selectedCuisine
   );
 
-  const displayData = searchQuery.trim().length > 0 ? searchResults : filteredRestaurants;
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults(EMPTY_SEARCH_RESULTS);
+  };
 
   const handleCartPress = () => {
     if (!userToken) {
       Alert.alert(
-        "Login Required",
-        "You need to log in to view your cart. Do you want to log in now?",
+        'Login Required',
+        'You need to log in to view your cart. Do you want to log in now?',
         [
-          { text: "Cancel", style: "cancel" },
-          { text: "Log In", onPress: () => navigation.navigate('Login') }
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Log In', onPress: () => navigation.navigate('Login') },
         ]
       );
       return;
@@ -106,12 +108,40 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate('Cart');
   };
 
+  const navigateToRestaurant = (restaurantId) => {
+    navigation.navigate('Restaurant', { restaurantId });
+  };
+
+  const renderSearchRow = ({ item, section }) => {
+    const isRestaurant = section.title === 'Restaurants';
+    const restaurantId = isRestaurant
+      ? item.id || item._id
+      : item.restaurantId;
+
+    return (
+      <TouchableOpacity
+        style={[styles.searchRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+        onPress={() => navigateToRestaurant(restaurantId)}
+      >
+        <Text style={[styles.searchRowTitle, { color: colors.text }]}>{item.name}</Text>
+        {item.description ? (
+          <Text style={[styles.searchRowDesc, { color: colors.subtext }]} numberOfLines={2}>
+            {item.description}
+          </Text>
+        ) : null}
+      </TouchableOpacity>
+    );
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTopRow}>
         <Text style={[styles.title, { color: colors.text }]}>Discovery</Text>
         <View style={styles.headerRightControls}>
-          <TouchableOpacity style={[styles.cartIconContainer, { backgroundColor: colors.surface }]} onPress={handleCartPress}>
+          <TouchableOpacity
+            style={[styles.cartIconContainer, { backgroundColor: colors.card }]}
+            onPress={handleCartPress}
+          >
             <Text style={styles.cartIconText}>🛒</Text>
             {cartCount > 0 && (
               <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
@@ -120,24 +150,33 @@ export default function HomeScreen({ navigation }) {
             )}
           </TouchableOpacity>
           {!userToken && (
-            <TouchableOpacity style={[styles.headerLoginBtn, { backgroundColor: colors.primary }]} onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity
+              style={[styles.headerLoginBtn, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('Login')}
+            >
               <Text style={styles.headerLoginText}>Log In</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
-      
-      <View style={[styles.searchContainer, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
+
+      <View style={[styles.searchContainer, { backgroundColor: colors.card, shadowColor: colors.text }]}>
         <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
+          style={[styles.searchInput, { color: colors.text, flex: 1 }]}
           placeholder="Search for restaurants or dishes..."
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={colors.subtext}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+        {isSearching && <ActivityIndicator size="small" color={colors.primary} />}
+        {isSearchActive && (
+          <TouchableOpacity onPress={handleClearSearch} style={styles.clearButton}>
+            <Ionicons name="close-circle" size={22} color={colors.subtext} />
+          </TouchableOpacity>
+        )}
       </View>
 
-      {searchQuery.trim().length === 0 && (
+      {!isSearchActive && (
         <View style={styles.cuisineContainer}>
           <FlatList
             horizontal
@@ -149,15 +188,17 @@ export default function HomeScreen({ navigation }) {
                 style={[
                   styles.cuisinePill,
                   { backgroundColor: colors.border },
-                  selectedCuisine === item && { backgroundColor: colors.primary }
+                  selectedCuisine === item && { backgroundColor: colors.primary },
                 ]}
                 onPress={() => setSelectedCuisine(item)}
               >
-                <Text style={[
-                  styles.cuisineText,
-                  { color: colors.textSecondary },
-                  selectedCuisine === item && styles.cuisineTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.cuisineText,
+                    { color: colors.subtext },
+                    selectedCuisine === item && styles.cuisineTextActive,
+                  ]}
+                >
                   {item}
                 </Text>
               </TouchableOpacity>
@@ -166,7 +207,7 @@ export default function HomeScreen({ navigation }) {
         </View>
       )}
 
-      {searchQuery.trim().length > 0 && (
+      {isSearchActive && (
         <Text style={[styles.resultsText, { color: colors.primary }]}>
           Search results for "{searchQuery}"
         </Text>
@@ -174,11 +215,16 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 
+  const searchSections = [
+    { title: 'Restaurants', data: searchResults.restaurants },
+    { title: 'Menu Items', data: searchResults.products },
+  ].filter((section) => section.data.length > 0);
+
   if (loading) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={{marginTop: 10, color: colors.textSecondary}}>Loading restaurants...</Text>
+        <Text style={{ marginTop: 10, color: colors.subtext }}>Loading restaurants...</Text>
       </View>
     );
   }
@@ -186,8 +232,11 @@ export default function HomeScreen({ navigation }) {
   if (error) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={fetchRestaurants}>
+        <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
+        <TouchableOpacity
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
+          onPress={fetchRestaurants}
+        >
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -196,23 +245,40 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <FlatList
-        data={displayData}
-        keyExtractor={(item) => item.id || item._id}
-        renderItem={({ item }) => (
-          <RestaurantCard 
-            restaurant={item} 
-            onPress={() => {
-              navigation.navigate('Restaurant', { restaurant: item });
-            }} 
-          />
-        )}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No restaurants found.</Text>
-        }
-      />
+      {isSearchActive ? (
+        <SectionList
+          sections={searchSections}
+          keyExtractor={(item, index) => item.id || item._id || `${item.name}-${index}`}
+          renderItem={renderSearchRow}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={[styles.sectionHeader, { color: colors.text }]}>{title}</Text>
+          )}
+          ListHeaderComponent={renderHeader}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            !isSearching ? (
+              <Text style={[styles.emptyText, { color: colors.subtext }]}>No results found.</Text>
+            ) : null
+          }
+          stickySectionHeadersEnabled={false}
+        />
+      ) : (
+        <FlatList
+          data={filteredRestaurants}
+          keyExtractor={(item) => item.id || item._id}
+          renderItem={({ item }) => (
+            <RestaurantCard
+              restaurant={item}
+              onPress={() => navigateToRestaurant(item.id || item._id)}
+            />
+          )}
+          ListHeaderComponent={renderHeader}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <Text style={[styles.emptyText, { color: colors.subtext }]}>No restaurants found.</Text>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -220,7 +286,6 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centered: {
     flex: 1,
@@ -279,7 +344,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   headerLoginBtn: {
-    backgroundColor: '#009de0',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -292,15 +356,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#202125',
   },
   searchContainer: {
-    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -308,7 +371,11 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     fontSize: 16,
-    color: '#202125',
+    paddingVertical: 4,
+  },
+  clearButton: {
+    marginLeft: 8,
+    padding: 4,
   },
   cuisineContainer: {
     marginBottom: 10,
@@ -317,16 +384,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#e0e0e0',
     marginRight: 10,
-  },
-  cuisinePillActive: {
-    backgroundColor: '#009de0',
   },
   cuisineText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#707070',
   },
   cuisineTextActive: {
     color: '#fff',
@@ -334,23 +396,39 @@ const styles = StyleSheet.create({
   resultsText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#009de0',
     marginBottom: 10,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  searchRow: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+  searchRowTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  searchRowDesc: {
+    fontSize: 14,
   },
   emptyText: {
     textAlign: 'center',
-    color: '#999',
     marginTop: 30,
     fontSize: 16,
   },
   errorText: {
-    color: '#ff4d4d',
     textAlign: 'center',
     marginBottom: 16,
     fontSize: 16,
   },
   retryButton: {
-    backgroundColor: '#009de0',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -358,5 +436,5 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#fff',
     fontWeight: 'bold',
-  }
+  },
 });

@@ -5,8 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import RestaurantCard from '../components/RestaurantCard';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function OwnerRestaurantsScreen({ navigation }) {
   const { userToken, userRole } = useContext(AuthContext);
@@ -29,18 +28,12 @@ export default function OwnerRestaurantsScreen({ navigation }) {
   const fetchMyRestaurants = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/restaurants/my`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch your restaurants');
-      const data = await response.json();
+      const data = await api.fetchMyRestaurants();
       setRestaurants(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err) {
       console.error(err);
-      setError('Could not fetch your restaurants.');
+      setError(err.message || 'Could not fetch your restaurants.');
     } finally {
       setLoading(false);
     }
@@ -57,18 +50,12 @@ export default function OwnerRestaurantsScreen({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': `Bearer ${userToken}`
-                }
-              });
-              if (!response.ok) throw new Error('Failed to delete');
+              await api.deleteRestaurant(id);
               fetchMyRestaurants();
             } catch (err) {
-              Alert.alert('Error', 'Could not delete restaurant');
+              Alert.alert('Error', err.message || 'Could not delete restaurant');
             }
-          }
+          },
         }
       ]
     );
