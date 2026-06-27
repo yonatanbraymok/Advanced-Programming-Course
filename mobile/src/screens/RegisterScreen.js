@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import PhoneInput from 'react-native-phone-number-input';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
+import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
 
 export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -76,7 +77,7 @@ export default function RegisterScreen({ navigation }) {
       name, 
       phone, 
       role,
-      profileImage: profileImage || 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1',
+      profileImage: profileImage || DEFAULT_WOLT_AVATAR,
     };
 
     userData.location = {

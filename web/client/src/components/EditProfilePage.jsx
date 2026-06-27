@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -24,7 +25,7 @@ export function EditProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const defaultWoltAvatar = 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1';
+  const defaultWoltAvatar = DEFAULT_WOLT_AVATAR;
 
   useEffect(() => {
     // If not logged in, redirect home
@@ -175,7 +176,8 @@ export function EditProfilePage() {
             
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <img 
-                src={(formData.profileImage && !formData.profileImage.startsWith('data:image/svg')) ? formData.profileImage : defaultWoltAvatar} 
+                src={(formData.profileImage && !formData.profileImage.includes('loading.io') && !formData.profileImage.startsWith('data:image/svg')) ? formData.profileImage : defaultWoltAvatar} 
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultWoltAvatar; }}
                 alt="Avatar Preview" 
                 style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #009de0', backgroundColor: '#009de0' }}
               />

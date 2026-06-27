@@ -1,10 +1,14 @@
 build/
 .git/
 .cursor/
+.gemini/
+mobile/
 **/CMakeFiles/
 **/*.o
 **/*.obj
 **/*.exe
 .vs/
 out/
+node_modules/
 web/node_modules/
+web/client/node_modules/
