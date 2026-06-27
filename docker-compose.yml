@@ -27,6 +27,11 @@ services:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     build:
@@ -44,8 +49,10 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
       - MONGODB_URI=mongodb://mongo:27017/wolt
     depends_on:
-      - server
-      - mongo
+      server:
+        condition: service_started
+      mongo:
+        condition: service_healthy
 
 volumes:
   mongo_data:
