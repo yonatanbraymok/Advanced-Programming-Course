@@ -1,6 +1,7 @@
 import React, { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -106,7 +107,7 @@ function RegisterPage() {
     }
 
     // Fallback to a default safe Wolt-styled blue W avatar if left blank
-    const defaultWoltAvatar = 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1';
+    const defaultWoltAvatar = DEFAULT_WOLT_AVATAR;
 
     const payload = {
       username: username.trim(),

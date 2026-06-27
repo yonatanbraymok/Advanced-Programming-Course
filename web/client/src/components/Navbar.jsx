@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { CartContext } from '../contexts/CartContext';
 import { CartSidebar } from './CartSidebar';
+import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
 
 export function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -134,7 +135,8 @@ export function Navbar() {
               title="Edit Profile"
             >
               <img 
-                src={(user.profileImage && !user.profileImage.startsWith('data:image/svg')) ? user.profileImage : 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1'}
+                src={(user.profileImage && !user.profileImage.includes('loading.io') && !user.profileImage.startsWith('data:image/svg')) ? user.profileImage : DEFAULT_WOLT_AVATAR}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_WOLT_AVATAR; }}
                 alt={user.name} 
                 style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #009de0', backgroundColor: '#009de0' }}
               />
@@ -170,22 +172,24 @@ export function Navbar() {
               </button>
             )}
 
-            <button 
-              type="button"
-              onClick={() => navigate('/orders')}
-              style={{
-                padding: '8px 14px',
-                backgroundColor: 'var(--bg-app)',
-                color: 'var(--text-main)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 'bold'
-              }}
-            >
-              Orders
-            </button>
+            {user.role !== 'restaurant_owner' && (
+              <button 
+                type="button"
+                onClick={() => navigate('/orders')}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: 'var(--bg-app)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold'
+                }}
+              >
+                Orders
+              </button>
+            )}
 
             <button 
               type="button"
@@ -204,54 +208,56 @@ export function Navbar() {
               Logout
             </button>
 
-            <button 
-              type="button"
-              onClick={() => setIsCartOpen(true)}
-              style={{
-                padding: '8px 14px',
-                backgroundColor: '#009de0',
-                color: 'white',
-                border: 'none',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 'bold',
-                position: 'relative'
-              }}
-            >
-              Cart 🛒
-              {cartCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-5px',
-                  right: '-5px',
-                  backgroundColor: '#ff4d4d',
+            {user.role !== 'restaurant_owner' && (
+              <button 
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: '#009de0',
                   color: 'white',
-                  borderRadius: '50%',
-                  padding: '2px 6px',
-                  fontSize: '11px'
-                }}>
-                  {cartCount}
-                </span>
-              )}
+                  border: 'none',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  position: 'relative'
+                }}
+              >
+                Cart 🛒
+                {cartCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-5px',
+                    backgroundColor: '#ff4d4d',
+                    color: 'white',
+                    borderRadius: '50%',
+                    padding: '2px 6px',
+                    fontSize: '11px'
+                  }}>
+                    {cartCount}
+                  </span>
+                )}
 
-              {/* Fading +1 Animation */}
-              {showAddedAnimation && (
-                <span style={{
-                  position: 'absolute',
-                  bottom: '-20px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  color: '#009de0',
-                  fontWeight: '900',
-                  fontSize: '16px',
-                  textShadow: '0px 2px 4px rgba(0,0,0,0.2)',
-                  animation: 'fadeOutDown 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards'
-                }}>
-                  +1
-                </span>
-              )}
-            </button>
+                {/* Fading +1 Animation */}
+                {showAddedAnimation && (
+                  <span style={{
+                    position: 'absolute',
+                    bottom: '-20px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    color: '#009de0',
+                    fontWeight: '900',
+                    fontSize: '16px',
+                    textShadow: '0px 2px 4px rgba(0,0,0,0.2)',
+                    animation: 'fadeOutDown 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards'
+                  }}>
+                    +1
+                  </span>
+                )}
+              </button>
+            )}
 
             <style>
               {`

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Switch } from 'react-native';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
+import { DEFAULT_WOLT_AVATAR } from '../utils/constants';
 
 const API_BASE_URL = 'http://10.0.2.2:3000/api';
 
@@ -73,7 +74,7 @@ export default function ProfileScreen({ navigation }) {
       {profile && (
         <View style={styles.profileHeader}>
           <Image 
-            source={{ uri: (profile.profileImage && !profile.profileImage.startsWith('data:image/svg')) ? profile.profileImage : 'https://file.loading.io/resources/icon/9qk4gp.svg?v=1' }} 
+            source={{ uri: (profile.profileImage && !profile.profileImage.includes('loading.io') && !profile.profileImage.startsWith('data:image/svg')) ? profile.profileImage : DEFAULT_WOLT_AVATAR }} 
             style={[styles.avatar, { backgroundColor: '#009de0' }]} 
           />
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}</Text>

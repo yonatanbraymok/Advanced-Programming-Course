@@ -22,7 +22,6 @@ export function RestaurantList() {
       try {
         const response = await fetch('/api/restaurants', {
           method: 'GET',
-          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` })
@@ -60,7 +59,6 @@ export function RestaurantList() {
       setSearchLoading(true);
       try {
         const response = await fetch(`/api/search/${encodeURIComponent(searchQuery.trim())}`, {
-          method: 'GET',
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

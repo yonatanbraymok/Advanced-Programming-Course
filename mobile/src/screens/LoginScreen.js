@@ -54,7 +54,11 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
       />
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleLogin} disabled={loading}>
+      <TouchableOpacity 
+        style={[styles.button, { backgroundColor: (!username.trim() || !password || loading) ? '#b0c4de' : colors.primary }]} 
+        onPress={handleLogin} 
+        disabled={!username.trim() || !password || loading}
+      >
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Log In</Text>}
       </TouchableOpacity>
 
