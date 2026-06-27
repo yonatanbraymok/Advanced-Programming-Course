@@ -3,6 +3,7 @@ import { View, ActivityIndicator, Alert } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -21,38 +22,80 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const MainTabs = () => {
-  const { userToken } = useContext(AuthContext);
+  const { userToken, userRole } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
+
+  if (userRole === 'restaurant_owner') {
+    return (
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: '#009DE0',
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+          },
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            if (route.name === 'OwnerRestaurantsTab') iconName = focused ? 'restaurant' : 'restaurant-outline';
+            else if (route.name === 'AddRestaurantTab') iconName = focused ? 'add-circle' : 'add-circle-outline';
+            else if (route.name === 'ProfileTab') iconName = focused ? 'person' : 'person-outline';
+            return <Ionicons name={iconName} size={size} color={color} />;
+          }
+        })}
+      >
+        <Tab.Screen name="OwnerRestaurantsTab" component={OwnerRestaurantsScreen} options={{ title: 'My Restaurants' }} />
+        <Tab.Screen name="AddRestaurantTab" component={EditRestaurantScreen} options={{ title: 'Add Restaurant' }} />
+        <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
+      </Tab.Navigator>
+    );
+  }
 
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: '#009DE0',
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+        },
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === 'HomeTab') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'OrdersTab') iconName = focused ? 'receipt' : 'receipt-outline';
+          else if (route.name === 'ProfileTab') iconName = focused ? 'person' : 'person-outline';
+          return <Ionicons name={iconName} size={size} color={color} />;
         }
-      }}
+      })}
     >
+      <Tab.Screen name="HomeTab" component={HomeScreen} options={{ title: 'Home' }} />
       <Tab.Screen 
-        name="HomeTab" 
-        component={HomeScreen} 
-        options={{ 
-          title: 'Home',
-          tabBarIconStyle: { display: 'none' }, 
-          tabBarLabelPosition: 'beside-icon' 
-        }}
+        name="OrdersTab" 
+        component={OrdersScreen} 
+        options={{ title: 'Orders' }} 
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            if (!userToken) {
+              e.preventDefault();
+              Alert.alert(
+                "Login Required",
+                "You need to log in to view your orders. Do you want to log in now?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Log In", onPress: () => navigation.navigate('Login') }
+                ]
+              );
+            }
+          },
+        })}
       />
       <Tab.Screen 
         name="ProfileTab" 
         component={ProfileScreen} 
-        options={{ 
-          title: 'Profile',
-          tabBarIconStyle: { display: 'none' }, 
-          tabBarLabelPosition: 'beside-icon' 
-        }}
+        options={{ title: 'Profile' }} 
         listeners={({ navigation }) => ({
           tabPress: (e) => {
             if (!userToken) {

@@ -9,7 +9,7 @@ import RestaurantCard from '../components/RestaurantCard';
 const API_BASE_URL = 'http://10.0.2.2:3000/api';
 
 export default function OwnerRestaurantsScreen({ navigation }) {
-  const { userToken } = useContext(AuthContext);
+  const { userToken, userRole } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
 
   const [restaurants, setRestaurants] = useState([]);
@@ -18,8 +18,12 @@ export default function OwnerRestaurantsScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      if (userRole !== 'restaurant_owner') {
+        navigation.navigate('HomeTab');
+        return;
+      }
       fetchMyRestaurants();
-    }, [userToken])
+    }, [userToken, userRole])
   );
 
   const fetchMyRestaurants = async () => {

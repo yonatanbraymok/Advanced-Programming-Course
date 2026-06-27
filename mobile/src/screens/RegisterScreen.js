@@ -18,10 +18,38 @@ export default function RegisterScreen({ navigation }) {
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const phoneInput = useRef(null);
   const { register } = useContext(AuthContext);
   const { colors, isDarkMode } = useContext(ThemeContext);
+
+  const validateForm = () => {
+    const errors = {};
+    if (!username.trim()) errors.username = 'Username is required.';
+    if (!name.trim()) errors.name = 'Full name is required.';
+    if (!phone || phone === '+972') {
+      errors.phone = 'Phone number is required.';
+    } else if (!phoneInput.current?.isValidNumber(phone)) {
+      errors.phone = 'Please enter a valid phone number.';
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!password) {
+      errors.password = 'Password is required.';
+    } else if (!passwordRegex.test(password)) {
+      errors.password = 'Must be at least 8 chars with uppercase, lowercase & digit.';
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password.';
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match.';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -38,24 +66,7 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = async () => {
     setErrorMsg('');
-    
-    if (!username || !password || !confirmPassword || !name || !phone) {
-      setErrorMsg('All fields are required.');
-      return;
-    }
-    if (password.length < 8) {
-      setErrorMsg('Password must be at least 8 characters long.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
-      return;
-    }
-    const checkValid = phoneInput.current?.isValidNumber(phone);
-    if (!checkValid) {
-      setErrorMsg('Please enter a valid phone number.');
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     
@@ -116,41 +127,49 @@ export default function RegisterScreen({ navigation }) {
       </TouchableOpacity>
 
       <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: fieldErrors.username ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: fieldErrors.username ? 4 : 15 }]}
         placeholder="Username"
         placeholderTextColor={colors.textSecondary}
         value={username}
-        onChangeText={setUsername}
+        onChangeText={(t) => { setUsername(t); if (fieldErrors.username) setFieldErrors({...fieldErrors, username: null}); }}
         autoCapitalize="none"
       />
+      {fieldErrors.username ? <Text style={styles.inlineError}>{fieldErrors.username}</Text> : null}
 
       <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-        placeholder="Password (min 8 chars)"
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: fieldErrors.password ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: 4 }]}
+        placeholder="Password"
         placeholderTextColor={colors.textSecondary}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(t) => { setPassword(t); if (fieldErrors.password) setFieldErrors({...fieldErrors, password: null}); }}
         secureTextEntry
       />
+      {fieldErrors.password ? (
+        <Text style={styles.inlineError}>{fieldErrors.password}</Text>
+      ) : (
+        <Text style={styles.hintText}>Min 8 chars, 1 uppercase, 1 lowercase & 1 digit</Text>
+      )}
 
       <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: fieldErrors.confirmPassword ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: fieldErrors.confirmPassword ? 4 : 15 }]}
         placeholder="Confirm Password"
         placeholderTextColor={colors.textSecondary}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(t) => { setConfirmPassword(t); if (fieldErrors.confirmPassword) setFieldErrors({...fieldErrors, confirmPassword: null}); }}
         secureTextEntry
       />
+      {fieldErrors.confirmPassword ? <Text style={styles.inlineError}>{fieldErrors.confirmPassword}</Text> : null}
 
       <TextInput
-        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: fieldErrors.name ? '#ff4d4d' : colors.border, color: colors.text, marginBottom: fieldErrors.name ? 4 : 15 }]}
         placeholder="Full Name"
         placeholderTextColor={colors.textSecondary}
         value={name}
-        onChangeText={setName}
+        onChangeText={(t) => { setName(t); if (fieldErrors.name) setFieldErrors({...fieldErrors, name: null}); }}
       />
+      {fieldErrors.name ? <Text style={styles.inlineError}>{fieldErrors.name}</Text> : null}
 
-      <View style={styles.phoneContainer}>
+      <View style={[styles.phoneContainer, { marginBottom: fieldErrors.phone ? 4 : 20 }]}>
         <PhoneInput
           ref={phoneInput}
           value={(() => {
@@ -166,6 +185,7 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={(text) => {
             const raw = text.replace(/\D/g, '');
             setPhone('+972' + raw);
+            if (fieldErrors.phone) setFieldErrors({...fieldErrors, phone: null});
           }}
           textInputProps={{
             value: (() => {
@@ -177,7 +197,7 @@ export default function RegisterScreen({ navigation }) {
               return f;
             })()
           }}
-          containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          containerStyle={[styles.phoneInputContainer, { backgroundColor: colors.surface, borderColor: fieldErrors.phone ? '#ff4d4d' : colors.border }]}
           textContainerStyle={[styles.phoneTextContainer, { backgroundColor: colors.surface }]}
           textInputStyle={{ color: colors.text }}
           codeTextStyle={{ color: colors.text }}
@@ -185,6 +205,7 @@ export default function RegisterScreen({ navigation }) {
           withShadow={false}
         />
       </View>
+      {fieldErrors.phone ? <Text style={[styles.inlineError, { marginBottom: 15 }]}>{fieldErrors.phone}</Text> : null}
 
         <>
           <Text style={[styles.subLabel, { color: colors.textSecondary }]}>Location Coordinates</Text>
@@ -208,7 +229,11 @@ export default function RegisterScreen({ navigation }) {
           </View>
         </>
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleRegister} disabled={loading}>
+      <TouchableOpacity 
+        style={[styles.button, { backgroundColor: (loading || Object.values(fieldErrors).some(err => err != null)) ? '#b0c4de' : colors.primary }]} 
+        onPress={handleRegister} 
+        disabled={loading || Object.values(fieldErrors).some(err => err != null)}
+      >
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Register</Text>}
       </TouchableOpacity>
 
@@ -346,6 +371,19 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
     fontWeight: 'bold'
+  },
+  inlineError: {
+    color: '#ff4d4d',
+    fontSize: 13,
+    marginBottom: 12,
+    marginLeft: 4,
+    fontWeight: '600'
+  },
+  hintText: {
+    color: '#888',
+    fontSize: 12,
+    marginBottom: 15,
+    marginLeft: 4
   },
   linkContainer: {
     marginTop: 20,

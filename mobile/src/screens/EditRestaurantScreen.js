@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -8,11 +8,17 @@ import { ThemeContext } from '../contexts/ThemeContext';
 const API_BASE_URL = 'http://10.0.2.2:3000/api';
 
 export default function EditRestaurantScreen({ route, navigation }) {
-  const restaurant = route.params?.restaurant;
+  const restaurant = route?.params?.restaurant;
   const isEditing = !!restaurant;
 
-  const { userToken } = useContext(AuthContext);
+  const { userToken, userRole } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (userRole !== 'restaurant_owner') {
+      navigation.navigate('HomeTab');
+    }
+  }, [userRole, navigation]);
 
   const [name, setName] = useState(restaurant?.name || '');
   const [description, setDescription] = useState(restaurant?.description || '');
