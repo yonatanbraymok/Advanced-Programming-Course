@@ -3,14 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Activi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import PhoneInput from 'react-native-phone-number-input';
-import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function EditProfileScreen({ route, navigation }) {
   const { profile } = route.params;
-  const { userToken } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
 
   const [username, setUsername] = useState(profile?.username || '');
@@ -68,23 +65,10 @@ export default function EditProfileScreen({ route, navigation }) {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify(userData)
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        navigation.goBack();
-      } else {
-        setErrorMsg(data.error || 'Failed to update profile');
-      }
+      await api.updateProfile(userData);
+      navigation.goBack();
     } catch (error) {
-      setErrorMsg('Network error connecting to server.');
+      setErrorMsg(error.message || 'Network error connecting to server.');
     } finally {
       setLoading(false);
     }

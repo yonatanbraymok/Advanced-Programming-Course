@@ -1,30 +1,72 @@
-import React, { useContext } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
+import ProductCard from '../components/ProductCard';
+import * as api from '../services/api';
+
+const DEFAULT_RESTAURANT_IMAGE =
+  'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg';
 
 export default function RestaurantScreen({ route, navigation }) {
-  const { restaurant } = route.params;
+  const { restaurantId } = route.params;
   const { colors } = useContext(ThemeContext);
   const { userToken } = useContext(AuthContext);
   const { addToCart, cartCount } = useContext(CartContext);
 
+  const [restaurant, setRestaurant] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadRestaurantData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [restaurantData, productsData] = await Promise.all([
+        api.fetchRestaurantById(restaurantId),
+        api.fetchProducts(restaurantId),
+      ]);
+      setRestaurant(restaurantData);
+      setProducts(Array.isArray(productsData) ? productsData : []);
+    } catch (err) {
+      console.error(err);
+      setError('Could not load restaurant details.');
+    } finally {
+      setLoading(false);
+    }
+  }, [restaurantId]);
+
+  useEffect(() => {
+    loadRestaurantData();
+  }, [loadRestaurantData]);
+
   const handleAddToCart = (item) => {
     if (!userToken) {
       Alert.alert(
-        "Login Required",
-        "You need to log in to add items to your cart. Do you want to log in now?",
+        'Login Required',
+        'You need to log in to add items to your cart. Do you want to log in now?',
         [
-          { text: "Cancel", style: "cancel" },
-          { text: "Log In", onPress: () => navigation.navigate('Login') }
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Log In', onPress: () => navigation.navigate('Login') },
         ]
       );
       return;
     }
-    
-    const addedDirectly = addToCart(restaurant.id || restaurant._id, item, 1);
+
+    const restId = restaurant?.id || restaurant?._id || restaurantId;
+    const addedDirectly = addToCart(restId, item, 1);
     if (addedDirectly) {
       Alert.alert('Added to Cart', `${item.name} has been added to your cart.`);
     }
@@ -33,11 +75,11 @@ export default function RestaurantScreen({ route, navigation }) {
   const handleCartPress = () => {
     if (!userToken) {
       Alert.alert(
-        "Login Required",
-        "You need to log in to view your cart. Do you want to log in now?",
+        'Login Required',
+        'You need to log in to view your cart. Do you want to log in now?',
         [
-          { text: "Cancel", style: "cancel" },
-          { text: "Log In", onPress: () => navigation.navigate('Login') }
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Log In', onPress: () => navigation.navigate('Login') },
         ]
       );
       return;
@@ -45,98 +87,100 @@ export default function RestaurantScreen({ route, navigation }) {
     navigation.navigate('Cart');
   };
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <TouchableOpacity 
-        style={styles.backButton} 
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={[styles.backButtonText, { color: '#fff' }]}>← Back</Text>
-      </TouchableOpacity>
+  const renderHeader = () => {
+    if (!restaurant) {
+      return null;
+    }
 
-      <TouchableOpacity 
-        style={styles.cartButton} 
-        onPress={handleCartPress}
-      >
-        <Text style={styles.cartButtonIcon}>🛒</Text>
-        {cartCount > 0 && (
-          <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
-            <Text style={styles.cartBadgeText}>{cartCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-      
-      <Image 
-        source={{ uri: restaurant.image || 'https://offloadmedia.feverup.com/secretphiladelphia.co/wp-content/uploads/2023/09/17082921/Untitled-design-625-1024x683.jpg' }} 
-        style={styles.heroImage} 
-      />
-      <View style={[styles.infoCard, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
-        <Text style={[styles.restaurantName, { color: colors.text }]}>{restaurant.name}</Text>
-        <Text style={[styles.restaurantCuisine, { color: colors.textSecondary }]}>
-          {restaurant.cuisine || 'International'}
-        </Text>
-        <View style={styles.ratingBadge}>
-          <Text style={styles.ratingText}>⭐️ {restaurant.rating || 'N/A'}</Text>
-        </View>
+    return (
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
 
-        {restaurant.distance !== undefined && (() => {
-          const baseTime = 15 + Math.round(restaurant.distance * 5);
-          return (
-            <View style={styles.badgesRow}>
-              <View style={[styles.distanceBadge, { backgroundColor: colors.background }]}>
-                <Text style={[styles.distanceText, { color: colors.primary }]}>📍 {restaurant.distance.toFixed(1)} km away</Text>
-              </View>
-              <View style={[styles.timeBadge, { backgroundColor: colors.primary }]}>
-                <Text style={styles.timeText}>🛵 {Math.max(0, baseTime - 5)}-{baseTime + 5} mins</Text>
-              </View>
+        <TouchableOpacity style={styles.cartButton} onPress={handleCartPress}>
+          <Text style={styles.cartButtonIcon}>🛒</Text>
+          {cartCount > 0 && (
+            <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
+              <Text style={styles.cartBadgeText}>{cartCount}</Text>
             </View>
-          );
-        })()}
+          )}
+        </TouchableOpacity>
 
-        <Text style={[styles.restaurantDesc, { color: colors.textSecondary }]}>
-          {restaurant.description || 'No description available for this restaurant.'}
-        </Text>
-      </View>
-    </View>
-  );
-
-  const renderMenuItem = ({ item }) => (
-    <View style={[styles.menuItemCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={styles.menuItemInfo}>
-        <Text style={[styles.menuItemName, { color: colors.text }]}>{item.name}</Text>
-        <Text style={[styles.menuItemDesc, { color: colors.textSecondary }]} numberOfLines={2}>
-          {item.description}
-        </Text>
-        <Text style={[styles.menuItemPrice, { color: colors.text }]}>
-          ₪{Number(item.price).toFixed(2)}
-        </Text>
-      </View>
-      
-      <View style={styles.menuItemAction}>
-        <Image 
-          source={{ uri: item.image || 'https://blogs.biomedcentral.com/on-medicine/wp-content/uploads/sites/6/2019/09/iStock-1131794876.t5d482e40.m800.xtDADj9SvTVFjzuNeGuNUUGY4tm5d6UGU5tkKM0s3iPk-620x342.jpg' }} 
-          style={styles.menuItemImage} 
+        <Image
+          source={{ uri: restaurant.image || DEFAULT_RESTAURANT_IMAGE }}
+          style={styles.heroImage}
         />
-        <TouchableOpacity 
-          style={[styles.addButton, { backgroundColor: colors.primary }]}
-          onPress={() => handleAddToCart(item)}
+        <View style={[styles.infoCard, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+          <Text style={[styles.restaurantName, { color: colors.text }]}>{restaurant.name}</Text>
+          <Text style={[styles.restaurantCuisine, { color: colors.subtext }]}>
+            {restaurant.cuisine || 'International'}
+          </Text>
+          <View style={styles.ratingBadge}>
+            <Text style={styles.ratingText}>⭐️ {restaurant.rating || 'N/A'}</Text>
+          </View>
+
+          {restaurant.distance !== undefined && (() => {
+            const baseTime = 15 + Math.round(restaurant.distance * 5);
+            return (
+              <View style={styles.badgesRow}>
+                <View style={[styles.distanceBadge, { backgroundColor: colors.background }]}>
+                  <Text style={[styles.distanceText, { color: colors.primary }]}>
+                    📍 {restaurant.distance.toFixed(1)} km away
+                  </Text>
+                </View>
+                <View style={[styles.timeBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.timeText}>
+                    🛵 {Math.max(0, baseTime - 5)}-{baseTime + 5} mins
+                  </Text>
+                </View>
+              </View>
+            );
+          })()}
+
+          <Text style={[styles.restaurantDesc, { color: colors.subtext }]}>
+            {restaurant.description || 'No description available for this restaurant.'}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 10, color: colors.subtext }}>Loading menu...</Text>
+      </View>
+    );
+  }
+
+  if (error || !restaurant) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.text }]}>{error || 'Restaurant not found.'}</Text>
+        <TouchableOpacity
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
+          onPress={loadRestaurantData}
         >
-          <Text style={styles.addButtonText}>Add</Text>
+          <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  );
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
-        data={restaurant.menu || []}
-        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
-        renderItem={renderMenuItem}
+        data={products}
+        keyExtractor={(item, index) => item.id || item._id || `product-${index}`}
+        renderItem={({ item }) => (
+          <ProductCard product={item} onAdd={handleAddToCart} />
+        )}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+          <Text style={[styles.emptyText, { color: colors.subtext }]}>
             No menu items available.
           </Text>
         }
@@ -148,6 +192,12 @@ export default function RestaurantScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   listContent: {
     paddingBottom: 40,
@@ -204,7 +254,7 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
   },
   cartBadgeText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -248,19 +298,16 @@ const styles = StyleSheet.create({
   },
   distanceBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#e6f7ff',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 12,
   },
   distanceText: {
-    color: '#009de0',
     fontSize: 12,
     fontWeight: 'bold',
   },
   timeBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#009de0',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 12,
@@ -274,64 +321,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  menuItemCard: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 12,
-    overflow: 'hidden',
-  },
-  menuItemInfo: {
-    flex: 1,
-    paddingRight: 12,
-    justifyContent: 'space-between',
-  },
-  menuItemName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  menuItemDesc: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  menuItemPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  menuItemAction: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  menuItemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  menuItemPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  addButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    width: 80,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
   emptyText: {
     textAlign: 'center',
     marginTop: 30,
     fontSize: 16,
-  }
+  },
+  errorText: {
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });

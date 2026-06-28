@@ -26,7 +26,11 @@ export default function LoginScreen({ navigation }) {
     if (!result.success) {
       setErrorMsg(result.error);
     } else {
-      navigation.goBack();
+      // Reset stack so goBack() cannot land on Register (or other auth screens) below Login.
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainTabs' }],
+      });
     }
   };
 

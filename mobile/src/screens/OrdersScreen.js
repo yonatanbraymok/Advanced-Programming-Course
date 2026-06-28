@@ -6,8 +6,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import OrderCard from '../components/OrderCard';
 import OrderDetailModal from '../components/OrderDetailModal';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function OrdersScreen({ navigation }) {
   const { userToken } = useContext(AuthContext);
@@ -35,21 +34,12 @@ export default function OrdersScreen({ navigation }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      const data = await response.json();
-      
-      // Sort orders by date descending (newest first)
+      const data = await api.fetchOrders();
       const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setOrders(sortedData);
     } catch (err) {
       console.error(err);
-      setError('Could not fetch your orders.');
+      setError(err.message || 'Could not fetch your orders.');
     } finally {
       setLoading(false);
     }

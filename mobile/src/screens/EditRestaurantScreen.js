@@ -4,14 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
-
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
+import * as api from '../services/api';
 
 export default function EditRestaurantScreen({ route, navigation }) {
   const restaurant = route?.params?.restaurant;
   const isEditing = !!restaurant;
 
-  const { userToken, userRole } = useContext(AuthContext);
+  const { userRole } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
 
   useEffect(() => {
@@ -107,26 +106,14 @@ export default function EditRestaurantScreen({ route, navigation }) {
     };
     
     try {
-      const url = isEditing ? `${API_BASE_URL}/restaurants/${restaurant.id || restaurant._id}` : `${API_BASE_URL}/restaurants`;
-      const method = isEditing ? 'PATCH' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        navigation.goBack();
+      if (isEditing) {
+        await api.updateRestaurant(restaurant.id || restaurant._id, payload);
       } else {
-        const data = await response.json();
-        setErrorMsg(data.error || 'Failed to save restaurant');
+        await api.createRestaurant(payload);
       }
+      navigation.goBack();
     } catch (error) {
-      setErrorMsg('Network error connecting to server.');
+      setErrorMsg(error.message || 'Network error connecting to server.');
     } finally {
       setLoading(false);
     }

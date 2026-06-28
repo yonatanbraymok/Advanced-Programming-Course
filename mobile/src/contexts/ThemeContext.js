@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { getColors } from '../theme';
 
 export const ThemeContext = createContext();
 
@@ -22,27 +23,20 @@ export const ThemeProvider = ({ children }) => {
     await SecureStore.setItemAsync('isDarkMode', String(newTheme));
   };
 
-  const theme = {
-    isDarkMode,
-    toggleTheme,
-    colors: isDarkMode 
-      ? {
-          background: '#121212',
-          surface: '#1e1e1e',
-          text: '#ffffff',
-          textSecondary: '#aaaaaa',
-          primary: '#009de0',
-          border: '#333333',
-        }
-      : {
-          background: '#f5f5f5',
-          surface: '#ffffff',
-          text: '#202125',
-          textSecondary: '#707070',
-          primary: '#009de0',
-          border: '#e0e0e0',
-        }
-  };
+  const theme = useMemo(() => {
+    const palette = getColors(isDarkMode);
+    const colors = {
+      ...palette,
+      surface: palette.card,
+      textSecondary: palette.subtext,
+    };
+
+    return {
+      isDarkMode,
+      toggleTheme,
+      colors,
+    };
+  }, [isDarkMode]);
 
   return (
     <ThemeContext.Provider value={theme}>
