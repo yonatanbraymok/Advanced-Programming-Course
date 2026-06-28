@@ -1,4 +1,4 @@
-# Advanced Programming Course — Exercise 4
+# Advanced Programming Course — Exercise 5
 
 ---
 ## Notes for TA
@@ -6,11 +6,14 @@
 Example: Task 1 code will be presented in a branch named "TASK-1-DONE".
 ---
 
-This repository contains a **Wolt-style food delivery Full Stack Application** (Exercise 4) built with a **React Frontend (Vite)**, a **Node.js + Express (MVC) REST API**, integrated with the **Exercise 2 C++ TCP recommender server**.
+This repository contains a **Wolt-style food delivery Full Stack Application** (Exercise 5) built with a **React Web Frontend (Vite)**, a **React Native Mobile App (Expo)**, a **Node.js + Express (MVC) REST API** backed by **MongoDB**, integrated with the **Exercise 2 C++ TCP recommender server**.
 
-- **Frontend (Ex4):** React UI built with Vite under `web/client`.
-- **Web API (Ex3):** JSON REST under `/api/*`, in-memory data.
+- **Web Frontend (Ex4):** React UI built with Vite under `web/client`.
+- **Mobile App (Ex5):** React Native (Expo) under `mobile/`.
+- **Web API (Ex3/Ex5):** JSON REST under `/api/*`, persistent MongoDB storage via Mongoose.
 - **Recommender (Ex2):** Line-based TCP protocol on port `8080`, persisted in `data/users_products.txt`.
+
+For step-by-step setup with screenshots, see the [`wiki/`](wiki/) folder.
 
 ---
 
@@ -18,13 +21,15 @@ This repository contains a **Wolt-style food delivery Full Stack Application** (
 
 | Component | Location | Role |
 |-----------|----------|------|
-| Web server | `web/` | Users, tokens, restaurants, products, orders, search |
+| Web server | `web/` | Users, tokens, restaurants, products, orders, search (MongoDB via Mongoose) |
+| Mobile app | `mobile/` | Expo React Native client (same REST API) |
+| MongoDB | Docker `mongo` service / local install | Persistent storage for users, restaurants, products, orders |
 | Ex2 server | `src/`, `build/app` | Product-view / recommendation over TCP |
 | Ex2 TCP client | `web/services/ex2TcpClient.js` | Web calls Ex2 when a product is viewed |
 | Tests (C++) | `tests/` | GTest suite via `tests_runner` |
-| Docker | `docker-compose.yml` | Separate containers for `server`, `web`, `tests`, `client` |
+| Docker | `docker-compose.yml` | Containers for `server`, `web`, `mongo`, `tests`, `client` |
 
-**Implemented API (Ex3):**
+**Implemented API:**
 
 - `POST/GET` `/api/users`, `POST` `/api/tokens`
 - Restaurants CRUD + nested products CRUD
@@ -37,11 +42,11 @@ This repository contains a **Wolt-style food delivery Full Stack Application** (
 
 ## Architecture
 
-### Exercise 4 — full stack
+### Exercise 5 — full stack
 
 ![Exercise 3 architecture](docs/architecture-ex3.svg)
 
-HTTP clients (React Frontend) talk to the Express app via `/api/*`. On **product view**, the web server opens a TCP client connection to the C++ server (fire-and-forget; API still returns JSON immediately).
+HTTP clients (React Web + React Native) talk to the Express app via `/api/*`. Data is stored in MongoDB. On **product view**, the web server opens a TCP client connection to the C++ server (fire-and-forget; API still returns JSON immediately).
 
 ### Exercise 2 — C++ recommender (detail)
 
@@ -64,10 +69,17 @@ cp .env.example .env
 | `PORT` | `3000` | Web server listen port |
 | `EX2_SERVER_HOST` | `127.0.0.1` | Ex2 TCP host |
 | `EX2_SERVER_PORT` | `8080` | Ex2 TCP port |
+| `JWT_SECRET` | *(required)* | JWT signing key for login and protected routes |
+| `JWT_EXPIRES_IN` | `24h` | JWT token lifetime |
+| `MONGODB_URI` | `mongodb://127.0.0.1:27017/wolt` | MongoDB connection string |
 
-The web app reads these via `process.env` (no extra npm packages). For local runs, export variables or use a `.env` file with Docker Compose / your shell.
+The web app reads these via `process.env` (no extra npm packages). For **native local runs**, export variables before starting the web server:
 
-**Docker:** `docker-compose.yml` loads `.env` and overrides `EX2_SERVER_HOST=server` so the web container reaches the C++ service on the compose network.
+```bash
+export $(grep -v '^#' .env | xargs)
+```
+
+**Docker:** `docker-compose.yml` loads `.env` and overrides `EX2_SERVER_HOST=server` and `MONGODB_URI=mongodb://mongo:27017/wolt` so the web container reaches services on the compose network.
 
 ---
 
@@ -82,10 +94,17 @@ cmake -S . -B build
 cmake --build build
 ```
 
-**Exercise 3 (web):**
+**Exercise 3/5 (web):**
 
 ```bash
 cd web
+npm install
+```
+
+**Exercise 5 (mobile):**
+
+```bash
+cd mobile
 npm install
 ```
 
@@ -98,7 +117,8 @@ docker compose build
 | Service | Dockerfile | Purpose |
 |---------|------------|---------|
 | `server` | `Dockerfile.server` | Build and run `./build/app` |
-| `web` | `Dockerfile.web` | Node web API |
+| `web` | `Dockerfile.web` | Node web API + built React client |
+| `mongo` | *(official image)* | MongoDB 7 with named volume |
 | `tests` | `Dockerfile.tests` | CMake + `ctest` |
 | `client` | `Dockerfile.client` | Python TCP client |
 
@@ -106,56 +126,120 @@ docker compose build
 
 ## How to run
 
-### Native (Local Development)
+### Docker (recommended for TA)
 
-To run the application locally with full Hot Module Replacement (HMR) for the frontend, you will need **three** terminals.
-
-**Terminal 1 — Ex2 Server (C++ Recommender):**
-```bash
-./build/app 8080
-```
-
-**Terminal 2 — Web API Server (Node.js):**
-```bash
-cd web
-npm install # if you haven't yet
-npm start
-```
-*The backend API will listen on `http://localhost:3000` (or `PORT` from environment).*
-
-**Terminal 3 — Frontend UI (React + Vite):**
-```bash
-cd web/client
-npm install # if you haven't yet
-npm run dev
-```
-*The frontend development server will run on **`http://localhost:5173`**. Open this link in your browser. All API calls are automatically proxied to `localhost:3000`.*
-
-**C++ unit tests:**
-```bash
-./build/tests_runner
-```
-
-### Docker (Production-like)
+Start the full backend stack (C++ server + MongoDB + Express API + built React UI) with one command:
 
 ```bash
-# C++ tests
-docker compose run --rm tests
-
-# Run the entire stack (Ex2 Server + Express API + React UI)
+cp .env.example .env   # if you haven't yet
 docker compose up --build server web
 ```
 
-- **Web App (React UI & API):** `http://localhost:3000` (The Express server automatically serves the built React app)
-- **Ex2 TCP server:** `localhost:8080`
+Starting `web` automatically starts `mongo` and `server` via `depends_on`. MongoDB must become healthy before the web container starts.
+
+| Service | URL / Port |
+|---------|------------|
+| Web App (React UI & API) | `http://localhost:3000` |
+| Ex2 TCP server | `localhost:8080` |
+| MongoDB (host access) | `localhost:27018` *(mapped to avoid clash with local MongoDB on 27017)* |
+
+**Expected web startup logs:**
+
+```
+MongoDB connected
+Seeded N restaurants          # first run only
+Web server listening on http://localhost:3000
+```
+
+**Verify:**
+
+```bash
+curl -i http://localhost:3000/api/health
+# Expected: 200 {"status":"ok"}
+```
+
+**C++ tests (optional):**
+
+```bash
+docker compose run --rm tests
+```
 
 **Interactive Ex2 client (optional):**
 
 ```bash
 docker compose run --rm -it client server 8080
-# or locally:
-python3 src/client.py 127.0.0.1 8080
 ```
+
+---
+
+### Native (Local Development)
+
+For HMR on the web frontend, use **four** terminals (MongoDB is required):
+
+**Terminal 0 — MongoDB:**
+
+```bash
+# Homebrew:
+brew services start mongodb-community
+
+# Or Docker (standalone):
+docker run -d --name wolt-mongo -p 27017:27017 mongo:7
+```
+
+**Terminal 1 — Ex2 Server (C++ Recommender):**
+
+```bash
+./build/app 8080
+```
+
+**Terminal 2 — Web API Server (Node.js):**
+
+```bash
+export $(grep -v '^#' .env | xargs)   # from repo root
+cd web
+npm install
+npm start
+```
+
+**Terminal 3 — Frontend UI (React + Vite):**
+
+```bash
+cd web/client
+npm install
+npm run dev
+```
+
+Open **`http://localhost:5173`**. API calls are proxied to `localhost:3000`.
+
+**C++ unit tests:**
+
+```bash
+./build/tests_runner
+```
+
+---
+
+### Running the React Native app
+
+The mobile app talks to the same REST API. Start the backend first (Docker or native), then:
+
+```bash
+cd mobile
+npm install
+npm start
+```
+
+Press **`i`** for iOS Simulator, **`a`** for Android Emulator, or scan the QR code with Expo Go.
+
+**API base URL** is configured in `mobile/src/services/api.js`:
+
+| Platform | Default URL |
+|----------|-------------|
+| iOS Simulator | `http://localhost:3000` |
+| Android Emulator | `http://10.0.2.2:3000` |
+| Physical device | Your computer's LAN IP, e.g. `http://192.168.1.5:3000` |
+
+When using Docker, the backend is still at `localhost:3000` from the host/emulator perspective.
 
 ---
 
@@ -230,21 +314,17 @@ Expected: `200` with `{"restaurants":[...],"products":[...]}` (case-insensitive)
 
 ---
 
-## Exercise 4 branch for TA
-
-Exercise 4 code is frozen for grading on branch **`TASK-4-DONE`**. Development continues on **`main`** and feature branches so next submissions do not mix.
-
----
-
 ## Project structure (summary)
 
 ```
 ├── src/              # Ex2 C++ recommender + TCP server
-├── web/              # Ex3 Node.js Express API
+├── web/              # Ex3/Ex5 Node.js Express API + React web client
 │   ├── client/       # Ex4 Vite React App
+├── mobile/           # Ex5 React Native (Expo) app
+├── wiki/             # GitHub Wiki source pages (setup, auth, CRUD, orders)
 ├── tests/            # C++ GTest
 ├── data/             # Ex2 persistence (runtime)
-├── docs/             # Architecture diagrams
+├── docs/             # Architecture diagrams + screenshots
 ├── docker-compose.yml
 ├── .env.example      # Environment template (copy to .env)
 └── Dockerfile.*
@@ -253,7 +333,6 @@ Exercise 4 code is frozen for grading on branch **`TASK-4-DONE`**. Development c
 ---
 
 ## Screenshots
-
 
 ### 1. Login Page
 ![Login Page](docs/screenshots/login.png)
