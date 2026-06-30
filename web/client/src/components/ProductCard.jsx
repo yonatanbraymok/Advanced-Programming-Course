@@ -14,7 +14,10 @@ export function ProductCard({ item, restaurantId, onAddToCart }) {
       }
       return;
     }
-    onAddToCart(restaurantId, item);
+    const result = onAddToCart(restaurantId, item);
+    if (result && !result.ok && result.error) {
+      window.alert(result.error);
+    }
   };
   return (
     <div 

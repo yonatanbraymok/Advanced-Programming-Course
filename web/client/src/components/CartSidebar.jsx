@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../contexts/CartContext';
+import { CartContext, OWNER_ORDER_MSG } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 
 export function CartSidebar({ isOpen, onClose }) {
   const { cartItems, restaurantId, removeFromCart, updateQuantity, clearCart, cartTotal } = useContext(CartContext);
-  const { token, logout } = useContext(AuthContext);
+  const { token, logout, user } = useContext(AuthContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -14,6 +14,11 @@ export function CartSidebar({ isOpen, onClose }) {
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
+
+    if (user?.role === 'restaurant_owner') {
+      setError(OWNER_ORDER_MSG);
+      return;
+    }
     
     setIsSubmitting(true);
     setError('');
