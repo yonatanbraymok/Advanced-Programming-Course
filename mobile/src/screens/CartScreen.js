@@ -1,14 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CartContext } from '../contexts/CartContext';
+import { CartContext, OWNER_ORDER_MSG } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import * as api from '../services/api';
 
 export default function CartScreen({ navigation }) {
   const { cartItems, cartTotal, restaurantId, updateQuantity, clearCart } = useContext(CartContext);
-  const { userToken } = useContext(AuthContext);
+  const { userToken, userRole } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
   const [isOrdering, setIsOrdering] = useState(false);
 
@@ -22,6 +22,11 @@ export default function CartScreen({ navigation }) {
           { text: "Log In", onPress: () => navigation.navigate('Login') }
         ]
       );
+      return;
+    }
+
+    if (userRole === 'restaurant_owner') {
+      Alert.alert('Cannot Place Order', OWNER_ORDER_MSG);
       return;
     }
 

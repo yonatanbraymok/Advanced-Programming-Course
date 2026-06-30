@@ -3,6 +3,9 @@
 const Order = require('../models/orderModel');
 const Restaurant = require('../models/restaurantModel');
 const Product = require('../models/productModel');
+const User = require('../models/userModel');
+
+const OWNER_ORDER_MSG = 'You must be on a regular user account to place an order.';
 
 const getOwnedOrder = async (req, res, userId) => {
     const order = await Order.getById(req.params.id);
@@ -17,6 +20,14 @@ const getOwnedOrder = async (req, res, userId) => {
 const createOrder = async (req, res, next) => {
     try {
         const userId = req.userId;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        if (user.role === 'restaurant_owner') {
+            return res.status(403).json({ error: OWNER_ORDER_MSG });
+        }
+
         const { restaurantId, items } = req.body;
 
         if (!restaurantId || !items || !Array.isArray(items) || items.length === 0) {

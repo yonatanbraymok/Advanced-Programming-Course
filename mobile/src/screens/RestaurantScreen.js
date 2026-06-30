@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { AuthContext } from '../contexts/AuthContext';
-import { CartContext } from '../contexts/CartContext';
+import { CartContext, OWNER_ORDER_MSG } from '../contexts/CartContext';
 import ProductCard from '../components/ProductCard';
 import * as api from '../services/api';
 
@@ -66,10 +66,14 @@ export default function RestaurantScreen({ route, navigation }) {
     }
 
     const restId = restaurant?.id || restaurant?._id || restaurantId;
-    const addedDirectly = addToCart(restId, item, 1);
-    if (addedDirectly) {
-      Alert.alert('Added to Cart', `${item.name} has been added to your cart.`);
+    const result = addToCart(restId, item, 1);
+    if (result && !result.ok) {
+      if (result.error) {
+        Alert.alert('Cannot Add to Cart', result.error);
+      }
+      return;
     }
+    Alert.alert('Added to Cart', `${item.name} has been added to your cart.`);
   };
 
   const handleCartPress = () => {
