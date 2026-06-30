@@ -1,163 +1,130 @@
-# Web server (`web/`) — developer guide
+# Web server (`web/`)
 
-**TA / grading:** use the root [`README.md`](../README.md) as the source of truth for build, run, and API examples.
+Express MVC REST API for the Wolt-style app. We kept the Ex3 layout but replaced in-memory arrays with **Mongoose + MongoDB** in Ex5.
 
-This document describes the **Exercise 3** Node.js + Express MVC layout for contributors - although you may read it if you want :)
+For how to run the full stack, see the root [`README.md`](../README.md).
 
 ---
 
 ## Stack
 
-- **Node.js** (>= 18)
-- **Express** only (no extra npm dependencies per course rules)
-- In-memory models (data lost on restart; restaurants reloaded from `data/restaurants.json`)
+- Node.js >= 18
+- Express
+- Mongoose (MongoDB)
+- JWT auth (`JWT_SECRET` in `.env`)
 - JSON API under `/api/*`
+
+On first startup, [`db.js`](db.js) connects to MongoDB and seeds restaurants from [`data/restaurants.json`](data/restaurants.json) if the collection is empty.
+
+---
+
+## Run the server (native)
+
+From **repo root**, export env vars then start:
+
+```bash
+cp .env.example .env          # once, at repo root
+export $(grep -v '^#' .env | xargs)
+
+# MongoDB must be running (local or docker run -p 27017:27017 mongo:7)
+# C++ server optional for most routes: ./build/app 8080
+
+cd web
+npm install
+npm start
+```
+
+Server listens on `http://localhost:3000` (or `PORT` from env).
+
+Quick check:
+
+```bash
+curl -i http://localhost:3000/api/health
+```
 
 ---
 
 ## Folder structure
 
-| Folder | Responsibility |
-|--------|----------------|
-| `server.js` | Process entry — binds `PORT`, loads `app.js` |
-| `app.js` | Express setup: JSON body parser, routes, 404, error handler |
-| `routes/` | URL mounting (`/users`, `/restaurants`, …) |
-| `controllers/` | HTTP logic, status codes, validation |
-| `models/` | In-memory arrays and CRUD helpers |
-| `middleware/` | `auth`, `notFound`, `errorHandler` |
-| `services/` | External integrations (`ex2TcpClient.js`) |
+| Folder | Role |
+|--------|------|
+| `server.js` | Entry — connects DB, then listens |
+| `app.js` | Express setup, static client, routes |
+| `db.js` | MongoDB connect + seed |
+| `config.js` | Reads `process.env` |
+| `routes/` | URL mounting |
+| `controllers/` | Request handlers |
+| `models/` | Mongoose schemas |
+| `middleware/` | Auth, 404, errors |
+| `services/` | Ex2 TCP client |
+| `client/` | Vite React app (Ex4) |
 
 ---
 
 ## Request flow
 
 ```
-HTTP request
-  routes/*.js
-  controllers/*.js
-  models/*.js
-  JSON response
+HTTP -> routes -> controllers -> models (MongoDB) -> JSON response
 ```
 
-Product view additionally calls `services/ex2TcpClient` (non-blocking).
+Product `GET` also calls `services/ex2TcpClient` (non-blocking TCP to C++ server).
 
 ---
 
 ## API map
 
 | Method | Path | Auth | Notes |
-|--------|------|------|--------|
+|--------|------|------|-------|
 | GET | `/api/health` | No | Smoke test |
-| POST | `/api/users` | No | Register (see validation rules below) |
-| GET | `/api/users/:id` | No | Profile includes `profileImage`; password never returned |
-| POST | `/api/tokens` | No | Login → returns JWT `token` |
-| GET/POST | `/api/restaurants` | No | List / create |
-| GET/PATCH/DELETE | `/api/restaurants/:id` | No | CRUD |
-| GET/POST | `/api/restaurants/:id/products` | No | Menu list / add product |
-| GET/PATCH/DELETE | `/api/restaurants/:id/products/:pId` | Optional on GET | GET notifies Ex2 |
-| POST/GET | `/api/orders` | Bearer JWT | Create / list own orders |
-| GET/PATCH/DELETE | `/api/orders/:id` | Bearer JWT | Own order only |
-| GET | `/api/search/:query` | No | Case-insensitive name/description |
+| POST | `/api/users` | No | Register |
+| GET | `/api/users/:id` | No | Profile (no password) |
+| GET | `/api/users/me` | Bearer | Current user |
+| PUT | `/api/users/me` | Bearer | Update profile |
+| POST | `/api/tokens` | No | Login -> JWT |
+| GET/POST | `/api/restaurants` | POST: Bearer | List / create |
+| GET | `/api/restaurants/my` | Bearer | Owner's restaurants |
+| GET/PATCH/DELETE | `/api/restaurants/:id` | PATCH/DELETE: Bearer | CRUD |
+| GET/POST | `/api/restaurants/:id/products` | POST: Bearer | Menu |
+| GET/PATCH/DELETE | `/api/restaurants/:id/products/:pId` | PATCH/DELETE: Bearer | Product CRUD |
+| POST/GET | `/api/orders` | Bearer | Create / list own |
+| GET/PATCH/DELETE | `/api/orders/:id` | Bearer | Order CRUD |
+| GET | `/api/search/:query` | No | Search restaurants + products |
 
 ---
 
-## Authentication model
+## Auth
 
-1. `POST /api/tokens` with `{ "username", "password" }` -> `{ "message", "token" }` (HS256 JWT signed with `JWT_SECRET`)
-2. Send `Authorization: Bearer <token>` on protected routes (all `/api/orders` endpoints).
+1. `POST /api/tokens` with `{ username, password }` -> `{ token }`
+2. Send `Authorization: Bearer <token>` on protected routes.
 
-JWT payload includes `sub` (user id) and `username`. Orders reject missing or invalid token with `401` and body `{ "error": "Unauthorized" }`. Product GET still accepts optional `user-id` header and falls back to `'0'` for Ex2 notification only.
+Orders and owner actions require a valid JWT. Missing/invalid token -> `401 { "error": "Unauthorized" }`.
 
-### Public vs protected routes
+### Registration rules (`POST /api/users`)
 
-| Access | Routes |
-|--------|--------|
-| **Public** (no JWT) | `GET /api/health`, `POST/GET /api/users`, `POST /api/tokens`, all `/api/restaurants` and nested products, `GET /api/search/:query` |
-| **Protected** (Bearer JWT) | All `/api/orders` endpoints: `POST`, `GET`, `GET /:id`, `PATCH /:id`, `DELETE /:id` |
+| Field | Rule |
+|-------|------|
+| `username` | Required, unique |
+| `password` | Min 8 chars, uppercase + lowercase + digit |
+| `name` | Required |
+| `phone`, `address` | Optional |
+| `profileImage` | Optional (URL or base64 data URL) |
 
-Auth middleware is mounted only in `routes/orderRoutes.js`. All other route modules stay public.
-
-### Registration validation (`POST /api/users`)
-
-Server-side rules (independent of client validation):
-
-| Field | Required | Rule |
-|-------|----------|------|
-| `username` | Yes | Non-empty string (trimmed) |
-| `password` | Yes | At least 8 characters with uppercase, lowercase, and a digit |
-| `name` | Yes | Non-empty string (trimmed) |
-| `phone` | No | Defaults to `""` |
-| `address` | No | Defaults to `""` |
-| `profileImage` | No | If sent, must be a non-empty string (URL or base64 data URL) |
-
-Invalid input returns `400` with a descriptive `{ "error": "..." }` message. Duplicate username returns `409`.
+Weak input -> `400`. Duplicate username -> `409`.
 
 ---
 
-## Ex2 TCP client (`services/ex2TcpClient.js`)
+## Ex2 TCP client
 
-- **`sendLine(command)`** — one `\n`-terminated line to Ex2.
-- **`recordProductView(userId, productId)`** — sends `GET <userId> <productId>`.
-
-Environment (see root `.env.example`):
-
-- `EX2_SERVER_HOST` (default `127.0.0.1`)
-- `EX2_SERVER_PORT` (default `8080`)
-
-Errors are logged; they do not fail the HTTP response.
-
-**Note:** Ex2 expects numeric user/product ids on the wire; web ids are strings (`user_...`, `prod_...`). Ex2 may return `400 Bad Request` on the socket while the REST API still returns `200`.
+[`services/ex2TcpClient.js`](services/ex2TcpClient.js) sends `GET <userId> <productId>` to the C++ server when a product is viewed. Uses `EX2_SERVER_HOST` and `EX2_SERVER_PORT` from env. Errors are logged only — HTTP still returns 200.
 
 ---
 
-## Local development
+## Smoke scripts
+
+From repo root (server must be running with `JWT_SECRET` set):
 
 ```bash
-# From repo root — start Ex2 first
-./build/app 8080
-
-# Web
-cd web
-npm install
-npm start
-```
-
-Copy root `.env.example` to `.env` and set `JWT_SECRET` before starting (required).
-
-Quick smoke:
-
-```bash
-curl -i http://localhost:3000/api/health
-curl -i http://localhost:3000/api/unknown
-```
-
-JWT auth smoke test (server must be running with `JWT_SECRET` set):
-
-```bash
-# Terminal 1
-cd web && npm start
-
-# Terminal 2 (from repo root)
-chmod +x web/scripts/smoke-jwt-auth.sh
+chmod +x web/scripts/smoke-jwt-auth.sh web/scripts/smoke-registration.sh
 ./web/scripts/smoke-jwt-auth.sh
-```
-
-The script checks: orders return `401` without a token, `200` with a valid Bearer token, and public routes stay open.
-
-Registration validation smoke test:
-
-```bash
-chmod +x web/scripts/smoke-registration.sh
 ./web/scripts/smoke-registration.sh
 ```
-
-The script checks: weak passwords return `400`, valid registration with `profileImage` returns `201`, and `GET /api/users/:id` includes `profileImage` without `password`.
-
----
-
-## Adding a feature (convention)
-
-1. Model helpers in `models/`
-2. Controller handlers in `controllers/`
-3. Routes in `routes/` and register in `routes/index.js`
-4. Document endpoint in this file and in root README examples if user-facing
